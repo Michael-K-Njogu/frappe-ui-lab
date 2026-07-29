@@ -1,18 +1,40 @@
 <script setup>
-import { onMounted } from 'vue'
+import { ref, computed, onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCustomers } from '../composables/useCustomers'
 import PageTitle from '../components/PageTitle.vue'
+import BaseSearchInput from '../components/BaseSearchInput.vue'
 import { Plus, RefreshCw } from '@lucide/vue'
 import { getCustomerTypeLabel } from '../config/customerTypes'
-
 import { formatCurrency, formatDate } from '../utils/formatters'
+import { useDebounce } from '../composables/useDebounce'
+
+const searchTerm = ref('')
+const debouncedSearchTerm = useDebounce(searchTerm)
+
+const filteredCustomers = computed(() => {
+  const query = debouncedSearchTerm.value.trim().toLowerCase()
+
+  if (!query) {
+    return customers.value
+  }
+
+  return customers.value.filter((customer) => {
+    return [
+      customer.name,
+      customer.email,
+    ]
+      .filter(Boolean)
+      .some((value) =>
+        value.toLowerCase().includes(query)
+      )
+  })
+})
 
 const router = useRouter()
 
 const {
-    filteredCustomers,
-    searchTerm,
+    customers,
     loading,
     error,
     loadCustomers
@@ -25,6 +47,7 @@ onMounted(() => {
 function viewCustomer(id) {
     router.push({ name: 'customer-details', params: { id } })
 }
+
 </script>
 
 <template>
@@ -49,15 +72,10 @@ function viewCustomer(id) {
     </template>
   </PageTitle>
 
-    <div class="form-group">
-      <input
-      name="search"
-      id="search"
-      type="text"
-      v-model="searchTerm"
-      placeholder="Search customers..."
-      />
-    </div>
+  <BaseSearchInput
+    v-model="searchTerm"
+    placeholder="Search customers..."
+  />
 
   <p v-if="loading">Loading customers...</p>
 
@@ -77,7 +95,7 @@ function viewCustomer(id) {
         <th>Created At</th>
       </tr>
     </thead>
-    <tbody v-if="filteredCustomers.length">
+    <tbody>
       <tr
         v-for="customer in filteredCustomers"
         :key="customer.id"
