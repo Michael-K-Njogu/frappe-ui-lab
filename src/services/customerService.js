@@ -22,8 +22,28 @@ function mapCustomerToApi(customer) {
   }
 } 
 
-export async function getCustomers() {
-  const customers = await apiClient.get('/customers?select=*')
+export async function getCustomers({
+  query = '',
+  customerType = '',
+  sort,
+  page = 1,
+  limit = 10,
+} = {}) {
+
+  const params = new URLSearchParams()
+  params.set('select', '*')
+
+  if (query) {
+    params.set(
+      'or',
+      `(name.ilike.*${query}*,email.ilike.*${query}*)`
+    )
+  }
+
+  const customers = await apiClient.get(
+    `/customers?${params.toString()}`
+  )
+
   return customers.map(mapCustomer)
 }
 
