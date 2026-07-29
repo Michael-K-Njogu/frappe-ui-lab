@@ -64,5 +64,5 @@ export async function updateCustomer(id, customer) {
 }
 
 export async function deleteCustomer(id) {
-  return apiClient.delete(`/customers/${id}`)
+  await apiClient.delete(`/customers?id=eq.${id}`)
 }
