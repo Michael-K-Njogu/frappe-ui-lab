@@ -1,0 +1,17 @@
+<script setup>
+import AppSidebarNav from '../components/AppSidebarNav.vue'
+</script>
+
+<template>
+  <div class="layout">
+    <AppSidebarNav />
+    <main>
+      <header class="header">
+        DDS Enterprise Application
+      </header>
+      <div class="content">
+        <RouterView />
+      </div>
+    </main>
+  </div>
+</template>
