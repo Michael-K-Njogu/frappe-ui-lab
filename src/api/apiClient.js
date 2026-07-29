@@ -42,13 +42,6 @@ export const apiClient = {
         })
     },
 
-    put(endpoint, data) {
-        return request(endpoint, {
-            method: 'PUT',
-            body: JSON.stringify(data),
-        })
-    },
-
     patch(endpoint, data, options = {}) {
         return request(endpoint, {
             method: 'PATCH',
@@ -57,9 +50,10 @@ export const apiClient = {
         })
     },
 
-    delete(endpoint) {
+    delete(endpoint, options = {}) {
         return request(endpoint, {
             method: 'DELETE',
+            ...options,
         })
     }
 }
