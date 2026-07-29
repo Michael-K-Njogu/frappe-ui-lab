@@ -239,6 +239,24 @@ input, select {
   margin-top: 8px;
 }
 
+.search-input-container {
+  background-color: var(--bg-colour-white);
+  border: 1px solid var(--border-colour-default);
+  border-radius: 4px;
+  margin-bottom: 16px;
+  padding: 8px 16px;
+  position: relative;
+  display: flex;
+  align-items: center;
+}
+
+.search-input {
+  width: 100%;
+  border: none;
+  outline: none;
+  font-size: 14px;
+}
+
 /* Table Styles */
 .data-table {
   width: 100%;
