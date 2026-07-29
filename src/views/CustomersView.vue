@@ -3,7 +3,7 @@ import { onMounted } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCustomers } from '../composables/useCustomers'
 import PageTitle from '../components/PageTitle.vue'
-import { Plus } from '@lucide/vue'
+import { Plus, RefreshCw } from '@lucide/vue'
 import { getCustomerTypeLabel } from '../config/customerTypes'
 
 import { formatCurrency, formatDate } from '../utils/formatters'
@@ -30,6 +30,15 @@ function viewCustomer(id) {
 <template>
   <PageTitle title="Customers">
     <template #actions>
+      <button
+        v-if="!loading && !error"
+        class="btn btn-secondary"
+        :disabled="loading"
+        @click="loadCustomers"
+      >
+        <RefreshCw size="16" />
+        {{ loading ? 'Loading...' : 'Refresh' }}
+      </button>
       <RouterLink
         :to="{ name: 'customer-new' }"
         class="btn btn-primary"
