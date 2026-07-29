@@ -2,7 +2,7 @@
 
   --text-colour-default: #171717;
   --text-colour-inverted: #ffffff;
-  --text-colour-disabled: #A3A3A3;
+  --text-colour-disabled: #737373;
   --text-colour-danger: #DC2626;
 
   --bg-colour-default: #F7F7F7;
@@ -14,6 +14,7 @@
 
   --btn-primary-bg: #2F5EAF;
   --btn-primary-bg-hover: #224583;
+  --btn-primary-bg-disabled: #e0e0e0;
 
   --icon-colour-default: #171717;
   --icon-colour-accent: #6EC3CE;
@@ -164,8 +165,8 @@ h1 {
   background-color: var(--btn-primary-bg-hover);
 }
 
-.btn-primary:disabled:not(:hover) {
-  background-color: var(--bg-colour-default);
+.btn-primary:disabled {
+  background-color: var(--btn-primary-bg-disabled);
   color: var(--text-colour-disabled);
   cursor: not-allowed;
 }
