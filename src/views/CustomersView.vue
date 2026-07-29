@@ -28,12 +28,17 @@ function viewCustomer(id) {
 </script>
 
 <template>
-  <PageTitle 
-    title="Customers" 
-    action-title="Add Customer"
-    :action-icon="Plus"
-    :to="'/customers/new'" 
-    />
+  <PageTitle title="Customers">
+    <template #actions>
+      <RouterLink
+        :to="{ name: 'customer-new' }"
+        class="btn btn-primary"
+      >
+        <Plus size="16" />
+        Add Customer
+      </RouterLink>
+    </template>
+  </PageTitle>
 
     <div class="form-group">
       <input
