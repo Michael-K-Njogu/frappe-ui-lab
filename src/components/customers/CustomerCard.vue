@@ -1,4 +1,6 @@
 <script setup>
+import { getCustomerTypeLabel } from '../../config/customerTypes'
+
 defineProps({
     customer: {
         type: Object,
@@ -17,7 +19,7 @@ import {
     <div class="card-header">
       <h2>{{ customer.name }}</h2>
       <span class="badge">
-        {{ customer.customerType }}
+        {{ getCustomerTypeLabel(customer.customerType) }}
       </span>
     </div>
 
