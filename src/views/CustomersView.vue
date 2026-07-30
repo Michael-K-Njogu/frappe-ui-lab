@@ -1,34 +1,24 @@
 <script setup>
-import { ref, computed, onMounted } from 'vue'
+import { reactive, ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useCustomers } from '../composables/useCustomers'
 import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/BaseSearchInput.vue'
-import { Plus, RefreshCw } from '@lucide/vue'
-import { getCustomerTypeLabel } from '../config/customerTypes'
+import BaseSelect from '../components/BaseSelect.vue'
+import { Plus, RefreshCw, ArrowDownWideNarrow, ArrowUpNarrowWide } from '@lucide/vue'
+import { getCustomerTypeLabel, customerTypes } from '../config/customerTypes'
 import { formatCurrency, formatDate } from '../utils/formatters'
-import { useDebounce } from '../composables/useDebounce'
 
-const searchTerm = ref('')
-const debouncedSearchTerm = useDebounce(searchTerm)
-
-const filteredCustomers = computed(() => {
-  const query = debouncedSearchTerm.value.trim().toLowerCase()
-
-  if (!query) {
-    return customers.value
-  }
-
-  return customers.value.filter((customer) => {
-    return [
-      customer.name,
-      customer.email,
-    ]
-      .filter(Boolean)
-      .some((value) =>
-        value.toLowerCase().includes(query)
-      )
-  })
+//const searchTerm = ref('')
+const filters = reactive({
+  query: '',
+  customerType: '',
+  sort: {
+    field: 'createdAt',
+    direction: 'desc'
+  },
+  page: 1,
+  limit: 10
 })
 
 const router = useRouter()
@@ -37,15 +27,57 @@ const {
     customers,
     loading,
     error,
-    loadCustomers
-} = useCustomers()
+    refresh
+} = useCustomers(filters)
 
-onMounted(() => {
-    loadCustomers()
-})
+const refreshing = ref(false)
+
+async function handleRefresh() {
+  refreshing.value = true
+
+  try {
+    await refresh()
+  } finally {
+    refreshing.value = false
+  }
+}
 
 function viewCustomer(id) {
     router.push({ name: 'customer-details', params: { id } })
+}
+
+const DEFAULT_SORT_DIRECTIONS = {
+  name: 'asc',
+  email: 'asc',
+  customerType: 'asc',
+  creditLimit: 'asc',
+  createdAt: 'desc',
+}
+
+function sortBy(field) {
+  if (filters.sort.field === field) {
+    filters.sort.direction =
+      filters.sort.direction === 'asc'
+        ? 'desc'
+        : 'asc'
+  } else {
+    filters.sort.field = field
+    filters.sort.direction = DEFAULT_SORT_DIRECTIONS[field] || 'asc'
+  }
+}
+
+function isSorted(field) {
+  return filters.sort.field === field
+}
+
+function sortIcon(field) {
+  if (!isSorted(field)) {
+    return ''
+  }
+
+  return filters.sort.direction === 'asc'
+    ? ArrowUpNarrowWide
+    : ArrowDownWideNarrow
 }
 
 </script>
@@ -54,13 +86,15 @@ function viewCustomer(id) {
   <PageTitle title="Customers">
     <template #actions>
       <button
-        v-if="!loading && !error"
         class="btn btn-secondary"
-        :disabled="loading"
-        @click="loadCustomers"
+        :disabled="refreshing"
+        @click="handleRefresh"
       >
-        <RefreshCw size="16" />
-        {{ loading ? 'Loading...' : 'Refresh' }}
+        <RefreshCw 
+          :size="16" 
+          :class="{ 'is-loading': refreshing }"
+        />
+        {{ refreshing ? 'Refreshing' : 'Refresh' }}
       </button>
       <RouterLink
         :to="{ name: 'customer-new' }"
@@ -72,10 +106,17 @@ function viewCustomer(id) {
     </template>
   </PageTitle>
 
-  <BaseSearchInput
-    v-model="searchTerm"
-    placeholder="Search customers..."
-  />
+  <div class="toolbar">
+    <BaseSearchInput
+      v-model="filters.query"
+      placeholder="Search customers..."
+    />
+
+    <BaseSelect
+      v-model="filters.customerType"
+      :options="customerTypes"
+    />
+  </div>
 
   <p v-if="loading">Loading customers...</p>
 
@@ -84,20 +125,80 @@ function viewCustomer(id) {
   </p>
 
   <div class="table-container" v-if="!loading && !error">
-    <p v-if="filteredCustomers.length === 0">No customers found.</p>
+    <p v-if="customers.length === 0">No customers found.</p>
     <table v-else class="data-table">
     <thead>
       <tr>
-        <th>Name</th>
-        <th>Email</th>
-        <th>Credit Limit</th>
-        <th>Customer Type</th>
-        <th>Created At</th>
+        <th>
+          <button
+            class="sort-button"
+            @click="sortBy('name')"
+          >
+            Name
+              <component
+                v-if="isSorted('name')"
+                :is="sortIcon('name')"
+                size="14"
+              />
+          </button>
+        </th>
+        <th>
+          <button
+            class="sort-button"
+            @click="sortBy('email')"
+          >
+            Email
+              <component
+                v-if="isSorted('email')"
+                :is="sortIcon('email')"
+                size="14"
+              />
+          </button>
+        </th>
+        <th>
+          <button
+            class="sort-button"
+            @click="sortBy('creditLimit')"
+          >
+            Credit Limit
+              <component
+                v-if="isSorted('creditLimit')"
+                :is="sortIcon('creditLimit')"
+                size="14"
+              />
+          </button>
+        </th>
+        <th>
+          <button
+            class="sort-button"
+            @click="sortBy('customerType')"
+          >
+            Customer Type
+              <component
+                v-if="isSorted('customerType')"
+                :is="sortIcon('customerType')"
+                size="14"
+              />
+          </button>
+        </th>
+        <th>
+          <button
+            class="sort-button"
+            @click="sortBy('createdAt')"
+          >
+            Created At
+              <component
+                v-if="isSorted('createdAt')"
+                :is="sortIcon('createdAt')"
+                size="14"
+              />
+          </button>
+        </th>
       </tr>
     </thead>
     <tbody>
       <tr
-        v-for="customer in filteredCustomers"
+        v-for="customer in customers"
         :key="customer.id"
         @click="viewCustomer(customer.id)"
       >
