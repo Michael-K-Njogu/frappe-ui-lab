@@ -1,5 +1,3 @@
-// 
-
 import { apiClient } from '../api/apiClient'
 
 const SORT_FIELD_MAP = {
@@ -44,10 +42,13 @@ export async function getCustomers({
   customerType = '',
   sort,
   page = 1,
-  limit = 10,
+  pageSize = 10,
 } = {}) {
 
   const params = new URLSearchParams()
+  const offset = (page - 1) * pageSize
+  params.set('offset', offset)
+  params.set('limit', pageSize)
   params.set('select', '*')
   
   if (query) {
@@ -64,7 +65,7 @@ export async function getCustomers({
   }
 
   const dbSortField = SORT_FIELD_MAP[sort.field]
-  
+
   if (dbSortField) {
     params.set(
       'order',
@@ -72,11 +73,24 @@ export async function getCustomers({
     )
   }
 
-  const customers = await apiClient.get(
-    `/customers?${params.toString()}`
-  )
+  const { data, response } = await apiClient.getRaw(
+    `/customers?${params.toString()}`,
+    {
+      headers: {
+        Prefer: 'count=exact',
+      },
+    }
+  )  
 
-  return customers.map(mapCustomer)
+  const contentRange = response.headers.get('content-range')
+  const total = contentRange 
+    ? Number(contentRange.split('/')[1]) // Extract total count from content-range header
+    : 0 // Default to 0 if content-range header is not present
+
+  return {
+    data: data.map(mapCustomer),
+    total,
+  }
 }
 
 export async function getCustomerById(id) {
