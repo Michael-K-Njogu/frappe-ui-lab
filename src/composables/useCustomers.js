@@ -6,6 +6,7 @@ export function useCustomers(filters) {
   const customers = ref([])
   const loading = ref(false)
   const error = ref(null)
+  const abortController = ref(null)
 
   const debouncedSearchTerm = useDebounce(
     toRef(filters, 'query')
@@ -21,6 +22,13 @@ export function useCustomers(filters) {
   }))
 
   async function fetchCustomers() {
+
+    if (abortController.value) {
+      abortController.value.abort()
+    }
+
+    abortController.value = new AbortController()
+
     loading.value = true
     error.value = null
 
@@ -32,33 +40,31 @@ export function useCustomers(filters) {
       sort: filters.sort,
       page: filters.pagination.currentPage,
       pageSize: filters.pagination.pageSize,
+      signal: abortController.value.signal
     })
 
     customers.value = data
     filters.pagination.totalItems = totalItems
 
     } catch (err) {
-      error.value = err.message
+      if (err.name !== 'AbortError') {
+        error.value = err.message || 'An error occurred while fetching customers.'
+      }
     } finally {
-      loading.value = false
+      if (abortController.value === abortController.value) {
+        loading.value = false
+      }
     }   
   }
 
-  function refresh() {
-    fetchCustomers()
-  }
+ const refresh = fetchCustomers
 
   onMounted(fetchCustomers)
 
-  function watchFilters() {
-
-    watch(
-      customerQueryOptions,
-      fetchCustomers
-    )
-  }
-
-  watchFilters()
+  watch(
+    customerQueryOptions,
+    fetchCustomers,
+  )
 
   return {
     customers,
