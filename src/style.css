@@ -1,6 +1,7 @@
 :root {
 
   --text-colour-default: #171717;
+  --text-colour-secondary: #737373;
   --text-colour-inverted: #ffffff;
   --text-colour-disabled: #737373;
   --text-colour-danger: #DC2626;
@@ -166,6 +167,16 @@ h1 {
   text-decoration: none;
 }
 
+.btn-md {
+  padding: 8px 16px;
+  font-size: 14px;
+}
+
+.btn-sm {
+  padding: 4px 12px;
+  font-size: 12px;
+}
+
 .btn-primary {
   background-color: var(--btn-primary-bg);
   color: var(--text-colour-inverted);
@@ -319,6 +330,25 @@ th, td {
 
 tr:hover {
   background-color: var(--bg-info-muted);
+}
+
+.pagination {
+  align-items: center;
+  display: flex;
+  justify-content: space-between;
+  margin-top: 16px;
+  gap: 8px;
+}
+
+.pagination-summary, .pagination-page-info {
+  color: var(--text-colour-secondary);
+  font-size: 14px;
+}
+
+.pagination-controls {
+  align-items: center;
+  display: flex;
+  gap: 8px;
 }
 
 /* Modal Styles */
