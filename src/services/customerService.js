@@ -2,6 +2,23 @@
 
 import { apiClient } from '../api/apiClient'
 
+const SORT_FIELD_MAP = {
+  name: 'name',
+  email: 'email',
+  customerType: 'customer_type',
+  creditLimit: 'credit_limit',
+  createdAt: 'created_at',
+}
+
+export const CUSTOMER_FIELDS = {
+  id: 'id',
+  name: 'name',
+  email: 'email',
+  creditLimit: 'credit_limit',
+  customerType: 'customer_type',
+  createdAt: 'created_at',
+}
+
 function mapCustomer(customer) {
   return {
     id: customer.id,
@@ -32,11 +49,26 @@ export async function getCustomers({
 
   const params = new URLSearchParams()
   params.set('select', '*')
-
+  
   if (query) {
     params.set(
       'or',
       `(name.ilike.*${query}*,email.ilike.*${query}*)`
+    )
+  }
+
+  if (customerType) {
+    params.set(
+      CUSTOMER_FIELDS.customerType,
+      `eq.${customerType}`)
+  }
+
+  const dbSortField = SORT_FIELD_MAP[sort.field]
+  
+  if (dbSortField) {
+    params.set(
+      'order',
+      `${dbSortField}.${sort.direction}`
     )
   }
 
