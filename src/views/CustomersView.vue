@@ -1,27 +1,18 @@
 <script setup>
-import { reactive, ref } from 'vue'
-import { useRouter } from 'vue-router'
+import { reactive, watch, ref } from 'vue'
+import { useRouter, useRoute } from 'vue-router'
 import { useCustomers } from '../composables/useCustomers'
 import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/BaseSearchInput.vue'
 import BaseSelect from '../components/BaseSelect.vue'
+import BasePagination from '../components/base/BasePagination.vue'
 import { Plus, RefreshCw, ArrowDownWideNarrow, ArrowUpNarrowWide } from '@lucide/vue'
 import { getCustomerTypeLabel, customerTypes } from '../config/customerTypes'
 import { formatCurrency, formatDate } from '../utils/formatters'
+import { useSorting } from '../composables/useSorting'
+import { useCustomerFilters } from '../composables/useCustomerFilters'
 
-//const searchTerm = ref('')
-const filters = reactive({
-  query: '',
-  customerType: '',
-  sort: {
-    field: 'createdAt',
-    direction: 'desc'
-  },
-  page: 1,
-  limit: 10
-})
-
-const router = useRouter()
+const { filters } = useCustomerFilters() // Use the composable to manage filters
 
 const {
     customers,
@@ -46,38 +37,18 @@ function viewCustomer(id) {
     router.push({ name: 'customer-details', params: { id } })
 }
 
-const DEFAULT_SORT_DIRECTIONS = {
-  name: 'asc',
-  email: 'asc',
-  customerType: 'asc',
-  creditLimit: 'asc',
-  createdAt: 'desc',
+const { 
+  sortBy, 
+  isSorted, 
+  sortIcon 
+} = useSorting(filters.sort)
+
+function handlePageChange(page) {
+  filters.pagination.currentPage = page
 }
 
-function sortBy(field) {
-  if (filters.sort.field === field) {
-    filters.sort.direction =
-      filters.sort.direction === 'asc'
-        ? 'desc'
-        : 'asc'
-  } else {
-    filters.sort.field = field
-    filters.sort.direction = DEFAULT_SORT_DIRECTIONS[field] || 'asc'
-  }
-}
-
-function isSorted(field) {
-  return filters.sort.field === field
-}
-
-function sortIcon(field) {
-  if (!isSorted(field)) {
-    return ''
-  }
-
-  return filters.sort.direction === 'asc'
-    ? ArrowUpNarrowWide
-    : ArrowDownWideNarrow
+function handlePageSizeChange(size) {
+  filters.pagination.pageSize = size
 }
 
 </script>
@@ -210,6 +181,15 @@ function sortIcon(field) {
       </tr>
     </tbody>
   </table>
+
+  <BasePagination
+    :current-page="filters.pagination.currentPage"
+    :page-size="filters.pagination.pageSize"
+    :total-items="filters.pagination.totalItems"
+    @update:currentPage="handlePageChange"
+    @update:pageSize="handlePageSizeChange"
+  /> 
+
   </div>
 
 </template>
