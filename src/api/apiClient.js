@@ -25,13 +25,21 @@ async function request(endpoint, options = {}) {
         )
     }
 
-    return data
+    return {
+        data,
+        response,
+    }
 }
 
 export const apiClient = {
 
-    get(endpoint) {
-        return request(endpoint)
+    get(endpoint, options = {}) {
+        return request(endpoint, options)
+         .then(({ data }) => data)
+    },
+
+    getRaw(endpoint, options = {}) {
+        return request(endpoint, options)
     },
 
     post(endpoint, data, options = {}) {
@@ -39,7 +47,7 @@ export const apiClient = {
             method: 'POST',
             body: JSON.stringify(data),
             ...options,
-        })
+        }).then(({ data }) => data)
     },
 
     patch(endpoint, data, options = {}) {
@@ -47,13 +55,13 @@ export const apiClient = {
             method: 'PATCH',
             body: JSON.stringify(data),
             ...options,
-        })
+        }).then(({ data }) => data)
     },
 
     delete(endpoint, options = {}) {
         return request(endpoint, {
             method: 'DELETE',
             ...options,
-        })
+        }).then(({ data }) => data)
     }
 }
