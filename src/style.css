@@ -206,6 +206,27 @@ h1 {
   cursor: not-allowed;
 }
 
+.is-loading {
+  animation: spin 1s linear infinite;
+}
+
+@keyframes spin {
+  0% { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.sort-button {
+  background: none;
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 14px;
+  font-weight: 600;
+  width: 100%;
+}
+
 /* Form Styles */
 .form-group {
   margin-bottom: 16px;
@@ -243,8 +264,7 @@ input, select {
   background-color: var(--bg-colour-white);
   border: 1px solid var(--border-colour-default);
   border-radius: 4px;
-  margin-bottom: 16px;
-  padding: 8px 16px;
+  padding-left: 16px;
   position: relative;
   display: flex;
   align-items: center;
@@ -255,6 +275,16 @@ input, select {
   border: none;
   outline: none;
   font-size: 14px;
+}
+
+.toolbar {
+  display: flex;
+  gap: 12px;
+  margin-bottom: 16px;
+}
+
+.toolbar > :first-child {
+  flex: 1;
 }
 
 /* Table Styles */
