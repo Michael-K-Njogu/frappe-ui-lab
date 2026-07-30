@@ -43,6 +43,7 @@ export async function getCustomers({
   sort,
   page = 1,
   pageSize = 10,
+  signal
 } = {}) {
 
   const params = new URLSearchParams()
@@ -79,6 +80,7 @@ export async function getCustomers({
       headers: {
         Prefer: 'count=exact',
       },
+      signal,
     }
   )  
 
