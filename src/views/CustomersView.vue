@@ -11,8 +11,10 @@ import { getCustomerTypeLabel, customerTypes } from '../config/customerTypes'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import { useSorting } from '../composables/useSorting'
 import { useCustomerFilters } from '../composables/useCustomerFilters'
+import CustomerTableSkeleton from '../components/customers/CustomerTableSkeleton.vue'
 
 const { filters } = useCustomerFilters() // Use the composable to manage filters
+const router = useRouter()
 
 const {
     customers,
@@ -89,7 +91,7 @@ function handlePageSizeChange(size) {
     />
   </div>
 
-  <p v-if="loading">Loading customers...</p>
+  <CustomerTableSkeleton v-if="loading" />
 
   <p v-else-if="error">
     {{ error }}
