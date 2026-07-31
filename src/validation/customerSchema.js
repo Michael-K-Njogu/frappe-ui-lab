@@ -10,7 +10,7 @@ const baseCustomerSchema = z.object({
     .email({ message: 'Invalid email address' }),
 
   creditLimit: z
-    .number()
+    .number({ invalid_type_error: 'Credit limit must be a number' })
     .positive({ message: 'Credit limit must be a positive number' })
     .max(100000, { message: 'Credit limit cannot exceed 100,000' }),
 
