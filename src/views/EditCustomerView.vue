@@ -5,14 +5,16 @@ import CustomerForm from '../components/customers/CustomerForm.vue'
 import { useCustomer } from '../composables/useCustomer.js'
 import { updateCustomer } from '../services/customerService.js'
 import PageTitle from '../components/PageTitle.vue'
+import { useToast } from '../composables/useToast.js'
 
 const router = useRouter()
 const route = useRoute()
+const { success, error } = useToast()
 
 const {
   customer,
   loading,
-  error,
+  error: fetchError,
 } = useCustomer(route.params.id)
 
 async function saveCustomer(values) {
@@ -22,6 +24,11 @@ async function saveCustomer(values) {
       values
     )
 
+    success(`Customer ${updatedCustomer.name} updated successfully.`, {
+      duration: 3000,
+      title: 'Customer Updated',
+    })
+
     await router.push({
       name: 'customer-details',
       params: {
@@ -30,16 +37,17 @@ async function saveCustomer(values) {
     })
   } catch (err) {
     console.error(err)
+    error('Failed to update customer')
   }
 }
 
 </script>
 
 <template>
-    <PageTitle title="Edit Customer" />
+    <PageTitle title="Edit Customer" :has-back-button="true" />
 
     <p v-if="loading">Loading...</p>
-    <p v-if="error">{{ error.message }}</p>
+    <p v-if="fetchError">{{ fetchError.message }}</p>
 
     <CustomerForm
         v-else-if="customer"
