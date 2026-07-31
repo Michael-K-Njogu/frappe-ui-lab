@@ -5,15 +5,14 @@ export function useDebounce(source, delay = 300) {
 
     let timeoutId = null
 
-    watch(source, (newValue) => {
+    watch(source, (newValue, _, onCleanup) => {
+    const timeoutId = setTimeout(() => {
+        debounced.value = newValue
+    }, delay)
+
+    onCleanup(() => {
         clearTimeout(timeoutId)
-        timeoutId = setTimeout(() => {
-            debounced.value = newValue
-        }, delay)
     })
-    
-    onUnmounted(() => {
-        clearTimeout(timeoutId)
     })
 
     return debounced
