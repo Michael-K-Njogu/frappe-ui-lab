@@ -2,47 +2,51 @@
 import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCustomer } from '../composables/useCustomer'
-import { deleteCustomer } from '../services/customerService'
+import { useToast } from '../composables/useToast'
 import PageTitle from '../components/PageTitle.vue'
 import { ArrowLeft, Pencil, Trash2 } from '@lucide/vue'
 import CustomerCard from '../components/customers/CustomerCard.vue'
 import ConfirmationModal from '../components/modals/ConfirmationModal.vue'
+import BaseSkeleton from '../components/base/BaseSkeleton.vue'
 
 const showDeleteModal = ref(false)
 const route = useRoute()
 const router = useRouter()
-const deleting = ref(false)
+const { toasts } = useToast()
 
 async function handleDelete() {
-
-    deleting.value = true
-
     try {
-        await deleteCustomer(route.params.id)
+        await deleteCustomer()
+
+        showDeleteModal.value = false
+
+        toasts.push({
+            type: 'info',
+            title: 'Customer Deleted',
+            message: 'The customer has been successfully deleted.',
+        })
 
         router.push({
             name: 'customers',
         })
-    } finally {
-        deleting.value = false
+    } catch (err) {
+        // optional
     }
-    showDeleteModal.value = false
 }
 
 const { 
     customer, 
     loading, 
     error, 
+    deleting,
+    refresh,
+    deleteCustomer,
 } = useCustomer(route.params.id)
 
 </script>
 
 <template>
-    <RouterLink :to="{ name: 'customers' }" class="back-link">
-        <ArrowLeft size="16" /> 
-        Back to Customers
-    </RouterLink>
-    <PageTitle title="Customer Details">
+    <PageTitle title="Customer Details" :has-back-button="true">
         <template #actions>
 
             <RouterLink 
@@ -83,6 +87,12 @@ const {
         :loading="deleting"
         @confirm="handleDelete"
         @cancel="showDeleteModal = false"
+    />
+    
+    <BaseSkeleton
+        v-if="loading"
+        width="100%"
+        height="1rem"
     />
 </template>
 
