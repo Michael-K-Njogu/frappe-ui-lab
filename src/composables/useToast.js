@@ -10,64 +10,81 @@ export function useToast() {
     message,
     type,
     title = '',
-    duration = 3000,
     dismissable = true,
+    duration = 3000,
   }) {
-    state.toasts.push({
+
+    const toast = {
       id: crypto.randomUUID(),
+      title,
       message,
       type,
-      title,
-      duration,
       dismissable,
-    })
+      duration,
+    }
+
+    state.toasts.push(toast)
+
+    // Auto-dismiss
+    if (toast.duration > 0) {
+      setTimeout(() => {
+        removeToast(toast.id)
+      }, toast.duration)
+    }
   }
 
   function success(message, options = {}) {
-    addToast({ 
-      message, 
+    addToast({
+      message,
       type: 'success',
-      ...options
+      duration: 3000,
+      ...options,
     })
   }
 
   function error(message, options = {}) {
-    addToast({ 
-      message, 
-      type: 'error', 
-      ...options 
-    })
-  }
-
-  function info(message, options = {}) {
-    addToast({ 
-      message, 
-      type: 'info', 
-      ...options 
+    addToast({
+      message,
+      type: 'error',
+      duration: 0, // Stay visible until dismissed
+      ...options,
     })
   }
 
   function warning(message, options = {}) {
-    addToast({ 
-      message, 
-      type: 'warning', 
-      ...options 
+    addToast({
+      message,
+      type: 'warning',
+      duration: 0,
+      ...options,
+    })
+  }
+
+  function info(message, options = {}) {
+    addToast({
+      message,
+      type: 'info',
+      duration: 3000,
+      ...options,
     })
   }
 
   function removeToast(id) {
-    state.toasts = state.toasts.filter(
-      toast => toast.id !== id
+    const index = state.toasts.findIndex(
+      toast => toast.id === id
     )
+
+    if (index !== -1) {
+      state.toasts.splice(index, 1)
+    }
   }
 
   return {
     toasts: state.toasts,
-    addToast,
     removeToast,
     success,
     error,
-    info,
     warning,
+    info,
   }
 }

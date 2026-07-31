@@ -1,18 +1,47 @@
 <script setup>
 import { useToast } from '../composables/useToast'
 import Toast from './Toast.vue'
+import { TransitionGroup } from 'vue'
 
-const { toasts } = useToast()
+const { toasts, removeToast } = useToast()
 </script>
 
 <template>
 
-    <div class="toast-container">
+    <TransitionGroup
+        name="toast"
+        tag="div"
+        class="toast-container"
+    >
         <Toast 
             v-for="toast in toasts" 
             :key="toast.id" 
             :toast="toast" 
+            @close="removeToast"
         />
-    </div>
-    
+    </TransitionGroup>
+
 </template>
+
+<style scoped>
+.toast-enter-active,
+.toast-leave-active {
+  transition:
+    opacity .25s ease,
+    transform .25s ease;
+}
+
+.toast-enter-from {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.toast-leave-to {
+    opacity: 0;
+    transform: translateY(-8px);
+}
+
+.toast-move {
+  transition: transform .25s ease;
+}
+</style>
