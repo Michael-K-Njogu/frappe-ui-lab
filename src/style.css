@@ -15,9 +15,9 @@
   --bg-danger-muted: #FEF2F2;
   --bg-warning-muted: #FFFBEB;
 
-  --border-success: #43A047;
-
   --border-colour-default: #D4D4D4;
+  --border-success: #43A047;
+  --border-danger: #DC2626;
 
   --btn-primary-bg: #2F5EAF;
   --btn-primary-bg-hover: #224583;
@@ -43,12 +43,18 @@
 
 }
 
+* {
+  box-sizing: border-box;
+  font-family: var(--font-family-default);
+}
+
 body {
   font-family: var(--font-family-default);
   color: var(--text-colour-default);
   background-color: var(--bg-colour-default);
   margin: 0;
   padding: 0;
+  font-optical-sizing: auto;
   text-rendering: optimizeLegibility;
 }
 
@@ -74,7 +80,7 @@ main {
 }
 
 h1, h2, h3, h4, h5, h6 {
-  font-weight: 600;
+  font-weight: 500;
   margin: 0;
 }
 
@@ -265,10 +271,24 @@ h1 {
   font-size: 14px;
   font-weight: 600;
   width: 100%;
+  padding: 0;
 }
 
 /* Form Styles */
+.form-container {
+  background-color: var(--bg-colour-white);
+  box-shadow: var(--shadow-default);
+  border-radius: 4px;
+  padding: 20px;
+}
+
+.form-row {
+  display: flex;
+  gap: 16px;
+}
+
 .form-group {
+  flex: 1;
   margin-bottom: 16px;
 }
 
@@ -281,11 +301,39 @@ h1 {
   line-height: 20px;
 }
 
-input, select {
+.form-group .form-label__inline {
+  display: inline-flex;
+  align-items: center;
+  margin-left: 4px;
+  vertical-align: middle;
+}
+
+input:not([type="checkbox"]):not([type="radio"]):not(.search-input), select {
   padding: 12px;
   border: 1px solid var(--border-colour-default);
   border-radius: 4px;
   font-size: 14px;
+  width: 100%;
+}
+
+input.is-invalid, select.is-invalid {
+  border-color: var(--border-danger);
+}
+
+select {
+  /* Hide the default native arrow */
+  -webkit-appearance: none;
+  -moz-appearance: none;
+  appearance: none;
+
+  padding-right: 36px; /* Add right padding so text doesn't overlap the icon */
+
+  /* Inject the new custom arrow icon via background-image */
+  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==");
+  background-repeat: no-repeat;
+  background-position: right 12px center; /* Align the icon to the right side */
+  background-size: 16px; /* Size your arrow icon appropriately */
+  cursor: pointer;
 }
 
 .required {
@@ -308,6 +356,7 @@ input, select {
   position: relative;
   display: flex;
   align-items: center;
+  gap: 8px;
 }
 
 .search-input {
@@ -531,12 +580,12 @@ tr:hover {
   padding: 20px;
 }
 
-.table-header {
+.customer-table-skeletion__header {
   background-color: var(--bg-colour-default);
 }
 
-.table-header,
-.table-row {
+.customer-table-skeleton__header,
+.customer-table-skeleton__row {
   display: grid;
   grid-template-columns:
     2fr
@@ -548,4 +597,42 @@ tr:hover {
   gap: 1rem;
 
   align-items: center;
+}
+
+.empty-state {
+  background-color: var(--bg-colour-white);
+  box-shadow: var(--shadow-default);
+  border-radius: 4px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 16px;
+  padding: 40px;
+  text-align: center;
+}
+
+.empty-state__icon {
+  background-color: var(--bg-colour-default);
+  border-radius: var(--border-radius-full);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 100px;
+  height: 100px;
+  color: var(--text-colour-secondary);
+}
+
+.empty-state__title {
+  margin: 0;
+}
+
+.empty-state__description {
+  margin: 0;
+  color: var(--text-colour-secondary);
+  font-size: 14px;
+}
+
+.empty-state__actions {
+  margin-top: 2rem;
 }
