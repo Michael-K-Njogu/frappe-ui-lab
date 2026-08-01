@@ -12,11 +12,15 @@ defineProps({
     type: Boolean,
     default: false,
   },
+  inline: {
+    type: Boolean,
+    default: false,
+  },
 })
 </script>
 
 <template>
-  <label :for="for" class="form-label">
+  <label :for="for" :class="['form-label', { 'form-label__inline': inline }]">
     {{ label }}
     <span v-if="required" class="required">*</span>
   </label>
