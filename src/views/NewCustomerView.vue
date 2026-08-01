@@ -27,7 +27,7 @@ async function saveCustomer(values) {
 </script>
 
 <template>
-    <PageTitle title="New Customer" />
+    <PageTitle title="New Customer" :has-back-button="true" />
 
     <CustomerForm
         :validation-schema="createCustomerSchema"
