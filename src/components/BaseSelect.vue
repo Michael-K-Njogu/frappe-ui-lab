@@ -8,19 +8,24 @@ defineProps({
         type: Array,
         default: () => []
     },
+    allOptionsSelectedText: {
+        type: String,
+        default: 'All Options'
+    }
 })
 
 const emit = defineEmits(['update:modelValue'])
 </script>
 
 <template>
-    <select
-        class="base-select"
-        name="base-select"
-        :value="modelValue"
-        @change="emit('update:modelValue', $event.target.value)"
-    >
-        <option value="">All Types</option>
+    <div class="base-select-wrapper">
+        <select
+            class="base-select"
+            name="base-select"
+            :value="modelValue"
+            @change="emit('update:modelValue', $event.target.value)"
+        >
+        <option value="">{{ allOptionsSelectedText }}</option>
         <option
             v-for="option in options"
             :key="option.value"
@@ -28,5 +33,6 @@ const emit = defineEmits(['update:modelValue'])
         >
             {{ option.label }}
         </option>
-    </select>
+        </select>
+    </div>
 </template>
