@@ -1,5 +1,5 @@
 import { computed } from 'vue'
-import { ArrowDownWideNarrow, ArrowUpNarrowWide } from '@lucide/vue'
+import { ArrowDownWideNarrow, ArrowUpNarrowWide, ArrowUpDown } from '@lucide/vue'
 
 const DEFAULT_SORT_DIRECTIONS = {
     name: 'asc',
@@ -29,12 +29,13 @@ export function useSorting(sort) {
 
     function sortIcon(field) {
         if(!isSorted(field)) {
-            return null
+            return ArrowUpDown // Return a default icon when the field is not sorted
         }
 
         return sort.direction === 'asc'
             ? ArrowUpNarrowWide
             : ArrowDownWideNarrow
+        return ArrowUpDown
     }
 
     return {
