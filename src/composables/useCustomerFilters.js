@@ -1,4 +1,4 @@
-import { reactive, watch } from 'vue'
+import { reactive, watch, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 export function useCustomerFilters() {
@@ -103,11 +103,28 @@ function syncFiltersToUrl() {
   )
 }
 
+const hasActiveFilters = computed(() => {
+  return Boolean(
+    filters.query ||
+    filters.customerType
+  )
+})
+
+const clearFilters = () => {
+  filters.query = ''
+  filters.customerType = ''
+  filters.sort.field = 'createdAt'
+  filters.sort.direction = 'desc'
+  filters.pagination.currentPage = 1
+  filters.pagination.pageSize = 10
+}
+
 initializeFiltersFromUrl()
 syncFiltersToUrl()
 resetPageWhenDatasetChanges()
 
   return {
     filters,
+    hasActiveFilters,
   }
 }
