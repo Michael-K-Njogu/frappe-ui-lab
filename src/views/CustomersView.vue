@@ -1,20 +1,27 @@
 <script setup>
-import { reactive, watch, ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { useCustomers } from '../composables/useCustomers'
 import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/BaseSearchInput.vue'
 import BaseSelect from '../components/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
-import { Plus, RefreshCw, ArrowDownWideNarrow, ArrowUpNarrowWide } from '@lucide/vue'
+import { Plus, RefreshCw } from '@lucide/vue'
 import { getCustomerTypeLabel, customerTypes } from '../config/customerTypes'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import { useSorting } from '../composables/useSorting'
 import { useCustomerFilters } from '../composables/useCustomerFilters'
 import CustomerTableSkeleton from '../components/customers/CustomerTableSkeleton.vue'
+import BaseEmptyState from '../components/base/BaseEmptyState.vue'
+import { UsersRound, SearchX } from '@lucide/vue'
 
-const { filters } = useCustomerFilters() // Use the composable to manage filters
 const router = useRouter()
+
+const {
+  filters,
+  hasActiveFilters,
+  clearFilters
+} = useCustomerFilters()
 
 const {
     customers,
@@ -53,6 +60,22 @@ function handlePageSizeChange(size) {
   filters.pagination.pageSize = size
 }
 
+const emptyState = computed(() => {
+  if (hasActiveFilters.value) {
+    return {
+      title: 'No matching customers found',
+      description: 'No customers match your search criteria. Please adjust your filters and try again.',
+      type: 'filter'
+    }
+  } else {
+    return {
+      title: 'No customers available',
+      description: 'Looks like you haven\'t added any customers yet. Create your first customer to get started.',
+      type: 'initial'
+    }
+  }
+})
+
 </script>
 
 <template>
@@ -88,16 +111,17 @@ function handlePageSizeChange(size) {
     <BaseSelect
       v-model="filters.customerType"
       :options="customerTypes"
+      all-options-selected-text="All Customer Types"
     />
   </div>
 
-  <CustomerTableSkeleton v-if="loading" />
+  <CustomerTableSkeleton v-if="loading" :rows="5" />
 
   <p v-else-if="error">
     {{ error }}
   </p>
 
-  <div class="table-container" v-if="!loading && !error">
+  <div class="table-container" v-if="!loading && !error && customers.length > 0">
     <p v-if="customers.length === 0">No customers found.</p>
     <table v-else class="data-table">
     <thead>
@@ -193,5 +217,46 @@ function handlePageSizeChange(size) {
   /> 
 
   </div>
+
+  <BaseEmptyState
+    v-else-if="!loading && customers.length === 0 && !error"
+    :title="emptyState.title"
+    :description="emptyState.description"
+  >
+
+    <template #icon>
+
+      <UsersRound 
+        v-if="emptyState.type === 'initial'"
+        size="48" 
+      />
+
+      <SearchX 
+        v-else-if="emptyState.type === 'filter'"
+        size="48"
+      />
+
+    </template>
+
+    <template #actions>
+      <RouterLink
+        v-if="emptyState.type === 'initial'"
+        :to="{ name: 'customer-new' }"
+        class="btn btn-primary"
+      >
+        <Plus size="16" />
+        Add Customer
+      </RouterLink>
+
+      <button
+        v-else-if="emptyState.type === 'filter'"
+        class="btn btn-secondary"
+        @click="clearFilters"
+      >
+        Clear Filters
+      </button>
+    </template>
+
+  </BaseEmptyState>  
 
 </template>
