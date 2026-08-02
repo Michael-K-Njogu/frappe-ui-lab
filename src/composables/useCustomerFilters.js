@@ -82,11 +82,15 @@ function syncFiltersToUrl() {
       router.replace({
         query: serializeFilters(),
       })
+    },
+    {
+      deep: true,
+      immediate: true
     }
   )
 }
 
-  function resetPageWhenDatasetChanges() {
+function resetPageWhenDatasetChanges() {
   watch(
     () => ({
       query: filters.query,
@@ -98,7 +102,7 @@ function syncFiltersToUrl() {
         filters.pagination.pageSize,
     }),
     () => {
-      filters.pagination.currentPage = 1
+      filters.pagination.currentPage = 1  
     }
   )
 }
@@ -126,5 +130,6 @@ resetPageWhenDatasetChanges()
   return {
     filters,
     hasActiveFilters,
+    clearFilters
   }
 }
