@@ -27,11 +27,6 @@ const router = createRouter({
           component: CustomersView,
         },
         {
-          path: 'orders',
-          name: 'orders',
-          component: OrdersView,
-        },
-        {
           path: 'customers/:id',
           name: 'customer-details',
           component: () => import('../views/CustomerDetailView.vue'),
@@ -45,6 +40,21 @@ const router = createRouter({
           path: 'customers/:id/edit',
           name: 'customer-edit',
           component: () => import('../views/EditCustomerView.vue'),
+        },
+        {
+          path: 'orders',
+          name: 'orders',
+          component: OrdersView,
+        },
+        {
+          path: 'orders/:id',
+          name: 'order-details',
+          component: () => import('../views/OrderDetailView.vue'),
+        },
+        {
+          path: 'orders/new',
+          name: 'order-new',
+          component: () => import('../views/NewOrderView.vue'),
         },
       ],
     },
