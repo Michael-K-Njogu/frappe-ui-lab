@@ -25,9 +25,10 @@ export function useCustomers(filters) {
 
     if (abortController.value) {
       abortController.value.abort()
-    }
+    }    
 
-    abortController.value = new AbortController()
+    const controller = new AbortController()
+    abortController.value = controller
 
     loading.value = true
     error.value = null
@@ -40,7 +41,7 @@ export function useCustomers(filters) {
       sort: filters.sort,
       page: filters.pagination.currentPage,
       pageSize: filters.pagination.pageSize,
-      signal: abortController.value.signal
+      signal: controller.signal
     })
 
     customers.value = data
@@ -51,26 +52,25 @@ export function useCustomers(filters) {
         error.value = err.message || 'An error occurred while fetching customers.'
       }
     } finally {
-      if (abortController.value === abortController.value) {
+
+      if (abortController.value === controller) {
         loading.value = false
       }
     }   
   }
 
- const refresh = fetchCustomers
-
-  onMounted(fetchCustomers)
-
   watch(
     customerQueryOptions,
     fetchCustomers,
+    {
+      immediate: true,
+    }
   )
 
   return {
     customers,
     loading,
     error,
-    refresh,
-    filters
+    refresh: fetchCustomers,
   }
 }
