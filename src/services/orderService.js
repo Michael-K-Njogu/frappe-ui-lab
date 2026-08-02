@@ -42,6 +42,7 @@ function mapOrderToApi(order) {
     customer_id: order.customerId,
     total_amount: order.totalAmount,
     status: order.status,
+    notes: order.notes,
   }
 }
 
@@ -116,7 +117,17 @@ export async function getOrderById(id, { signal } = {}) {
 
 export async function createOrder(order) {
   const apiOrder = mapOrderToApi(order)
-  const data = await apiClient.post(RESOURCE_PATH, apiOrder)
+
+  const data = await apiClient.post(
+    RESOURCE_PATH, 
+    apiOrder,
+    {
+      headers: {
+        Prefer: 'return=representation',
+      },
+    }
+  )
+
   return mapOrder(data)
 }
 
