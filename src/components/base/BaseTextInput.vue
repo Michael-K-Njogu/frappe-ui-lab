@@ -13,6 +13,8 @@ defineProps({
         default: 'text'
     }
 })
+
+const emit = defineEmits(['update:modelValue'])
 </script>
 
 <template>
@@ -20,6 +22,6 @@ defineProps({
         :type="type"
         :placeholder="placeholder"
         :value="modelValue"
-        @input="$emit('update:modelValue', $event.target.value)"
+        @input="emit('update:modelValue', $event.target.value)"
     />
 </template>
