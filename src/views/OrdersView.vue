@@ -1,5 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
+import { getOrders } from '../services/orderService'
 import { useRouter, useRoute } from 'vue-router'
 import { useOrders } from '../composables/useOrders'
 import PageTitle from '../components/PageTitle.vue'
@@ -15,6 +16,7 @@ import OrderTableSkeleton from '../components/orders/OrderTableSkeleton.vue'
 import BaseEmptyState from '../components/base/BaseEmptyState.vue'
 import { Package, SearchX, CircleAlert } from '@lucide/vue'
 import Alert from '../components/Alert.vue'
+import { ORDER_STATUS_OPTIONS } from '../constants/orderStatuses.js'
 
 const router = useRouter()
 
@@ -62,7 +64,7 @@ function handlePageSizeChange(size) {
 }
 
 const emptyState = computed(() => {
-  if (hasActiveFilters.value) {
+  if (hasActiveFilters) {
     return {
       title: 'No orders found',
       description: 'Try adjusting your filters or clear them to see all orders.'
@@ -79,7 +81,7 @@ const viewState = computed(() => {
     if (loading.value) return 'loading'
     if (error.value) return 'error'
     if (orders.value.length > 0) return 'ready'
-    if (hasActiveFilters.value) return 'filtered-empty'
+    if (hasActiveFilters) return 'filtered-empty'
 
     return 'empty'
 })
@@ -118,28 +120,34 @@ const viewState = computed(() => {
       />
       <BaseSelect
         v-model="filters.status"
-        :options="[
-          { value: '', label: 'All Statuses' },
-          { value: 'pending', label: 'Pending' },
-          { value: 'completed', label: 'Completed' },
-          { value: 'canceled', label: 'Canceled' }
-        ]"
+        all-options-selected-text="All Statuses"
+        :options="ORDER_STATUS_OPTIONS"
         :disabled="loading"
       />
     </div>
 
-    <OrderTableSkeleton v-if="loading" :rows="5" />
+    <OrderTableSkeleton v-if="viewState === 'loading'" :rows="6" />
 
-    <OrderTable
-        v-else-if="!loading && !error && orders.length > 0"
-        :orders="orders"
-        :sort-by="filters.sort.by"
-        :sort-order="filters.sort.order"
-        @sort="sortBy"
-        @view-order="viewOrder"
-    />
+    <div class="data-table-container" v-else-if="viewState === 'ready'">
 
-    <Alert v-else-if="error" type="danger" :message="error" alertIcon="CircleX">
+      <OrderTable
+          :orders="orders"
+          :sort="filters.sort"
+          @sort="sortBy"
+          @view="viewOrder"
+      />
+
+      <BasePagination
+        :current-page="filters.pagination.currentPage"
+        :page-size="filters.pagination.pageSize"
+        :total-items="filters.pagination.totalItems"
+        @update:currentPage="handlePageChange"
+        @update:pageSize="handlePageSizeChange"
+      />       
+
+    </div>
+
+    <Alert v-else-if="viewState === 'error'" type="danger" :message="error" alertIcon="CircleX">
         <template #title>
             Error Loading Orders
         </template>
@@ -157,12 +165,12 @@ const viewState = computed(() => {
         <template #icon>
 
             <Package 
-                v-if="emptyState.type === 'initial'"
+                v-if="viewState === 'empty'"
                 size="48" 
             />
 
             <SearchX 
-                v-else-if="emptyState.type === 'filter'"
+                v-else-if="viewState === 'filtered-empty'"
                 size="48"
             />
 
@@ -170,7 +178,7 @@ const viewState = computed(() => {
 
         <template #actions>
         <RouterLink
-            v-if="emptyState.type === 'initial'"
+            v-if="viewState === 'empty'"
             :to="{ name: 'order-new' }"
             class="btn btn-primary"
         >
@@ -179,7 +187,7 @@ const viewState = computed(() => {
         </RouterLink>
 
         <button
-            v-else-if="emptyState.type === 'filter'"
+            v-else-if="viewState === 'filtered-empty'"
             class="btn btn-secondary"
             @click="clearFilters"
         >
