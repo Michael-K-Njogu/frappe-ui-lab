@@ -121,9 +121,8 @@ const emptyState = computed(() => {
     {{ error }}
   </p>
 
-  <div class="table-container" v-if="!loading && !error && customers.length > 0">
-    <p v-if="customers.length === 0">No customers found.</p>
-    <table v-else class="data-table">
+  <div class="data-table-container" v-else-if="!loading && !error && customers.length > 0">
+    <table class="data-table">
     <thead>
       <tr>
         <th>
@@ -219,7 +218,7 @@ const emptyState = computed(() => {
   </div>
 
   <BaseEmptyState
-    v-else-if="!loading && customers.length === 0 && !error"
+    v-else
     :title="emptyState.title"
     :description="emptyState.description"
   >
