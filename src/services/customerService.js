@@ -40,7 +40,10 @@ function mapCustomerToApi(customer) {
 export async function getCustomers({
   query = '',
   customerType = '',
-  sort,
+  sort = { 
+    field: 'createdAt', 
+    direction: 'desc' 
+  },
   page = 1,
   pageSize = 10,
   signal
@@ -67,12 +70,16 @@ export async function getCustomers({
 
   const dbSortField = SORT_FIELD_MAP[sort.field]
 
+ if (sort) {
+  const dbSortField = SORT_FIELD_MAP[sort.field]
+
   if (dbSortField) {
     params.set(
       'order',
       `${dbSortField}.${sort.direction}`
     )
   }
+}
 
   const { data, response } = await apiClient.getRaw(
     `/customers?${params.toString()}`,
