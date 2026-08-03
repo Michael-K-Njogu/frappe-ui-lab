@@ -10,9 +10,17 @@ export const ORDER_STATUS = {
 
 export const ORDER_STATUS_OPTIONS = [
   {
+    value: ORDER_STATUS.DRAFT,
+    label: ORDER_STATUS.DRAFT,
+  },  
+  {
     value: ORDER_STATUS.PENDING,
     label: ORDER_STATUS.PENDING,
   },
+  {
+    value: ORDER_STATUS.PROCESSING,
+    label: ORDER_STATUS.PROCESSING,
+  },  
   {
     value: ORDER_STATUS.COMPLETED,
     label: ORDER_STATUS.COMPLETED,
@@ -20,13 +28,5 @@ export const ORDER_STATUS_OPTIONS = [
   {
     value: ORDER_STATUS.CANCELED,
     label: ORDER_STATUS.CANCELED,
-  },
-  {
-    value: ORDER_STATUS.PROCESSING,
-    label: ORDER_STATUS.PROCESSING,
-  },
-  {
-    value: ORDER_STATUS.DRAFT,
-    label: ORDER_STATUS.DRAFT,
   },
 ]
