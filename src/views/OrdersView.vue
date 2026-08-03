@@ -49,6 +49,10 @@ function viewOrder(id) {
     router.push({ name: 'order-details', params: { id } })
 }
 
+function editOrder(id) {
+    router.push({ name: 'order-edit', params: { id } })
+}
+
 const { 
   sortBy, 
   isSorted, 
@@ -135,6 +139,7 @@ const viewState = computed(() => {
           :sort="filters.sort"
           @sort="sortBy"
           @view="viewOrder"
+          @edit="editOrder"
       />
 
       <BasePagination
