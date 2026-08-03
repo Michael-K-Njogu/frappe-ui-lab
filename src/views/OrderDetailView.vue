@@ -6,6 +6,7 @@ import OrderCard from '../components/orders/OrderCard.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
 
 const route = useRoute()
+const router = useRouter()
 
 
 const { 
