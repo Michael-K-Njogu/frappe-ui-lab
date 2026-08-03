@@ -197,6 +197,7 @@ const emptyState = computed(() => {
         v-for="customer in customers"
         :key="customer.id"
         @click="viewCustomer(customer.id)"
+        class="clickable-row"
       >
         <td>{{ customer.name }}</td>
         <td>{{ customer.email }}</td>
