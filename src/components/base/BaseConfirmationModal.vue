@@ -2,9 +2,9 @@
 import BaseButton from './BaseButton.vue'
 
 defineProps({
-    open: {
+    modelValue: {
         type: Boolean,
-        required: true
+        default: false
     },
 
     title: {
@@ -19,7 +19,12 @@ defineProps({
 
     confirmText: {
         type: String,
-        default: 'Delete'
+        default: 'Confirm'
+    },
+
+    cancelText: {
+        type: String,
+        default: 'Cancel'
     },
 
     confirmVariant: {
@@ -33,31 +38,71 @@ defineProps({
     }
 })
 
-const emit = defineEmits(['confirm', 'cancel'])
+const emit = defineEmits([
+    'confirm', 
+    'cancel'
+])
+
+function closeModal() {
+    emit('update:modelValue', false)
+}
+
+function confirm() {
+    emit('confirm')
+    closeModal()
+}
 </script>
 
 <template>
-    <div class="modal-backdrop">
+    <Teleport to="body">
+        <div 
+            v-if="modelValue"
+            class="modal-backdrop"
+            @click.self="closeModal"
+        >
+            <div 
+                class="modal"
+                role="dialog"
+                aria-modal="true"
+            >
 
-        <div class="modal">
-            <h2>{{ title }}</h2>
-            <p>{{ message }}</p>
+                <div class="modal-header">
 
-            <div class="modal-actions">
-                <BaseButton 
-                    label="Cancel"
-                    variant="secondary" 
-                    :disabled="loading" 
-                    @click="emit('cancel')"
-                />
-                <BaseButton 
-                    :label="loading ? 'Deleting...' : confirmText"
-                    :variant="confirmVariant" 
-                    :disabled="loading" 
-                    @click="emit('confirm')"
-                />
+                    <slot name="icon" />
+
+                    <h3>{{ title }}</h3>
+
+                </div>
+
+                <div class="modal-body">
+
+                    <slot name="body">
+                        <p>{{ message }}</p>
+                    </slot>
+
+                </div>
+
+                <div class="modal-footer">
+
+                    <BaseButton
+                        :label="cancelText"
+                        variant="secondary"
+                        @click="closeModal"
+                    >
+                    </BaseButton>
+
+                    <BaseButton
+                        :label="confirmText"
+                        :variant="confirmVariant"
+                        :loading="loading"
+                        @click="confirm"
+                    >
+                        {{ confirmText }}
+                    </BaseButton>
+
+                </div>
+
             </div>
         </div>
-
-    </div>
+    </Teleport>
 </template>
