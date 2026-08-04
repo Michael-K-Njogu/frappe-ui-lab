@@ -2,7 +2,7 @@
 import { watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { ORDER_STATUS, ORDER_STATUS_OPTIONS } from '../../constants/orderStatuses.js'
+import { ORDER_STATUS } from '../../constants/orderStatuses.js'
 import FormLabel from '../FormLabel.vue'
 import BaseSelect from '../BaseSelect.vue'
 import BaseTextInput from '../base/BaseTextInput.vue'
@@ -42,8 +42,8 @@ const props = defineProps({
 })
 
 const emit = defineEmits([
-  'submit',
-  'cancel',
+  'post-order',
+  'save-draft',
 ])
 
 const {
@@ -57,13 +57,16 @@ const {
     initialValues: props.initialValues,
 })
 
-const onSubmit = handleSubmit((values) => {
-  emit('submit', values)
+const saveDraft = handleSubmit((values) => {
+  emit('save-draft', values)
+})
+
+const postOrder = handleSubmit((values) => {
+  emit('post-order', values)
 })
 
 const fields = {
     customerId: defineField('customerId')[0],
-    status: defineField('status')[0],
     totalAmount: defineField('totalAmount')[0],
     notes: defineField('notes')[0],
 }
@@ -84,6 +87,7 @@ watch(
 
         <div class="form-row">
 
+            <!-- Customer select - will be updated to searchable dropdown to enhance user experience -->
             <div class="form-group">
                 <FormLabel for="customerId" label="Customer" required />
                 <BaseSelect
@@ -97,22 +101,7 @@ watch(
                 <p v-if="errors.customerId" class="invalid">{{ errors.customerId }}</p>
             </div>
 
-            <div class="form-group">
-                <FormLabel for="status" label="Status" required />
-                <BaseSelect
-                    all-options-selected-text="-- Select a status --"
-                    v-model="fields.status.value"
-                    :options="ORDER_STATUS_OPTIONS"
-                    :error="errors.status"
-                    placeholder="Select a status"
-                /> 
-                <p v-if="errors.status" class="invalid">{{ errors.status }}</p>
-            </div>
-
-        </div>
-
-        <div class="form-row">
-
+            <!-- Total amount field - will be omitted when Products module is completed -->
             <div class="form-group">
                 <FormLabel for="totalAmount" label="Order Total" required />
                 <BaseTextInput
@@ -123,24 +112,39 @@ watch(
                     placeholder="Enter total amount"
                 />
                 <p v-if="errors.totalAmount" class="invalid">{{ errors.totalAmount }}</p>
-            </div>
+            </div>            
 
         </div>
 
-            <div class="form-group">
-                <FormLabel for="notes" label="Notes" />
+
+        <div class="form-group">
+            <FormLabel for="notes" label="Notes" />
                 <BaseTextArea
                     v-model="fields.notes.value"
                     :error="errors.notes"
                     placeholder="Enter notes"
                 />
-                <p v-if="errors.notes" class="invalid">{{ errors.notes }}</p>
-            </div>        
+            <p v-if="errors.notes" class="invalid">{{ errors.notes }}</p>
+        </div>     
 
         <div class="form-actions">
-            <BaseButton :label="'Cancel'" :loading="loading" type="button" variant="secondary" size="lg" @click="emit('cancel')" />
-            <BaseButton :label="submitLabel" :loading="loading" type="submit" variant="primary" size="lg" />
-        </div>
+
+            <BaseButton 
+                :label="'Save Draft'" 
+                :loading="loading" 
+                variant="secondary" 
+                size="lg" 
+                @click="saveDraft" 
+            />
+
+            <BaseButton 
+                :label="submitLabel" 
+                :loading="loading"  
+                variant="primary" 
+                size="lg" 
+                @click="postOrder"
+                />
+            </div>
 
     </form>
 </template>
