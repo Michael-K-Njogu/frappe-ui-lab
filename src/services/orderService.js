@@ -39,7 +39,7 @@ function mapOrder(order) {
 
 function mapOrderToApi(order) {
   return {
-    order_number: order.orderNumber ?? generateOrderNumber(),
+    order_number: order.orderNumber,
     customer_id: order.customerId,
     total_amount: order.totalAmount,
     status: order.status,
@@ -133,7 +133,10 @@ export async function getOrderById(id, { signal } = {}) {
 }
 
 export async function createOrder(order) {
-  const apiOrder = mapOrderToApi(order)
+  const apiOrder = mapOrderToApi({
+    ...order,
+    orderNumber: order.orderNumber ?? generateOrderNumber(),
+  })
 
   const data = await apiClient.post(
     RESOURCE_PATH, 
@@ -151,6 +154,8 @@ export async function createOrder(order) {
 export async function updateOrder(id, order) {
   const apiOrder = mapOrderToApi(order)
 
+  console.log(apiOrder)
+
   const data = await apiClient.patch(
     `${RESOURCE_PATH}?id=eq.${id}`, 
     apiOrder,
@@ -162,6 +167,18 @@ export async function updateOrder(id, order) {
   )
 
   return mapOrder(data[0])
+}
+
+export async function transitionOrder(order, status) {
+  console.log('Transitioning order:', {
+      id: order.id,
+      currentStatus: order.status,
+      newStatus: status,
+    })  
+  return updateOrder(order.id, {
+    ...order,
+    status,
+  })
 }
 
 export async function deleteOrder(id) {
