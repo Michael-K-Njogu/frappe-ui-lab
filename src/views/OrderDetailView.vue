@@ -8,7 +8,7 @@ import OrderCard from '../components/orders/OrderCard.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 import { updateOrder, deleteOrder, transitionOrder } from '../services/orderService'
-import { ORDER_STATUS } from '../constants/orderStatuses.js'
+import { ORDER_STATUS, ORDER_STATUS_TIMESTAMP_FIELD } from '../constants/orderStatuses.js'
 import { canTransitionTo } from '../business/orderTransitions'
 import { getAvailableActions } from '../business/orderPermissions'
 import { Play, CheckCheck } from '@lucide/vue'
@@ -34,8 +34,21 @@ async function performTransition(status, title, message) {
   if (!order.value) return
 
   try {
+    const updatedOrder = {
+      ...order.value,
+      status,
+    }
+
+    const timestampField =
+      ORDER_STATUS_TIMESTAMP_FIELD[status]
+
+    if (timestampField) {
+      updatedOrder[timestampField] =
+        new Date().toISOString()
+    }
+
     await transitionOrder(
-      order.value,
+      updatedOrder,
       status
     )
 
