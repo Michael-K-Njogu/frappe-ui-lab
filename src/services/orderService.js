@@ -164,6 +164,8 @@ export async function updateOrder(id, order) {
 }
 
 export async function deleteOrder(id) {
-  await apiClient.delete(`${RESOURCE_PATH}/${id}`)
+  await apiClient.delete(
+    `${RESOURCE_PATH}?id=eq.${id}`
+  )
 }   
 
