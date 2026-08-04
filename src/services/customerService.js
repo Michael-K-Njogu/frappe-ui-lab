@@ -25,6 +25,7 @@ function mapCustomer(customer) {
     creditLimit: customer.credit_limit,
     customerType: customer.customer_type,
     createdAt: customer.created_at,
+    orderCount: customer.orders?.[0]?.count ?? 0,
   }
 }
 
@@ -53,7 +54,10 @@ export async function getCustomers({
   const offset = (page - 1) * pageSize
   params.set('offset', offset)
   params.set('limit', pageSize)
-  params.set('select', '*')
+  params.set(
+    'select',
+    '*, orders(count)'
+  )
   
   if (query) {
     params.set(
@@ -70,16 +74,16 @@ export async function getCustomers({
 
   const dbSortField = SORT_FIELD_MAP[sort.field]
 
- if (sort) {
-  const dbSortField = SORT_FIELD_MAP[sort.field]
+  if (sort) {
+    const dbSortField = SORT_FIELD_MAP[sort.field]
 
-  if (dbSortField) {
-    params.set(
-      'order',
-      `${dbSortField}.${sort.direction}`
-    )
+    if (dbSortField) {
+      params.set(
+        'order',
+        `${dbSortField}.${sort.direction}`
+      )
+    }
   }
-}
 
   const { data, response } = await apiClient.getRaw(
     `/customers?${params.toString()}`,
@@ -100,13 +104,17 @@ export async function getCustomers({
     data: data.map(mapCustomer),
     total,
   }
+  
 }
 
 export async function getCustomerById(id) {
   const customers = await apiClient.get(
-    `/customers?id=eq.${id}&select=*`
+    `/customers?id=eq.${id}&select=*,orders(count)`
   )
-  return customers.length > 0 ? mapCustomer(customers[0]) : null
+  
+  return customers.length > 0 
+    ? mapCustomer(customers[0]) 
+    : null
 }
 
 export async function createCustomer(customer) {
