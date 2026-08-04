@@ -18,13 +18,14 @@ defineProps({
     },
     size: {
         type: String,
-        default: 'lg',
+        default: '',
     },
 })
 </script>
 
 <template>
     <button :type="type" :class="`btn btn-${variant} btn-${size}`">
+        <slot name="icon" />
         {{ label }}
     </button>
 </template>
