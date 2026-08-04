@@ -12,9 +12,9 @@ const columns = 5 // Assuming there are 5 columns in the customer table
 </script>
 
 <template>
-    <div class="customer-table-skeleton">
+    <div class="data-table-skeleton">
 
-        <div class="customer-table-skeleton__header">
+        <div class="data-table-skeleton__header">
             <BaseSkeleton 
                 v-for="col in columns"
                 :key="col"
@@ -26,7 +26,7 @@ const columns = 5 // Assuming there are 5 columns in the customer table
         <div 
             v-for="row in rows"
             :key="row"
-            class="customer-table-skeleton__row"
+            class="data-table-skeleton__row"
         >
             <BaseSkeleton 
                 v-for="col in columns"
