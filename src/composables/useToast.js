@@ -4,6 +4,13 @@ const state = reactive({
   toasts: [],
 })
 
+const TOAST_DURATION = {
+  success: 3000,
+  error: 0, // Stay visible until dismissed
+  warning: 0, // Stay visible until dismissed
+  info: 3000,
+}
+
 export function useToast() {
 
   function addToast({
@@ -37,7 +44,7 @@ export function useToast() {
     addToast({
       message,
       type: 'success',
-      duration: 3000,
+      duration: TOAST_DURATION.success,
       ...options,
     })
   }
@@ -46,7 +53,7 @@ export function useToast() {
     addToast({
       message,
       type: 'error',
-      duration: 0, // Stay visible until dismissed
+      duration: TOAST_DURATION.error,
       ...options,
     })
   }
@@ -55,7 +62,7 @@ export function useToast() {
     addToast({
       message,
       type: 'warning',
-      duration: 0,
+      duration: TOAST_DURATION.warning,
       ...options,
     })
   }
@@ -64,7 +71,7 @@ export function useToast() {
     addToast({
       message,
       type: 'info',
-      duration: 3000,
+      duration: TOAST_DURATION.info,
       ...options,
     })
   }
