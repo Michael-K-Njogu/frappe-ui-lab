@@ -6,13 +6,13 @@ import { useToast } from '../composables/useToast'
 import PageTitle from '../components/PageTitle.vue'
 import { ArrowLeft, Pencil, Trash2 } from '@lucide/vue'
 import CustomerCard from '../components/customers/CustomerCard.vue'
-import ConfirmationModal from '../components/modals/ConfirmationModal.vue'
+import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
 
 const showDeleteModal = ref(false)
 const route = useRoute()
 const router = useRouter()
-const { toasts } = useToast()
+const { info, error: showError } = useToast()
 
 async function handleDelete() {
     try {
@@ -20,17 +20,15 @@ async function handleDelete() {
 
         showDeleteModal.value = false
 
-        toasts.push({
-            type: 'info',
+        info('The customer has been successfully deleted.', {
             title: 'Customer Deleted',
-            message: 'The customer has been successfully deleted.',
         })
 
         router.push({
             name: 'customers',
         })
     } catch (err) {
-        // optional
+        showError(err.message) // Display the error message in a toast notification
     }
 }
 
@@ -80,7 +78,7 @@ const {
         <p>Customer not found.</p>
     </div>
 
-    <ConfirmationModal
+    <BaseConfirmationModal
         v-if="showDeleteModal"
         title="Confirm Deletion"
         :message="`Are you sure you want to delete ${customer.name} from the database? This action cannot be undone.`"
