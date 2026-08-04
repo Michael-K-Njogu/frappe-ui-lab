@@ -56,6 +56,11 @@ const router = createRouter({
           name: 'order-new',
           component: () => import('../views/NewOrderView.vue'),
         },
+        {
+          path: 'orders/:id/edit',
+          name: 'order-edit',
+          component: () => import('../views/EditOrderView.vue'),
+        }
       ],
     },
   ],
