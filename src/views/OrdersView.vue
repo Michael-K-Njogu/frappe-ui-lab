@@ -7,18 +7,25 @@ import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/BaseSearchInput.vue'
 import BaseSelect from '../components/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
-import { Plus, RefreshCw } from '@lucide/vue'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import { useSorting } from '../composables/useSorting'
 import { useOrderFilters } from '../composables/useOrderFilters'
 import OrderTable from '../components/orders/OrderTable.vue'
 import OrderTableSkeleton from '../components/orders/OrderTableSkeleton.vue'
 import BaseEmptyState from '../components/base/BaseEmptyState.vue'
-import { Package, SearchX, CircleAlert } from '@lucide/vue'
+import { Plus, RefreshCw, Package, SearchX, CircleAlert } from '@lucide/vue'
 import Alert from '../components/Alert.vue'
 import { ORDER_STATUS_OPTIONS } from '../constants/orderStatuses.js'
+import { useToast } from '../composables/useToast'
+import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
+import { deleteOrder } from '../services/orderService'
 
 const router = useRouter()
+const { info, error: showError } = useToast()
+const showDeleteModal = ref(false)
+const deleting = ref(false)
+const selectedOrder = ref(null)
+const refreshing = ref(false)
 
 const {
   filters,
@@ -33,8 +40,6 @@ const {
     refresh
 } = useOrders(filters)
 
-const refreshing = ref(false)
-
 async function handleRefresh() {
   refreshing.value = true
 
@@ -47,6 +52,48 @@ async function handleRefresh() {
 
 function viewOrder(id) {
     router.push({ name: 'order-details', params: { id } })
+}
+
+function confirmDeleteOrder(order) {
+  selectedOrder.value = order
+  showDeleteModal.value = true
+}
+
+async function handleDeleteOrder() {
+  if (!selectedOrder.value) return
+
+  const order = selectedOrder.value
+
+  deleting.value = true
+
+  try {
+    await deleteOrder(order.id)
+
+    info(
+      `Order ${order.orderNumber} deleted successfully.`,
+      {
+        title: 'Order Deleted',
+      }
+    )
+
+    showDeleteModal.value = false
+
+    await refresh()
+
+  } catch (err) {
+    showError(
+      `Failed to delete order ${order.orderNumber}. Please try again.`,
+      {
+        title: 'Failed to Delete Order',
+      }
+    )
+  } finally {
+    deleting.value = false
+  }
+}
+
+function resetDeleteState() {
+  selectedOrder.value = null
 }
 
 function editOrder(id) {
@@ -140,6 +187,7 @@ const viewState = computed(() => {
           @sort="sortBy"
           @view="viewOrder"
           @edit="editOrder"
+          @delete="confirmDeleteOrder"
       />
 
       <BasePagination
@@ -202,6 +250,21 @@ const viewState = computed(() => {
 
     </BaseEmptyState>    
 
+    <BaseConfirmationModal
+      v-if="selectedOrder"
+      v-model="showDeleteModal"
+      title="Delete Order"
+      :message="`Are you sure you want to delete order ${selectedOrder.orderNumber}? This action cannot be undone.`"
+      confirmText="Delete Order"
+      cancelText="Cancel"
+      :loading="deleting"
+      @confirm="handleDeleteOrder"
+      @closed="resetDeleteState"
+    >
+      <template #icon>
+        <CircleAlert size="24" />
+      </template>
+    </BaseConfirmationModal>
 
 </template>
 
