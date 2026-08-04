@@ -3,7 +3,7 @@ import { formatCurrency, formatDate } from '../../utils/formatters'
 import BaseBadge from '../base/BaseBadge.vue'
 import { Eye, Pencil, Trash2, ArrowUp, ArrowDown, SquarePen, MessageSquareText, Printer } from '@lucide/vue'
 import { ORDER_STATUS } from '../../constants/orderStatuses.js'
-import { canEditOrder, canDeleteOrder, canPrintOrder, getEditRestrictionReason } from '../../utils/orderPermissions.js'
+import { canEditOrder, canDeleteOrder, canPrintOrder, getEditRestrictionReason } from '../../business/orderPermissions.js'
 
 defineProps({
     orders: {
