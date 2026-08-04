@@ -32,8 +32,16 @@ function mapOrder(order) {
     totalAmount: order.total_amount,
     status: order.status,
     notes: order.notes,
+
     createdAt: order.created_at,
     updatedAt: order.updated_at,
+
+    // Map the new timestamp fields
+    postedAt: order.posted_at,
+    processingStartedAt: order.processing_started_at,
+    completedAt: order.completed_at,
+    canceledAt: order.canceled_at,
+
   }
 }
 
@@ -44,6 +52,12 @@ function mapOrderToApi(order) {
     total_amount: order.totalAmount,
     status: order.status,
     notes: order.notes,
+
+    // Map the new timestamp fields
+    posted_at: order.postedAt,
+    processing_started_at: order.processingStartedAt,
+    completed_at: order.completedAt,
+    canceled_at: order.canceledAt,    
   }
 }
 
@@ -148,13 +162,11 @@ export async function createOrder(order) {
     }
   )
 
-  return mapOrder(data)
+  return mapOrder(data[0])
 }
 
 export async function updateOrder(id, order) {
   const apiOrder = mapOrderToApi(order)
-
-  console.log(apiOrder)
 
   const data = await apiClient.patch(
     `${RESOURCE_PATH}?id=eq.${id}`, 
@@ -170,11 +182,7 @@ export async function updateOrder(id, order) {
 }
 
 export async function transitionOrder(order, status) {
-  console.log('Transitioning order:', {
-      id: order.id,
-      currentStatus: order.status,
-      newStatus: status,
-    })  
+
   return updateOrder(order.id, {
     ...order,
     status,
