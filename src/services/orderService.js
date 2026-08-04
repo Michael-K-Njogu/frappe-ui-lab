@@ -1,4 +1,5 @@
 import { apiClient } from '../api/apiClient'
+import { generateOrderNumber } from '../utils/orderNumber.js'
 
 const RESOURCE_PATH = '/orders'
 
@@ -38,7 +39,7 @@ function mapOrder(order) {
 
 function mapOrderToApi(order) {
   return {
-    order_number: order.orderNumber,
+    order_number: order.orderNumber ?? generateOrderNumber(),
     customer_id: order.customerId,
     total_amount: order.totalAmount,
     status: order.status,
