@@ -17,3 +17,10 @@ export const ORDER_STATUS_OPTIONS =
     label: status,
     value: status,
   }))
+
+  export const ORDER_STATUS_TIMESTAMP_FIELD = {
+    [ORDER_STATUS.PENDING]: 'postedAt',
+    [ORDER_STATUS.PROCESSING]: 'processingStartedAt',
+    [ORDER_STATUS.COMPLETED]: 'completedAt',
+    [ORDER_STATUS.CANCELED]: 'canceledAt',
+  }
