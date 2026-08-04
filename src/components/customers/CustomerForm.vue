@@ -1,10 +1,10 @@
 <script setup>
-import { watch } from 'vue'
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { customerTypes } from '../../config/customerTypes'
+import { customerTypes } from '../../constants/customerTypes.js'
 import FormLabel from '../FormLabel.vue'
 import BaseSelect from '../BaseSelect.vue'
+import BaseTextInput from '../base/BaseTextInput.vue'
 
 const props = defineProps({
     initialValues: {
@@ -69,13 +69,26 @@ const fields = {
 
             <div class="form-group">
                 <FormLabel label="Name" for="name" required />
-                <input :class="{ 'is-invalid': errors.name }" v-model="fields.name.value" name="name" id="name" autocomplete="name" placeholder="Enter name" />
+                <BaseTextInput
+                    :class="{ 'is-invalid': errors.name }"
+                    v-model="fields.name.value"
+                    name="name"
+                    id="name"
+                    placeholder="Enter customer name"
+                />
                 <p v-if="errors.name" class="invalid">{{ errors.name }}</p>
             </div>
 
             <div class="form-group">
                 <FormLabel label="Email" for="email" required />
-                <input :class="{ 'is-invalid': errors.email }" v-model="fields.email.value" name="email" id="email" autocomplete="email" placeholder="Enter email" />
+                <BaseTextInput  
+                    :class="{ 'is-invalid': errors.email }"
+                    v-model="fields.email.value"
+                    name="email"
+                    id="email"
+                    placeholder="Enter customer email"
+                    type="email"
+                />
                 <p v-if="errors.email" class="invalid">{{ errors.email }}</p>
             </div>    
 
@@ -95,7 +108,7 @@ const fields = {
                     :class="{ 'is-invalid': errors.customerType }"
                     v-model="fields.customerType.value"
                     :options="customerTypes"
-                    all-options-selected-text="All Customer Types"
+                    all-options-selected-text="-- Select a customer type --"
                 />
                 <p v-if="errors.customerType" class="invalid">{{ errors.customerType }}</p>
             </div>  
