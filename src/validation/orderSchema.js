@@ -3,7 +3,7 @@ import { z } from 'zod';
 const baseOrderSchema = z.object({
   customerId: z
     .string()
-    .min(1, { message: 'Please select a customer' }),
+    .min(1, { message: 'Please select a customer from the list' }),
 
   status: z
     .string()
