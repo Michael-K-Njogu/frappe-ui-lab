@@ -4,15 +4,31 @@ import { useRoute, useRouter } from 'vue-router'
 import { useCustomer } from '../composables/useCustomer'
 import { useToast } from '../composables/useToast'
 import PageTitle from '../components/PageTitle.vue'
-import { ArrowLeft, Pencil, Trash2 } from '@lucide/vue'
+import { ArrowLeft, Pencil, Trash2, Info } from '@lucide/vue'
 import CustomerCard from '../components/customers/CustomerCard.vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
+import { canDeleteCustomer } from '../business/customerPermissions'
+import Alert from '../components/Alert.vue'
 
 const open = ref(false)
 const route = useRoute()
 const router = useRouter()
 const { info, error: showError } = useToast()
+
+const canDelete = computed(() => {
+    return customer.value 
+        ? canDeleteCustomer(customer.value) 
+        : false
+})
+
+function confirmDeleteCustomer() {
+    if(!canDelete.value) {
+        showError('This customer cannot be deleted because they have existing orders.')
+        return
+    }
+    open.value = true
+}
 
 async function handleDelete() {
     try {
@@ -64,26 +80,34 @@ const {
             </RouterLink>
 
             <button 
-                v-if="customer" 
+                v-if="customer && canDelete"
                 class="btn btn-danger" 
-                @click="open = true"
+                @click="confirmDeleteCustomer"
             >
                 <Trash2 size="16" />
                 Delete Customer
             </button>
         </template>
     </PageTitle>
-    <p v-if="loading">Loading customer details...</p>
-    <p v-else-if="error">
+
+    <p v-if="error">
         {{ error }}
     </p>
+    
     <CustomerCard
         v-else-if="customer"
         :customer="customer"
     />
-    <div v-else>
-        <p>Customer not found.</p>
-    </div>
+
+    <Alert
+        v-if="customer && !canDelete"
+        :message="`This customer cannot be deleted because they have existing orders.`"
+        type="info"
+    >
+        <template #icon>    
+            <Info size="24" />
+        </template>
+    </Alert>    
 
     <BaseConfirmationModal
         v-if="customer"
