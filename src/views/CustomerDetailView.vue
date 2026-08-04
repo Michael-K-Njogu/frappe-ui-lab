@@ -1,5 +1,5 @@
 <script setup>
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 import { useCustomer } from '../composables/useCustomer'
 import { useToast } from '../composables/useToast'
@@ -9,7 +9,7 @@ import CustomerCard from '../components/customers/CustomerCard.vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
 
-const showDeleteModal = ref(false)
+const open = ref(false)
 const route = useRoute()
 const router = useRouter()
 const { info, error: showError } = useToast()
@@ -18,7 +18,7 @@ async function handleDelete() {
     try {
         await deleteCustomer()
 
-        showDeleteModal.value = false
+        open.value = false
 
         info('The customer has been successfully deleted.', {
             title: 'Customer Deleted',
@@ -31,6 +31,13 @@ async function handleDelete() {
         showError(err.message) // Display the error message in a toast notification
     }
 }
+
+const deleteMessage = computed(() => {
+    if (customer.value) {
+        return `Are you sure you want to delete ${customer.value.name} from the database? This action cannot be undone.`
+    }
+    return ''
+})
 
 const { 
     customer, 
@@ -59,7 +66,7 @@ const {
             <button 
                 v-if="customer" 
                 class="btn btn-danger" 
-                @click="showDeleteModal = true"
+                @click="open = true"
             >
                 <Trash2 size="16" />
                 Delete Customer
@@ -79,12 +86,14 @@ const {
     </div>
 
     <BaseConfirmationModal
-        v-if="showDeleteModal"
+        v-if="customer"
+        v-model="open"
         title="Confirm Deletion"
-        :message="`Are you sure you want to delete ${customer.name} from the database? This action cannot be undone.`"
+        :message="deleteMessage"
+        confirmText="Delete"
+        cancelText="Cancel"
         :loading="deleting"
         @confirm="handleDelete"
-        @cancel="showDeleteModal = false"
     />
     
     <BaseSkeleton
