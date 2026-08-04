@@ -25,7 +25,6 @@ async function saveCustomer(values) {
     )
 
     success(`Customer ${updatedCustomer.name} updated successfully.`, {
-      duration: 3000,
       title: 'Customer Updated',
     })
 
