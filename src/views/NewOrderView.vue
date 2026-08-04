@@ -44,6 +44,10 @@ async function saveOrder(values, status) {
       status,
     }     
 
+    if (status === ORDER_STATUS.PENDING) {
+      order.postedAt = new Date().toISOString()
+    }    
+
     const createdOrder = await createOrder(order)
 
     success(
