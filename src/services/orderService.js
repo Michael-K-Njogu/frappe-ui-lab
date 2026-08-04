@@ -111,8 +111,24 @@ export async function getOrders({
 }
 
 export async function getOrderById(id, { signal } = {}) {
-  const data = await apiClient.get(`${RESOURCE_PATH}/${id}`, { signal })
-  return mapOrder(data)
+  const params = new URLSearchParams()
+
+  params.set(
+    'select',
+    '*,customers(id,name)'
+  )
+
+  params.set(
+    'id',
+    `eq.${id}`
+  )
+
+  const { data } = await apiClient.getRaw(
+    `${RESOURCE_PATH}?${params.toString()}`,
+    { signal }
+  )
+
+  return mapOrder(data[0])
 }
 
 export async function createOrder(order) {
@@ -133,8 +149,18 @@ export async function createOrder(order) {
 
 export async function updateOrder(id, order) {
   const apiOrder = mapOrderToApi(order)
-  const data = await apiClient.patch(`${RESOURCE_PATH}/${id}`, apiOrder)
-  return mapOrder(data)
+
+  const data = await apiClient.patch(
+    `${RESOURCE_PATH}?id=eq.${id}`, 
+    apiOrder,
+    {
+      headers: {
+        Prefer: 'return=representation',
+      },
+    }
+  )
+
+  return mapOrder(data[0])
 }
 
 export async function deleteOrder(id) {
