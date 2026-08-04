@@ -1,9 +1,9 @@
 <script setup>
 import { formatCurrency, formatDate } from '../../utils/formatters'
 import BaseBadge from '../base/BaseBadge.vue'
-import { Eye, Pencil, Trash2, ArrowUp, ArrowDown, SquarePen, MessageSquareText } from '@lucide/vue'
+import { Eye, Pencil, Trash2, ArrowUp, ArrowDown, SquarePen, MessageSquareText, Printer } from '@lucide/vue'
 import { ORDER_STATUS } from '../../constants/orderStatuses.js'
-import { canEditOrder, canDeleteOrder, getEditRestrictionReason } from '../../utils/orderPermissions.js'
+import { canEditOrder, canDeleteOrder, canPrintOrder, getEditRestrictionReason } from '../../utils/orderPermissions.js'
 
 defineProps({
     orders: {
@@ -20,7 +20,8 @@ const emit = defineEmits([
     'sort',
     'view',
     'edit',
-    'delete'
+    'delete',
+    'print'
 ])
 
 function getOrderStatusVariant(status) {
@@ -140,7 +141,8 @@ function getOrderStatusVariant(status) {
                             :aria-label="`View Order: ${order.orderNumber}`" 
                             :title="`View Order: ${order.orderNumber}`" 
                             @click="$emit('view', order.id)" 
-                            class="btn btn-sm btn-secondary btn-icon">
+                            class="btn btn-sm btn-secondary btn-icon"
+                        >
                             <Eye size="16" />
                         </button>
 
@@ -150,16 +152,28 @@ function getOrderStatusVariant(status) {
                             :title="getEditRestrictionReason(order) || `Edit Order: ${order.orderNumber}`"
                             :aria-label="`Edit Order: ${order.orderNumber}`" 
                             @click="$emit('edit', order.id)" 
-                            class="btn btn-sm btn-secondary btn-icon">
+                            class="btn btn-sm btn-secondary btn-icon"
+                        >
                             <SquarePen size="16" />
+                        </button>
+
+                        <button
+                            v-if="canPrintOrder(order)"
+                            :aria-label="`Print Order: ${order.orderNumber}`" 
+                            :title="`Print Order: ${order.orderNumber}`"
+                            @click="$emit('print', order.id)" 
+                            class="btn btn-sm btn-secondary btn-icon"
+                        >
+                            <Printer size="16" />
                         </button>
 
                         <button 
                             v-if="canDeleteOrder(order)"
                             :aria-label="`Delete Order: ${order.orderNumber}`" 
                             :title="`Delete Order: ${order.orderNumber}`" 
-                            @click="$emit('delete', order.id)" 
-                            class="btn btn-sm btn-icon btn-danger">
+                            @click="$emit('delete', order)" 
+                            class="btn btn-sm btn-icon btn-danger"
+                        >
                             <Trash2 size="16" />
                         </button>
                     </td>
