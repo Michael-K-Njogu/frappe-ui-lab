@@ -7,7 +7,7 @@ import OrderForm from '../components/orders/OrderForm.vue'
 import { createOrder } from '../services/orderService'
 import PageTitle from '../components/PageTitle.vue'
 import { useToast } from '../composables/useToast'
-import { generateOrderNumber } from '../utils/orderNumber.js'
+import { ORDER_STATUS } from '../constants/orderStatuses.js'
 
 const router = useRouter()
 const { success, error: showError } = useToast()
@@ -35,14 +35,19 @@ onMounted(() => {
   loadCustomers()
 })
 
-async function saveOrder(values) {
+async function saveOrder(values, status) {
   saving.value = true
 
   try {
     const order = {
       ...values,
-      orderNumber: generateOrderNumber(),
-    }
+      status,
+    }  
+
+console.log({
+  ...values,
+  status,
+})    
 
     const createdOrder = await createOrder(order)
 
@@ -61,6 +66,20 @@ async function saveOrder(values) {
     saving.value = false
   }
 }
+
+async function saveDraft(values) {
+  await saveOrder(
+    values,
+    ORDER_STATUS.DRAFT
+  )
+}
+
+async function postOrder(values) {
+  await saveOrder(
+    values,
+    ORDER_STATUS.PENDING
+  )
+}
 </script>
 
 <template>
@@ -71,6 +90,7 @@ async function saveOrder(values) {
         :validation-schema="createOrderSchema"
         :loading="saving"
         submit-label="Create Order"
-        @submit="saveOrder"
+        @save-draft="saveDraft"
+        @post-order="postOrder"
     />
 </template>
