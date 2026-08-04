@@ -13,6 +13,7 @@ import { canTransitionTo } from '../business/orderTransitions'
 import { getAvailableActions } from '../business/orderPermissions'
 import { Play, CheckCheck } from '@lucide/vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
+import OrderTimeline from '../components/orders/OrderTimeline.vue'
 
 const ACTION = {
   EDIT: 'edit',
@@ -229,6 +230,11 @@ function handleAction(actionId) {
         v-if="order"
         :order="order"      
     />
+
+    <OrderTimeline
+      v-if="order"
+      :order="order"
+    />    
 
     <BaseConfirmationModal
     v-if="order"
