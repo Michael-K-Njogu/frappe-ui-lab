@@ -1,27 +1,63 @@
 import { ORDER_STATUS } from '../constants/orderStatuses.js'
+import { canTransitionTo } from './orderTransitions.js'
 
 export function canEditOrder(order) {
-    return order.status === ORDER_STATUS.DRAFT
+  return order.status === ORDER_STATUS.DRAFT
 }
 
 export function canDeleteOrder(order) {
-    return order.status === ORDER_STATUS.DRAFT
+  return order.status === ORDER_STATUS.DRAFT
 }
 
 export function canCancelOrder(order) {
-    return order.status === ORDER_STATUS.PENDING
+  return order.status === ORDER_STATUS.PENDING
 }
 
 export function canPostOrder(order) {
-    return order.status === ORDER_STATUS.DRAFT
+  return order.status === ORDER_STATUS.DRAFT
 }
 
 export function canPrintOrder(order) {
-    return order.status === ORDER_STATUS.COMPLETED
+  return order.status === ORDER_STATUS.COMPLETED
 }
 
 export function canShareOrder(order) {
-    return order.status === ORDER_STATUS.COMPLETED
+  return order.status === ORDER_STATUS.COMPLETED
+}
+
+export function canStartProcessing(order) {
+  return canTransitionTo(
+    order.status, 
+    ORDER_STATUS.PROCESSING
+  )
+}
+
+export function canCompleteOrder(order) {
+  return canTransitionTo(
+    order.status, 
+    ORDER_STATUS.COMPLETED
+  )
+}
+
+export function canCancelProcessing(order) {
+  return canTransitionTo(
+    order.status, 
+    ORDER_STATUS.CANCELED
+  )
+}
+
+export function getAvailableActions(order) {
+  return {
+    canEdit: canEditOrder(order),
+    canDelete: canDeleteOrder(order),
+    canCancel: canCancelOrder(order),
+    canPost: canPostOrder(order),
+    canPrint: canPrintOrder(order),
+    canShare: canShareOrder(order),
+    canStartProcessing: canStartProcessing(order),
+    canComplete: canCompleteOrder(order),
+    canCancelProcessing: canCancelProcessing(order),
+  }
 }
 
 export function getEditRestrictionReason(order) {
