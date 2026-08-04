@@ -132,8 +132,7 @@ watch(
             <BaseButton 
                 :label="'Save Draft'" 
                 :loading="loading" 
-                variant="secondary" 
-                size="lg" 
+                variant="secondary"  
                 @click="saveDraft" 
             />
 
@@ -141,7 +140,6 @@ watch(
                 :label="submitLabel" 
                 :loading="loading"  
                 variant="primary" 
-                size="lg" 
                 @click="postOrder"
                 />
             </div>
