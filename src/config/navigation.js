@@ -3,6 +3,10 @@ import {
   Users,
   ShoppingCart,
   Settings,
+  Package,
+  ChartNoAxesCombined,
+  ReceiptText,
+  CreditCard,
 } from '@lucide/vue'
 
 export const navigation = [
@@ -21,4 +25,31 @@ export const navigation = [
     icon: ShoppingCart,
     to: '/orders',
   },
+  /*
+  {
+    title: 'Products',
+    icon: Package,
+    to: '/products',
+  },
+  {
+    title: 'Invoices',
+    icon: ReceiptText,
+    to: '/invoices',
+  },
+  {
+    title: 'Payments',
+    icon: CreditCard,
+    to: '/payments',
+  },
+  {
+    title: 'Reports',
+    icon: ChartNoAxesCombined,
+    to: '/reports',
+  },
+  {
+    title: 'Settings',
+    icon: Settings,
+    to: '/settings',
+  },
+  */
 ]
