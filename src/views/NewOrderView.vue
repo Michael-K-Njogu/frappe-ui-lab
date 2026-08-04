@@ -27,7 +27,6 @@ async function loadCustomers() {
     }))
 
   } catch (err) {
-    console.error('Customer load failed:', err)
     showError(err.message)
   }
 }
