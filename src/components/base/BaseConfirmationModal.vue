@@ -39,12 +39,15 @@ defineProps({
 })
 
 const emit = defineEmits([
-    'confirm', 
+    'update:modelValue',
+    'closed',
+    'confirm',
     'cancel'
 ])
 
 function closeModal() {
     emit('update:modelValue', false)
+    emit('closed')
 }
 
 function confirm() {
