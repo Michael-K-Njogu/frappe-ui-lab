@@ -1,4 +1,4 @@
-import { ORDER_STATUS } from '../constants/orderStatus'
+import { ORDER_STATUS } from '../constants/orderStatuses.js'
 
 export const ORDER_TRANSITIONS = {
   [ORDER_STATUS.DRAFT]: [
@@ -7,7 +7,7 @@ export const ORDER_TRANSITIONS = {
 
   [ORDER_STATUS.PENDING]: [
     ORDER_STATUS.PROCESSING,
-    ORDER_STATUS.CANCELLED,
+    ORDER_STATUS.CANCELED,
   ],
 
   [ORDER_STATUS.PROCESSING]: [
@@ -16,7 +16,7 @@ export const ORDER_TRANSITIONS = {
 
   [ORDER_STATUS.COMPLETED]: [],
 
-  [ORDER_STATUS.CANCELLED]: [],
+  [ORDER_STATUS.CANCELED]: [],
 }
 
 export function getAllowedTransitions(status) {
