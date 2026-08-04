@@ -42,12 +42,7 @@ async function saveOrder(values, status) {
     const order = {
       ...values,
       status,
-    }  
-
-console.log({
-  ...values,
-  status,
-})    
+    }     
 
     const createdOrder = await createOrder(order)
 
