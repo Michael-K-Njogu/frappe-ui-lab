@@ -1,11 +1,11 @@
 import { ORDER_STATUS } from '../constants/orderStatuses.js'
 
 export function canEditOrder(order) {
-    return order.status === ORDER_STATUS.DRAFT || order.status === ORDER_STATUS.PENDING
+    return order.status === ORDER_STATUS.DRAFT
 }
 
 export function canDeleteOrder(order) {
-    return order.status === ORDER_STATUS.DRAFT || order.status === ORDER_STATUS.PENDING
+    return order.status === ORDER_STATUS.DRAFT
 }
 
 export function canCancelOrder(order) {
