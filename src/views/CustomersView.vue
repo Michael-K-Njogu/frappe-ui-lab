@@ -6,14 +6,15 @@ import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
 import BaseSelect from '../components/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
-import { Plus, RefreshCw } from '@lucide/vue'
+import BaseButton from '../components/base/BaseButton.vue'
+import { Plus, RefreshCw, UsersRound, SearchX, CircleAlert } from '@lucide/vue'
 import { getCustomerTypeLabel, customerTypes } from '../constants/customerTypes.js'
 import { formatCurrency, formatDate } from '../utils/formatters'
 import { useSorting } from '../composables/useSorting'
 import { useCustomerFilters } from '../composables/useCustomerFilters'
 import CustomerTableSkeleton from '../components/customers/CustomerTableSkeleton.vue'
 import BaseEmptyState from '../components/base/BaseEmptyState.vue'
-import { UsersRound, SearchX } from '@lucide/vue'
+import Alert  from '../components/Alert.vue'
 
 const router = useRouter()
 
@@ -67,6 +68,12 @@ const emptyState = computed(() => {
       description: 'No customers match your search criteria. Please adjust your filters and try again.',
       type: 'filter'
     }
+  } else if(error.value) {
+    return {
+      title: 'Failed to load customers',
+      description: 'An error occurred while trying to load customer data. Please try again.',
+      type: 'error' 
+    }
   } else {
     return {
       title: 'No customers available',
@@ -116,10 +123,6 @@ const emptyState = computed(() => {
   </div>
 
   <CustomerTableSkeleton v-if="loading" :rows="5" />
-
-  <p v-else-if="error">
-    {{ error }}
-  </p>
 
   <div class="data-table-container" v-else-if="!loading && !error && customers.length > 0">
     <table class="data-table">
@@ -232,7 +235,12 @@ const emptyState = computed(() => {
       />
 
       <SearchX 
-        v-else-if="emptyState.type === 'filter'"
+        v-if="emptyState.type === 'filter'"
+        size="48"
+      />
+
+      <CircleAlert 
+        v-else-if="emptyState.type === 'error'"
         size="48"
       />
 
@@ -249,12 +257,22 @@ const emptyState = computed(() => {
       </RouterLink>
 
       <button
-        v-else-if="emptyState.type === 'filter'"
+        v-if="emptyState.type === 'filter'"
         class="btn btn-secondary"
         @click="clearFilters"
       >
         Clear Filters
       </button>
+
+      <BaseButton 
+        v-else-if="emptyState.type === 'error'"
+        label="Retry"
+        @click="refresh"
+      >
+        <template #icon>
+          <RefreshCw size="16" />
+        </template>
+      </BaseButton>
     </template>
 
   </BaseEmptyState>  
