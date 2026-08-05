@@ -116,6 +116,9 @@ const emptyState = computed(() => {
     />
 
     <BaseSelect
+      name="customerType"
+      id="customerType"
+      :show-label="false"
       v-model="filters.customerType"
       :options="customerTypes"
       all-options-selected-text="All Customer Types"
