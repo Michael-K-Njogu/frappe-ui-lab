@@ -25,12 +25,12 @@ export const navigation = [
     icon: ShoppingCart,
     to: '/orders',
   },
-  /*
   {
     title: 'Products',
     icon: Package,
     to: '/products',
   },
+  /*
   {
     title: 'Invoices',
     icon: ReceiptText,
