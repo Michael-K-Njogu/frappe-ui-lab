@@ -2,9 +2,11 @@
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 import { customerTypes } from '../../constants/customerTypes.js'
+
 import FormLabel from '../FormLabel.vue'
 import BaseSelect from '../BaseSelect.vue'
 import BaseTextInput from '../base/BaseTextInput.vue'
+import BaseButton from '../base/BaseButton.vue'
 
 const props = defineProps({
     initialValues: {
@@ -37,7 +39,7 @@ const props = defineProps({
     },
 })
 
-const emit = defineEmits(['submit'])
+const emit = defineEmits(['submit', 'cancel'])
 
 const {
     defineField,
@@ -68,22 +70,22 @@ const fields = {
         <div class="form-row">
 
             <div class="form-group">
-                <FormLabel label="Name" for="name" required />
                 <BaseTextInput
-                    :class="{ 'is-invalid': errors.name }"
-                    v-model="fields.name.value"
                     name="name"
                     id="name"
+                    label="Customer Name"
+                    :class="{ 'is-invalid': errors.name }"
+                    v-model="fields.name.value"
                     placeholder="Enter customer name"
                 />
                 <p v-if="errors.name" class="invalid">{{ errors.name }}</p>
             </div>
 
             <div class="form-group">
-                <FormLabel label="Email" for="email" required />
                 <BaseTextInput  
                     :class="{ 'is-invalid': errors.email }"
                     v-model="fields.email.value"
+                    label="Customer Email"
                     name="email"
                     id="email"
                     placeholder="Enter customer email"
@@ -97,14 +99,23 @@ const fields = {
         <div class="form-row">
 
             <div class="form-group">
-                <FormLabel label="Credit Limit" for="creditLimit" required />
-                <input :class="{ 'is-invalid': errors.creditLimit }" v-model.number="fields.creditLimit.value" name="creditLimit" id="creditLimit" type="number" placeholder="Enter credit limit" />
+                <BaseTextInput
+                    :class="{ 'is-invalid': errors.creditLimit }"
+                    v-model.number="fields.creditLimit.value"
+                    label="Credit Limit"
+                    name="creditLimit"
+                    id="creditLimit"
+                    placeholder="Enter credit limit"
+                    type="number"
+                />
                 <p v-if="errors.creditLimit" class="invalid">{{ errors.creditLimit }}</p>
             </div>
 
             <div class="form-group">
-                <FormLabel label="Customer Type" for="customerType" required />
                 <BaseSelect
+                    name="customerType"
+                    id="customerType"
+                    label="Customer Type"
                     :class="{ 'is-invalid': errors.customerType }"
                     v-model="fields.customerType.value"
                     :options="customerTypes"
@@ -122,8 +133,24 @@ const fields = {
             <p v-if="errors.acceptedTerms" class="invalid">{{ errors.acceptedTerms }}</p>
         </div>
 
-        <div class="form-group">
-            <button class="btn btn-primary" type="submit" :disabled="props.loading">{{ props.submitLabel }}</button>
+        <div class="form-actions">
+
+            <BaseButton 
+                label="Cancel" 
+                :loading="props.loading" 
+                variant="secondary"  
+                @click="$emit('cancel')"
+            />
+
+            <BaseButton 
+                :label="props.submitLabel" 
+                :loading="props.loading"  
+                :disabled="props.loading"
+                variant="primary" 
+                type="submit"
+            />
+
         </div>
+
     </form>
 </template>
