@@ -1,0 +1,256 @@
+<script setup>
+import { computed } from 'vue'
+import { useForm } from 'vee-validate'
+import { toTypedSchema } from '@vee-validate/zod'
+
+import BaseTextInput from '../base/BaseTextInput.vue'
+import BaseTextArea from '../base/BaseTextArea.vue'
+import BaseSelect from '../BaseSelect.vue'
+import BaseButton from '../base/BaseButton.vue'
+import BaseFormSection from '../base/BaseFormSection.vue'
+
+import {
+  PRODUCT_CATEGORIES,
+} from '../../constants/productCategories'
+
+import {
+  PRODUCT_UNITS,
+} from '../../constants/productUnits'
+
+import {
+  PRODUCT_STATUS_OPTIONS,
+  PRODUCT_STATUS,
+} from '../../constants/productStatuses'
+
+const props = defineProps({
+  schema: {
+    type: Object,
+    required: true,
+  },
+
+  initialValues: {
+    type: Object,
+    default: () => ({
+      sku: '',
+      name: '',
+      description: '',
+      category: '',
+      unit: '',
+      costPrice: 0,
+      sellingPrice: 0,
+      stockQuantity: 0,
+      status: PRODUCT_STATUS.ACTIVE,
+    }),
+  },
+
+  loading: Boolean,
+})
+
+const emit = defineEmits([
+  'submit',
+  'cancel',
+])
+
+const {
+  handleSubmit,
+  defineField,
+  errors,
+} = useForm({
+  validationSchema: toTypedSchema(
+    props.schema
+  ),
+  initialValues: props.initialValues,
+})
+
+const [sku] = defineField('sku')
+const [name] = defineField('name')
+const [description] = defineField('description')
+
+const [category] = defineField('category')
+const [unit] = defineField('unit')
+
+const [costPrice] = defineField('costPrice')
+const [sellingPrice] = defineField('sellingPrice')
+
+const [stockQuantity] =
+  defineField('stockQuantity')
+
+const [status] = defineField('status')
+
+const onSubmit = handleSubmit(values => {
+  emit('submit', values)
+})
+</script>
+
+<template>
+    <form class="form-container" @submit.prevent="onSubmit">
+
+        <BaseFormSection
+            title="Product Details"
+            description="Enter the details of the product."
+        >
+            <template #content>
+                <div class="form-row">
+                    <div class="form-group">
+                        <BaseTextInput
+                            name="sku"
+                            id="sku"
+                            v-model="sku"
+                            :error="errors.sku"
+                            :class="{ 'is-invalid': errors.sku }"
+                            label="SKU"
+                            placeholder="Enter SKU"
+                        />
+                        <p v-if="errors.sku" class="invalid">{{ errors.sku }}</p>
+                    </div>
+
+                    <div class="form-group">
+                        <BaseTextInput
+                            name="name"
+                            id="name"
+                            v-model="name"
+                            :error="errors.name"
+                            :class="{ 'is-invalid': errors.name }"
+                            label="Name"
+                            placeholder="Enter product name"
+                        />
+                        <p v-if="errors.name" class="invalid">{{ errors.name }}</p>
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <BaseTextArea
+                        name="description"
+                        id="description"
+                        v-model="description"
+                        :error="errors.description"
+                        :class="{ 'is-invalid': errors.description }"
+                        label="Product Description"
+                        placeholder="Enter product description"
+                        :required="false"
+                    ></BaseTextArea>
+                    <p v-if="errors.description" class="invalid">{{ errors.description }}</p>
+                </div>
+            </template>
+        </BaseFormSection>
+
+        <BaseFormSection
+            title="Pricing and Stock"
+            description="Set the pricing and stock information for the product."
+        >
+            <template #content>
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <BaseSelect
+                            name="category"
+                            id="category"
+                            all-options-selected-text="-- Select Category --"
+                            v-model="category"
+                            :error="errors.category"
+                            :class="{ 'is-invalid': errors.category }"
+                            label="Product Category"
+                            :options="PRODUCT_CATEGORIES"
+                        />
+                        <p v-if="errors.category" class="invalid">{{ errors.category }}</p>
+                    </div>
+
+                    <div class="form-group">
+                        <BaseSelect
+                            name="unit"
+                            id="unit"
+                            all-options-selected-text="-- Select Unit --"
+                            v-model="unit"
+                            :error="errors.unit"
+                            :class="{ 'is-invalid': errors.unit }"
+                            label="Unit of Measurement"
+                            :options="PRODUCT_UNITS"
+                        />
+                        <p v-if="errors.unit" class="invalid">{{ errors.unit }}</p>
+                    </div>    
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <BaseSelect
+                            all-options-selected-text="-- Select Status --"
+                            name="status"
+                            id="status"
+                            v-model="status"
+                            :error="errors.status"
+                            :class="{ 'is-invalid': errors.status }"
+                            label="Product Status"
+                            :options="PRODUCT_STATUS_OPTIONS"
+                        />
+                        <p v-if="errors.status" class="invalid">{{ errors.status }}</p>
+                    </div>
+
+                    <div class="form-group">
+                        <BaseTextInput
+                            name="costPrice"
+                            id="costPrice"
+                            v-model.number="costPrice"
+                            :error="errors.costPrice"
+                            :class="{ 'is-invalid': errors.costPrice }"
+                            type="number"
+                            label="Cost Price"
+                            :required="false"
+                            placeholder="Enter cost price (optional)"
+                        />
+                        <p v-if="errors.costPrice" class="invalid">{{ errors.costPrice }}</p>
+                    </div>
+
+                </div>
+
+                <div class="form-row">
+
+                    <div class="form-group">
+                        <BaseTextInput
+                            name="sellingPrice"
+                            id="sellingPrice"
+                            v-model.number="sellingPrice"
+                            :error="errors.sellingPrice"
+                            :class="{ 'is-invalid': errors.sellingPrice }"
+                            type="number"
+                            label="Selling Price"
+                            placeholder="Enter selling price"
+                        />
+                        <p v-if="errors.sellingPrice" class="invalid">{{ errors.sellingPrice }}</p>
+                    </div>
+
+                    <div class="form-group">
+                        <BaseTextInput
+                            name="stockQuantity"
+                            id="stockQuantity"
+                            v-model.number="stockQuantity"
+                            :error="errors.stockQuantity"
+                            :class="{ 'is-invalid': errors.stockQuantity }"
+                            type="number"
+                            label="Stock Quantity"
+                            placeholder="Enter stock quantity"
+                        />
+                        <p v-if="errors.stockQuantity" class="invalid">{{ errors.stockQuantity }}</p>
+                    </div>
+                </div>
+            </template>
+        </BaseFormSection>
+
+        <div class="form-actions">
+
+            <BaseButton
+                label="Cancel"
+                variant="secondary"
+                @click="$emit('cancel')"
+            />
+
+            <BaseButton
+                label="Add Product"
+                :loading="loading"
+                @click="onSubmit"
+            />
+
+        </div>
+    </form>
+</template>
