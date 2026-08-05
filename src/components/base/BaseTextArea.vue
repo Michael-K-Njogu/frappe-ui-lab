@@ -1,4 +1,6 @@
 <script setup>
+import FormLabel from '../FormLabel.vue'
+
 defineProps({
     modelValue: {
         type: String,
@@ -8,19 +10,42 @@ defineProps({
         type: String,
         default: ''
     },
-    type: {
+    label: {
         type: String,
-        default: 'text'
-    }
+        default: 'Form Label',
+    },
+    name: {
+        type: String,
+        default: 'base-text-area',
+    },
+    required: {
+        type: Boolean,
+        default: true,
+    },    
+    id: {
+        type: String,
+        default: 'base-text-area',
+    },   
+    rows: {
+        type: Number,
+        default: 4,
+    }, 
 })
 
 const emit = defineEmits(['update:modelValue'])
 </script>
 
 <template>
-    <textarea
-        :placeholder="placeholder"
-        :value="modelValue"
-        @input="emit('update:modelValue', $event.target.value)"
-    ></textarea>
+    <div class="base-text-area-wrapper">
+        <FormLabel :label="label" :for="id" :required="required" />
+        <textarea
+            :value="modelValue"
+            :rows="rows"
+            :name="name"
+            :id="id"
+            :placeholder="placeholder"
+            @input="emit('update:modelValue', $event.target.value)"
+        >
+        </textarea>
+    </div>
 </template>

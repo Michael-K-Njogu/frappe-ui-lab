@@ -10,7 +10,7 @@ defineProps({
   },
   required: {
     type: Boolean,
-    default: false,
+    default: true,
   },
   inline: {
     type: Boolean,
