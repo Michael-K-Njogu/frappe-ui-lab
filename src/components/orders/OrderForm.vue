@@ -89,8 +89,10 @@ watch(
 
             <!-- Customer select - will be updated to searchable dropdown to enhance user experience -->
             <div class="form-group">
-                <FormLabel for="customerId" label="Customer" required />
                 <BaseSelect
+                    name="customerId"
+                    id="customerId"
+                    label="Customer"
                     :class="{ 'is-invalid': errors.customerId }"
                     all-options-selected-text="-- Select a customer --"
                     v-model="fields.customerId.value"
@@ -103,8 +105,10 @@ watch(
 
             <!-- Total amount field - will be omitted when Products module is completed -->
             <div class="form-group">
-                <FormLabel for="totalAmount" label="Order Total" required />
                 <BaseTextInput
+                    name="totalAmount"
+                    id="totalAmount"
+                    label="Total Amount"
                     :class="{ 'is-invalid': errors.totalAmount }"
                     v-model.number="fields.totalAmount.value"
                     :error="errors.totalAmount"
@@ -116,14 +120,16 @@ watch(
 
         </div>
 
-
         <div class="form-group">
-            <FormLabel for="notes" label="Notes" />
-                <BaseTextArea
-                    v-model="fields.notes.value"
-                    :error="errors.notes"
-                    placeholder="Enter notes"
-                />
+            <BaseTextArea
+                name="notes"
+                id="notes"
+                :required=false
+                label="Notes"
+                v-model="fields.notes.value"
+                :error="errors.notes"
+                placeholder="Enter notes"
+            />
             <p v-if="errors.notes" class="invalid">{{ errors.notes }}</p>
         </div>     
 
