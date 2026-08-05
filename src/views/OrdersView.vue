@@ -1,6 +1,6 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { getOrders } from '../services/orderService'
+import { getOrders, deleteOrder } from '../services/orderService'
 import { useRouter, useRoute } from 'vue-router'
 import { useOrders } from '../composables/useOrders'
 import PageTitle from '../components/PageTitle.vue'
@@ -18,7 +18,6 @@ import Alert from '../components/Alert.vue'
 import { ORDER_STATUS_OPTIONS } from '../constants/orderStatuses.js'
 import { useToast } from '../composables/useToast'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
-import { deleteOrder } from '../services/orderService'
 
 const router = useRouter()
 const { info, error: showError } = useToast()
@@ -170,6 +169,9 @@ const viewState = computed(() => {
         :disabled="loading"
       />
       <BaseSelect
+        name="status"
+        id="status"
+        :show-label="false"
         v-model="filters.status"
         all-options-selected-text="All Statuses"
         :options="ORDER_STATUS_OPTIONS"
