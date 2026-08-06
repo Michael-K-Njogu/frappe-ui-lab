@@ -1,5 +1,5 @@
 <script setup>
-import FormLabel from '../FormLabel.vue'
+import BaseFormLabel from './BaseFormLabel.vue'
 
 defineProps({
     modelValue: {

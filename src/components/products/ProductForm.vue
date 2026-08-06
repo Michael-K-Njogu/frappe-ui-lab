@@ -8,7 +8,7 @@ import { PRODUCT_UNITS } from '../../constants/productUnits'
 
 import BaseTextInput from '../base/BaseTextInput.vue'
 import BaseTextArea from '../base/BaseTextArea.vue'
-import BaseSelect from '../BaseSelect.vue'
+import BaseSelect from '../base/BaseSelect.vue'
 import BaseButton from '../base/BaseButton.vue'
 import BaseFormContainer from '../base/BaseFormContainer.vue'
 import BaseFormSection from '../base/BaseFormSection.vue'

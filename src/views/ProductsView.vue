@@ -12,7 +12,7 @@ import { useProductFilters } from '../composables/useProductFilters'
 
 import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
-import BaseSelect from '../components/BaseSelect.vue'
+import BaseSelect from '../components/base/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 import ProductTable from '../components/products/ProductTable.vue'
