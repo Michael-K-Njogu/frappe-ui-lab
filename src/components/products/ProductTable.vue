@@ -184,7 +184,7 @@ function showProductUnit(product) {
                 <td class="row-actions">
                     <button
                         class="btn btn-sm btn-secondary btn-icon"
-                        @click="emit('view', product)"
+                        @click="emit('view', product.id)"
                         title="View Product"
                     >
                         <Eye size="16" />
