@@ -1,29 +1,21 @@
 <script setup>
 // Utilities
 import { formatCurrency } from '../../utils/formatters'
-
-// Constants
 import { PRODUCT_STATUS } from '../../constants/productStatuses.js'
 
-// Components
 import BaseBadge from '../base/BaseBadge.vue'
-
-// Icons
 import { Eye, SquarePen, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from '@lucide/vue'
 
-const props = defineProps({
-  products: {
-    type: Array,
-    required: true,
-  },
-
-  sort: {
-    type: Object,
-    default: () => ({
-      field: 'name',
-      direction: 'asc',
-    }),
-  },
+defineProps({
+    products: {
+        type: Array,
+        required: true,
+    },
+    
+    sort: {
+        type: Object,
+        required: true,
+    },
 })
 
 const emit = defineEmits([
@@ -33,21 +25,7 @@ const emit = defineEmits([
     'delete',
 ])
 
-function isSorted(field) {
-  return props.sort?.field === field
-}
-
-function sortIcon(field) {
-  if (!isSorted(field)) {
-    return ArrowUpDown
-  }
-
-  return props.sort.direction === 'asc'
-    ? ArrowUp
-    : ArrowDown
-}
-
-function statusVariant(status) {
+function getProductStatusVariant(status) {
   switch (status) {
     case PRODUCT_STATUS.ACTIVE:
       return 'success'
@@ -56,12 +34,8 @@ function statusVariant(status) {
       return 'danger'
 
     default:
-      return 'neutral'
+      return 'default'
   }
-}
-
-function sortBy(field) {
-  emit('sort', field)
 }
 
 function showProductUnit(product) {
@@ -79,88 +53,79 @@ function showProductUnit(product) {
         <thead>
             <tr>
                 <th 
-                    :class="`sortable ${isSorted('sku') ? 'sorted' : ''}`"
-                    @click="sortBy('sku')"
+                    class="sortable"
+                    @click="$emit('sort', 'sku')"
                 >
                     <span>
                         SKU
                         <component
-                            v-if="sortIcon('sku')"
-                            :is="sortIcon('sku')"
+                            v-if="sort.field === 'sku'"
+                            :is="sort.direction === 'asc' ? ArrowUp : ArrowDown"
                             :size="14"
-                        />          
+                        />
                     </span>
                 </th>
                 <th 
-                    :class="`sortable ${isSorted('name') ? 'sorted' : ''}`"
-                    @click="sortBy('name')"
+                    class="sortable"
+                    @click="$emit('sort', 'name')"
                 >
                     <span>
                         Product
                         <component
-                            v-if="sortIcon('name')"
-                            :is="sortIcon('name')"
+                            v-if="sort.field === 'name'"
+                            :is="sort.direction === 'asc' ? ArrowUp : ArrowDown"
                             :size="14"
                         />          
                     </span>              
                 </th>
                 <th 
-                    :class="`sortable ${isSorted('category') ? 'sorted' : ''}`"
-                    @click="sortBy('category')"
+                    class="sortable"
+                    @click="$emit('sort', 'category')"
                 >
                     <span>
                         Category
                         <component
-                            v-if="sortIcon('category')"
-                            :is="sortIcon('category')"
+                            v-if="sort.field === 'category'"
+                            :is="sort.direction === 'asc' ? ArrowUp : ArrowDown"
                             :size="14"
                             />          
                     </span>
                 </th>
                 <th 
-                    :class="{
-                        sortable: true,
-                        sorted: isSorted('sellingPrice'),
-                    }"
-                    @click="sortBy('sellingPrice')"
+                    class="sortable"
+                    @click="$emit('sort', 'sellingPrice')"
                 >
                     <span>
                         Selling Price
                         <component
-                            v-if="sortIcon('sellingPrice')"
-                            :is="sortIcon('sellingPrice')"
+                            v-if="sort.field === 'sellingPrice'"
+                            :is="sort.direction === 'asc' ? ArrowUp : ArrowDown"
                             :size="14"
                         />          
                     </span>
                 </th>      
                 <th 
-                    :class="{
-                        sortable: true,
-                        sorted: isSorted('stockQuantity'),
-                    }"
-                    @click="sortBy('stockQuantity')"
+                    class="sortable"
+                    @click="$emit('sort', 'stockQuantity')"
                 >
                     <span>
                         Stock Quantity
                         <component
-                            v-if="sortIcon('stockQuantity')"
-                            :is="sortIcon('stockQuantity')"
+                            v-if="sort.field === 'stockQuantity'"
+                            :is="sort.direction === 'asc' ? ArrowUp : ArrowDown"
                             :size="14"
                         />          
                     </span>
                 </th>                           
                 <th 
-                    :class="{
-                        sortable: true,
-                        sorted: isSorted('status'),
-                    }"
-                    @click="sortBy('status')"
+                    class="sortable"
+                    @click="$emit('sort', 'status')"
                 >
                     <span>
                         Status
                         <component
-                            v-if="sortIcon('status')"
-                            :is="sortIcon('status')"
+                            v-if="sort.field === 'status'"
+                            :is="sort.direction === 'asc' ? ArrowUp : ArrowDown"
                             :size="14"
                         />          
                     </span>
@@ -177,14 +142,14 @@ function showProductUnit(product) {
                 <td>{{ formatCurrency(product.sellingPrice) }}</td>
                 <td>{{ showProductUnit(product) }}</td>
                 <td>
-                    <BaseBadge :variant="statusVariant(product.status)">
+                    <BaseBadge :variant="getProductStatusVariant(product.status)">
                         {{ product.status }}
                     </BaseBadge>
                 </td>
                 <td class="row-actions">
                     <button
                         class="btn btn-sm btn-secondary btn-icon"
-                        @click="emit('view', product.id)"
+                        @click="$emit('view', product.id)"
                         title="View Product"
                     >
                         <Eye size="16" />
@@ -192,7 +157,7 @@ function showProductUnit(product) {
 
                     <button
                         class="btn btn-sm btn-secondary btn-icon"
-                        @click="emit('edit', product)"
+                        @click="$emit('edit', product.id)"
                         title="Edit Product"
                     >
                         <SquarePen size="16" />
@@ -200,7 +165,7 @@ function showProductUnit(product) {
 
                     <button
                         class="btn btn-sm btn-danger btn-icon"
-                        @click="emit('delete', product)"
+                        @click="$emit('delete', product)"
                         title="Delete Product"
                     >
                         <Trash2 size="16" />
