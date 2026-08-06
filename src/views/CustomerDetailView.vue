@@ -73,7 +73,7 @@ const {
             <RouterLink 
                 v-if="customer" 
                 :to="{ name: 'customer-edit', params: { id: customer.id } }" 
-                class="btn btn-primary"
+                class="btn btn-secondary"
             >
                 <Pencil size="16" />
                 Edit Customer
@@ -93,12 +93,8 @@ const {
     <p v-if="error">
         {{ error }}
     </p>
-    
-    <CustomerCard
-        v-else-if="customer"
-        :customer="customer"
-    />
 
+    <!--
     <Alert
         v-if="customer && !canDelete"
         :message="`This customer cannot be deleted because they have existing orders.`"
@@ -107,7 +103,13 @@ const {
         <template #icon>    
             <Info size="24" />
         </template>
-    </Alert>    
+    </Alert>   
+    -->  
+    
+    <CustomerCard
+        v-if="customer"
+        :customer="customer"
+    />   
 
     <BaseConfirmationModal
         v-if="customer"
@@ -128,5 +130,8 @@ const {
 </template>
 
 <style scoped>
+.alert {
+    margin-bottom: 1rem;
+}
 </style>
 
