@@ -1,18 +1,12 @@
 <script setup>
 import { useRouter } from 'vue-router'
 
-// Components
+import { useToast } from '../composables/useToast'
+import { createProduct } from '../services/productService'
+import { createProductSchema } from '../validation/productSchema.js'
+
 import PageTitle from '../components/PageTitle.vue'
 import ProductForm from '../components/products/ProductForm.vue'
-
-// Composables
-import { useToast } from '../composables/useToast'
-
-// Services
-import { createProduct } from '../services/productService'
-
-// Validation
-import { createProductSchema } from '../validation/productSchema'
 
 const router = useRouter()
 const { success, error: showError } = useToast()
@@ -23,7 +17,6 @@ async function saveProduct(values) {
     const product = await createProduct(values)
 
     success(
-        console.log(values),
       `Product ${product.name} created successfully.`
     )
 
@@ -41,7 +34,7 @@ async function saveProduct(values) {
     <PageTitle title="New Product" :has-back-button="true" />
 
     <ProductForm
-        :schema="createProductSchema"
+        :validation-schema="createProductSchema"
         @submit="saveProduct"
         @cancel="() => router.back()"
     />
