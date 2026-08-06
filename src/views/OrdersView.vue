@@ -1,22 +1,24 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { getOrders, deleteOrder } from '../services/orderService'
 import { useRouter, useRoute } from 'vue-router'
+
+import { useToast } from '../composables/useToast'
 import { useOrders } from '../composables/useOrders'
+import { useSorting } from '../composables/useSorting'
+import { getOrders, deleteOrder } from '../services/orderService'
+import { ORDER_STATUS_OPTIONS } from '../constants/orderStatuses.js'
+import { useOrderFilters } from '../composables/useOrderFilters'
+
 import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
 import BaseSelect from '../components/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
-import { formatCurrency, formatDate } from '../utils/formatters'
-import { useSorting } from '../composables/useSorting'
-import { useOrderFilters } from '../composables/useOrderFilters'
+import BaseButton from '../components/base/BaseButton.vue'
 import OrderTable from '../components/orders/OrderTable.vue'
 import OrderTableSkeleton from '../components/orders/OrderTableSkeleton.vue'
 import BaseEmptyState from '../components/base/BaseEmptyState.vue'
 import { Plus, RefreshCw, Package, SearchX, CircleAlert } from '@lucide/vue'
 import Alert from '../components/Alert.vue'
-import { ORDER_STATUS_OPTIONS } from '../constants/orderStatuses.js'
-import { useToast } from '../composables/useToast'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 
 const router = useRouter()
@@ -33,10 +35,10 @@ const {
 } = useOrderFilters()
 
 const {
-    orders,
-    loading,
-    error,
-    refresh
+  orders,
+  loading,
+  error,
+  refresh
 } = useOrders(filters)
 
 async function handleRefresh() {
@@ -53,12 +55,12 @@ function viewOrder(id) {
     router.push({ name: 'order-details', params: { id } })
 }
 
-function confirmDeleteOrder(order) {
+function confirmDelete(order) {
   selectedOrder.value = order
   showDeleteModal.value = true
 }
 
-async function handleDeleteOrder() {
+async function handleDelete() {
   if (!selectedOrder.value) return
 
   const order = selectedOrder.value
@@ -139,35 +141,43 @@ const viewState = computed(() => {
 </script>
 
 <template>
-    <PageTitle title="Orders">
+  <PageTitle title="Orders">
+
     <template #actions>
-      <button
-        class="btn btn-secondary"
-        :disabled="refreshing"
+
+      <BaseButton
+        :label="refreshing ? 'Refreshing' : 'Refresh'"
+        variant="secondary"
         @click="handleRefresh"
       >
-        <RefreshCw 
-          :size="16" 
-          :class="{ 'is-loading': refreshing }"
-        />
-        {{ refreshing ? 'Refreshing' : 'Refresh' }}
-      </button>
-      <RouterLink
-        :to="{ name: 'order-new' }"
-        class="btn btn-primary"
+        <template #icon>
+          <RefreshCw 
+            size="16" 
+            :class="{ 'is-loading': refreshing }"
+          />
+        </template>
+      </BaseButton>
+      
+      <BaseButton
+        label="Create Order"
+        @click="router.push({ name: 'order-new' })"
       >
-        <Plus size="16" />
-        Create Order
-      </RouterLink>
+        <template #icon>
+          <Plus size="16" />
+        </template>
+      </BaseButton>
+
     </template>
-    </PageTitle>
+  </PageTitle>
 
     <div class="toolbar">
+
       <BaseSearchInput
         v-model="filters.query"
         placeholder="Search orders..."
         :disabled="loading"
       />
+
       <BaseSelect
         name="status"
         id="status"
@@ -177,6 +187,7 @@ const viewState = computed(() => {
         :options="ORDER_STATUS_OPTIONS"
         :disabled="loading"
       />
+      
     </div>
 
     <OrderTableSkeleton v-if="viewState === 'loading'" :rows="6" />
@@ -189,7 +200,7 @@ const viewState = computed(() => {
           @sort="sortBy"
           @view="viewOrder"
           @edit="editOrder"
-          @delete="confirmDeleteOrder"
+          @delete="confirmDelete"
       />
 
       <BasePagination
@@ -260,7 +271,7 @@ const viewState = computed(() => {
       confirmText="Delete Order"
       cancelText="Cancel"
       :loading="deleting"
-      @confirm="handleDeleteOrder"
+      @confirm="handleDelete"
       @closed="resetDeleteState"
     >
       <template #icon>
