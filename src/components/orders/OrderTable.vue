@@ -1,15 +1,17 @@
 <script setup>
 import { formatCurrency, formatDate } from '../../utils/formatters'
-import BaseBadge from '../base/BaseBadge.vue'
-import { Eye, Pencil, Trash2, ArrowUp, ArrowDown, SquarePen, MessageSquareText, Printer } from '@lucide/vue'
 import { ORDER_STATUS } from '../../constants/orderStatuses.js'
 import { canEditOrder, canDeleteOrder, canPrintOrder, getEditRestrictionReason } from '../../business/orderPermissions.js'
+
+import BaseBadge from '../base/BaseBadge.vue'
+import { Eye, Pencil, Trash2, ArrowUp, ArrowDown, SquarePen, MessageSquareText, Printer } from '@lucide/vue'
 
 defineProps({
     orders: {
         type: Array,
         required: true,
     },
+
     sort: {
         type: Object,
         required: true,
@@ -48,7 +50,6 @@ function getOrderStatusVariant(status) {
 </script>
 
 <template>
-    <!-- Table for displaying orders -->
         <table class="data-table">
             <thead>
                 <tr>
