@@ -7,7 +7,6 @@ import PageTitle from '../components/PageTitle.vue'
 import { useToast } from '../composables/useToast'
 
 const router = useRouter()
-
 const { success, error: showError } = useToast()
 
 async function saveCustomer(values) {
