@@ -23,7 +23,7 @@ import BaseSkeleton from '../components/base/BaseSkeleton.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 
-import { Play, CheckCheck, Plus } from '@lucide/vue'
+import { Play, CheckCheck, Plus, Printer, Share2 } from '@lucide/vue'
 
 const ACTION = {
   EDIT: 'edit',
@@ -44,38 +44,46 @@ const showAddItemModal = ref(false)
 const showDeleteModal = ref(false)
 
 async function performTransition(status, title, message) {
-  if (!order.value) return
+    if (!order.value) return
 
-  try {
-    const updatedOrder = {
-      ...order.value,
-      status,
+    if (!canTransitionTo(order.value.status, status)) {
+        showError(
+            `Order cannot be changed from ${order.value.status} to ${status}.`
+        )
+        return
     }
 
-    const timestampField =
-      ORDER_STATUS_TIMESTAMP_FIELD[status]
+    try {
+        const updatedOrder = {
+            ...order.value,
+            status,
+        }
 
-    if (timestampField) {
-      updatedOrder[timestampField] =
-        new Date().toISOString()
+        const timestampField =
+            ORDER_STATUS_TIMESTAMP_FIELD[status]
+
+        if (timestampField) {
+            updatedOrder[timestampField] =
+                new Date().toISOString()
+        }
+
+        await transitionOrder(
+            updatedOrder,
+            status
+        )
+
+        info(message, {
+            title,
+        })
+
+        await router.push({
+            name: 'orders',
+        })
+
+    } catch (err) {
+        console.error(err)
+        showError(err.message)
     }
-
-    await transitionOrder(
-      updatedOrder,
-      status
-    )
-
-    info(message, {
-      title,
-    })
-
-    await router.push({
-      name: 'orders',
-    })
-
-  } catch (err) {
-    showError(err.message)
-  }
 }
 
 async function postOrder() {
@@ -278,6 +286,20 @@ const actionButtons = computed(() => {
         label: 'Cancel Order',
         variant: 'danger',
         visible: actions.value.canCancel,
+    },
+    {
+        id: ACTION.PRINT,
+        label: 'Print',
+        variant: 'secondary',
+        visible: actions.value.canPrint,
+        icon: Printer,
+    },
+    {
+        id: ACTION.SHARE,
+        label: 'Share',
+        variant: 'secondary',
+        visible: actions.value.canShare,  
+        icon: Share2,
     }
   ].filter(action => action.visible)
 })
@@ -405,6 +427,7 @@ const pageTitle = computed(() => {
       </h3>
 
       <BaseButton
+        v-if="actions.canEdit"
         id="add-order-item"
         name="add-order-item"
         label="Add Item"
@@ -423,6 +446,7 @@ const pageTitle = computed(() => {
     <OrderItemTable
       :items="orderItems"
       :loading="loadingOrderItems"
+      :editable="actions.canEdit"
     >
 
       <template #actions>
