@@ -1,19 +1,29 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useToast } from '../composables/useToast'
-import PageTitle from '../components/PageTitle.vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { useToast } from '../composables/useToast'
 import { useOrder } from '../composables/useOrder'
-import OrderCard from '../components/orders/OrderCard.vue'
-import BaseSkeleton from '../components/base/BaseSkeleton.vue'
-import BaseButton from '../components/base/BaseButton.vue'
-import { updateOrder, deleteOrder, transitionOrder } from '../services/orderService'
+import { useOrderItems } from '../composables/useOrderItems'
+
+import { updateOrder, deleteOrder, transitionOrder, updateOrderGrandTotal } from '../services/orderService'
+
 import { ORDER_STATUS, ORDER_STATUS_TIMESTAMP_FIELD } from '../constants/orderStatuses.js'
 import { canTransitionTo } from '../business/orderTransitions'
 import { getAvailableActions } from '../business/orderPermissions'
-import { Play, CheckCheck } from '@lucide/vue'
-import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
+import { calculateLineTotal } from '../business/orderItemCalculations.js'
+import { calculateSubtotal, calculateDiscount, calculateGrandTotal, calculateTotalItems,} from '../business/orderCalculations'
+
+import PageTitle from '../components/PageTitle.vue'
+import OrderCard from '../components/orders/OrderCard.vue'
 import OrderTimeline from '../components/orders/OrderTimeline.vue'
+import OrderItemTable from '../components/order-items/OrderItemTable.vue'
+import AddOrderItemModal from '../components/order-items/AddOrderItemModal.vue'
+import BaseSkeleton from '../components/base/BaseSkeleton.vue'
+import BaseButton from '../components/base/BaseButton.vue'
+import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
+
+import { Play, CheckCheck, Plus } from '@lucide/vue'
 
 const ACTION = {
   EDIT: 'edit',
@@ -30,6 +40,8 @@ const route = useRoute()
 const router = useRouter()
 const { info, error: showError } = useToast()
 const showCancelModal = ref(false)
+const showAddItemModal = ref(false)
+const showDeleteModal = ref(false)
 
 async function performTransition(status, title, message) {
   if (!order.value) return
@@ -100,6 +112,22 @@ async function cancelOrder() {
   showCancelModal.value = false
 }
 
+async function handleDeleteOrder() {
+  try {
+    await deleteOrder(order.value.id)
+
+    info('Order deleted successfully.', {
+      title: 'Order Deleted',
+    })
+
+    router.push({
+      name: 'orders',
+    })
+  } catch (err) {
+    showError(err.message)
+  }
+}
+
 const { 
     order, 
     loading, 
@@ -107,6 +135,99 @@ const {
     deleting,  
     refresh
 } = useOrder(route.params.id)
+
+const {
+  orderItems,
+  loading: loadingOrderItems,
+  saving: savingOrderItems,
+
+  addOrderItem,
+  saveOrderItem,
+  removeOrderItem,
+
+  refresh: refreshOrderItems,
+} = useOrderItems(route.params.id)
+
+const subtotal = computed(() =>
+  calculateSubtotal(orderItems.value)
+)
+
+const totalDiscount = computed(() =>
+  calculateDiscount(orderItems.value)
+)
+
+const grandTotal = computed(() =>
+  calculateGrandTotal(orderItems.value)
+)
+
+const totalItems = computed(() =>
+  calculateTotalItems(orderItems.value)
+)
+
+const lineTotal = computed(() =>
+  calculateLineTotal({
+    quantity: quantity.value,
+    unitPrice: unitPrice.value,
+    discount: discount.value,
+  })
+)
+
+async function createOrderItem(values) {
+  try {
+    const existingItem = orderItems.value.find(
+      item => item.productId === values.productId
+    )
+
+    if (existingItem) {
+      
+      const mergedQuantity = Number(existingItem.quantity) + Number(values.quantity)
+      const mergedDiscount = Number(existingItem.discount) + Number(values.discount)
+      
+      console.log({
+          existingQuantity: existingItem.quantity,
+          newQuantity: values.quantity,
+          mergedQuantity,
+          mergedDiscount,
+      })      
+
+      await saveOrderItem(existingItem.id, {
+        ...existingItem,
+        
+        quantity: mergedQuantity,
+
+        discount: mergedDiscount,
+
+        lineTotal: calculateLineTotal({
+          quantity: mergedQuantity,
+          unitPrice: existingItem.unitPrice,
+          discount: mergedDiscount,
+        }),
+      })
+
+      info('Product quantity updated successfully.', {
+        title: 'Order Updated',
+      })
+
+    } else {
+      await addOrderItem({
+        ...values,
+        orderId: order.value.id,
+      })
+
+      info('Product added to the order successfully.', {
+        title: 'Order Updated',
+      })
+    }
+
+    await refreshOrderTotals()
+
+    showAddItemModal.value = false
+
+  } catch (err) {
+    showError(err.message)
+    console.error('Error creating order item:', err)
+  }
+}
 
 const actions = computed(() => {
     if (!order.value) {
@@ -174,7 +295,7 @@ function handleAction(actionId) {
       break
 
     case ACTION.DELETE:
-      deleteOrder(order.value.id)
+      showDeleteModal.value = true
       break
 
     case ACTION.START_PROCESSING:
@@ -197,10 +318,41 @@ function handleAction(actionId) {
       console.warn(`Unknown action: ${actionId}`)
   }
 }
+
+const summary = computed(() => ({
+    totalItems: calculateTotalItems(orderItems.value),
+    subtotal: calculateSubtotal(orderItems.value),
+    totalDiscount: calculateDiscount(orderItems.value),
+    grandTotal: calculateGrandTotal(orderItems.value),
+}))
+
+async function refreshOrderTotals() {
+  if(!order.value) return
+
+  await updateOrderGrandTotal(
+    order.value.id,
+    grandTotal.value
+  )
+
+  await refresh()
+}
+
+const pageTitle = computed(() => {
+    if (order.value?.orderNumber) {
+        return `Order #${order.value.orderNumber}`
+    } else if (loading.value) {
+        return 'Loading...'
+    } else {
+        return 'Order Details'
+    }
+})
 </script>
 
 <template>
-    <PageTitle title="Order Details" :has-back-button="true">
+    <PageTitle 
+      :title="pageTitle"
+      :has-back-button="true"
+      >
         <template #actions>
 
             <BaseButton
@@ -215,10 +367,10 @@ function handleAction(actionId) {
                 v-if="button.icon"
                 #icon
                 >
-                <component
-                    :is="button.icon"
-                    size="20"
-                />
+                  <component
+                      :is="button.icon"
+                      size="20"
+                  />
                 </template>
 
             </BaseButton>          
@@ -226,17 +378,69 @@ function handleAction(actionId) {
         </template>
     </PageTitle>
 
-    <OrderCard
-        v-if="order"
-        :order="order"      
-    />
+    <div class="row">
 
-    <OrderTimeline
-      v-if="order"
-      :order="order"
-    />    
+      <div class="column">
+        <OrderCard
+            v-if="order"
+            :order="order"    
+            :summary="summary"
+        />
+      </div>
 
-    <BaseConfirmationModal
+      <div class="column">
+        <OrderTimeline
+          v-if="order"
+          :order="order"
+        />   
+        </div>        
+      </div> 
+
+<div class="card">
+
+  <div class="card-header">
+
+      <h3>
+        Order Items
+      </h3>
+
+      <BaseButton
+        id="add-order-item"
+        name="add-order-item"
+        label="Add Item"
+        size="sm"
+        @click="showAddItemModal = true"
+      >
+        <template #icon>
+          <Plus size="20" />
+        </template>
+      </BaseButton>
+
+  </div>
+
+  <div class="card-body">
+
+    <OrderItemTable
+      :items="orderItems"
+      :loading="loadingOrderItems"
+    >
+
+      <template #actions>
+
+        <BaseButton
+          label="Add First Item"
+          @click="showAddItemModal = true"
+        />
+
+      </template>
+
+    </OrderItemTable>
+
+  </div>
+
+</div>    
+
+  <BaseConfirmationModal
     v-if="order"
     v-model="showCancelModal"
     title="Cancel Order"
@@ -244,5 +448,23 @@ function handleAction(actionId) {
     confirmText="Cancel Order"
     cancelText="Keep Order"
     @confirm="cancelOrder"
-    />    
+  />    
+
+  <BaseConfirmationModal
+    v-if="order"
+    v-model="showDeleteModal"
+    title="Delete Order"
+    :message="`Are you sure you want to delete order ${order.orderNumber}? This action cannot be undone.`"
+    confirmText="Delete Order"
+    cancelText="Keep Order"
+    @confirm="handleDeleteOrder"
+  />    
+
+  <AddOrderItemModal
+    :open="showAddItemModal"
+    :loading="savingOrderItems"
+    @close="showAddItemModal = false"
+    @submit="createOrderItem"
+  />   
+
 </template>
