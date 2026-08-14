@@ -10,7 +10,10 @@ export function canDeleteOrder(order) {
 }
 
 export function canCancelOrder(order) {
-  return order.status === ORDER_STATUS.PENDING
+    return canTransitionTo(
+        order.status,
+        ORDER_STATUS.CANCELED
+    )
 }
 
 export function canPostOrder(order) {
@@ -39,13 +42,6 @@ export function canCompleteOrder(order) {
   )
 }
 
-export function canCancelProcessing(order) {
-  return canTransitionTo(
-    order.status, 
-    ORDER_STATUS.CANCELED
-  )
-}
-
 export function getAvailableActions(order) {
   return {
     canEdit: canEditOrder(order),
@@ -56,7 +52,6 @@ export function getAvailableActions(order) {
     canShare: canShareOrder(order),
     canStartProcessing: canStartProcessing(order),
     canComplete: canCompleteOrder(order),
-    canCancelProcessing: canCancelProcessing(order),
   }
 }
 
