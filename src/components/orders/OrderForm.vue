@@ -1,23 +1,36 @@
 <script setup>
-import { watch } from 'vue'
+import { watch, ref } from 'vue'
+
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
-import { ORDER_STATUS } from '../../constants/orderStatuses.js'
+
+import { calculateLineTotal } from '../../business/orderItemCalculations.js'
+
+import BaseFormSection from '../base/BaseFormSection.vue'
 import BaseFormLabel from '../base/BaseFormLabel.vue'
+import Alert from '../Alert.vue'
 import BaseSelect from '../base/BaseSelect.vue'
+import BaseSearchableSelect from '../base/BaseSearchableSelect.vue'
 import BaseTextInput from '../base/BaseTextInput.vue'
 import BaseButton from '../base/BaseButton.vue'
 import BaseTextArea from '../base/BaseTextArea.vue'
-
+import OrderItemTable from '../order-items/OrderItemTable.vue'
+import AddOrderItemModal from '../order-items/AddOrderItemModal.vue'
+import BaseConfirmationModal from '../base/BaseConfirmationModal.vue'
+import { Info, Plus } from '@lucide/vue'
+ 
 const props = defineProps({
     initialValues: {
         type: Object,
         default: () => ({
             customerId: '',
-            status: ORDER_STATUS.PENDING,
-            totalAmount: null,
             notes: '',
         })
+    },
+
+    initialOrderItems: {
+        type: Array,
+        default: () => [],
     },
 
     customerOptions: {
@@ -32,7 +45,7 @@ const props = defineProps({
     
     submitLabel: {
         type: String,
-        default: 'Save Order',
+        default: 'Submit Order',
     },
 
     validationSchema: {
@@ -41,9 +54,16 @@ const props = defineProps({
     },
 })
 
+const showAddItemModal = ref(false)
+const editingOrderItem = ref(null)
+const showDeleteItemModal = ref(false)
+const itemToDelete = ref(null)
+const orderItems = ref([...props.initialOrderItems])
+
 const emit = defineEmits([
   'post-order',
   'save-draft',
+  'delete-order'
 ])
 
 const {
@@ -58,17 +78,56 @@ const {
 })
 
 const saveDraft = handleSubmit((values) => {
-  emit('save-draft', values)
+    emit('save-draft', {
+        ...values,
+        orderItems: [...orderItems.value],
+    })
 })
 
 const postOrder = handleSubmit((values) => {
-  emit('post-order', values)
+    if (!orderItems.value.length) {
+        return
+    }
+
+    emit('post-order', {
+        ...values,
+        orderItems: [...orderItems.value],
+    })
 })
 
 const fields = {
     customerId: defineField('customerId')[0],
-    totalAmount: defineField('totalAmount')[0],
     notes: defineField('notes')[0],
+}
+
+function handleEditOrderItem(item) {
+    editingOrderItem.value = item
+    showAddItemModal.value = true
+}
+
+function handleDeleteOrderItem(item) {
+    itemToDelete.value = item
+    showDeleteItemModal.value = true
+}
+
+function closeOrderItemModal() {
+    showAddItemModal.value = false
+    editingOrderItem.value = null
+}
+
+function confirmDeleteOrderItem() {
+    if (!itemToDelete.value) return
+
+    const item = itemToDelete.value
+
+    orderItems.value = orderItems.value.filter(
+        currentItem => currentItem.id !== item.id
+    )
+
+    itemToDelete.value = null
+    showDeleteItemModal.value = false
+
+    emit('delete-item', item)
 }
 
 watch(
@@ -80,75 +139,173 @@ watch(
   },
   { deep: true }
 )
+
+watch(
+    () => props.initialOrderItems,
+    (items) => {
+        orderItems.value = [...items]
+    },
+    { deep: true }
+)
+
+function handleOrderItemSubmit(values) {
+    // Editing an existing order item
+    if (editingOrderItem.value) {
+        const index = orderItems.value.findIndex(
+            item => item.id === editingOrderItem.value.id
+        )
+
+        if (index !== -1) {
+            orderItems.value[index] = {
+                ...orderItems.value[index],
+                ...values,
+            }
+        }
+    } else {
+        // Adding a new item
+        const existingItem = orderItems.value.find(
+            item => item.productId === values.productId
+        )
+
+        if (existingItem) {
+            const mergedQuantity =
+                Number(existingItem.quantity) +
+                Number(values.quantity)
+
+            const mergedDiscount =
+                Number(existingItem.discount || 0) +
+                Number(values.discount || 0)
+
+            existingItem.quantity = mergedQuantity
+            existingItem.discount = mergedDiscount
+
+            existingItem.lineTotal = calculateLineTotal({
+                quantity: mergedQuantity,
+                unitPrice: existingItem.unitPrice,
+                discount: mergedDiscount,
+            })
+        } else {
+            orderItems.value.push({
+                id: crypto.randomUUID(),
+                ...values,
+                isTemporary: true,
+            })
+        }
+    }
+
+    closeOrderItemModal()
+}
 </script>
 
 <template>
-    <form class="form-container" @submit.prevent="onSubmit">
+    <form class="form-container" @submit.prevent> 
 
         <div class="form-row">
 
             <!-- Customer select - will be updated to searchable dropdown to enhance user experience -->
             <div class="form-group">
-                <BaseSelect
-                    name="customerId"
-                    id="customerId"
-                    label="Customer"
-                    :class="{ 'is-invalid': errors.customerId }"
-                    all-options-selected-text="-- Select a customer --"
+
+                <BaseSearchableSelect
                     v-model="fields.customerId.value"
+                    label="Customer"
                     :options="customerOptions"
                     :error="errors.customerId"
-                    placeholder="Select a customer"
-                />
+                    placeholder="Search customers..."
+                    all-options-selected-text="Select a customer"
+                />                
                 <p v-if="errors.customerId" class="invalid">{{ errors.customerId }}</p>
-            </div>
-
-            <!-- Total amount field - will be omitted when Products module is completed -->
-            <div class="form-group">
-                <BaseTextInput
-                    name="totalAmount"
-                    id="totalAmount"
-                    label="Total Amount"
-                    :class="{ 'is-invalid': errors.totalAmount }"
-                    v-model.number="fields.totalAmount.value"
-                    :error="errors.totalAmount"
-                    type="number"
-                    placeholder="Enter total amount"
-                />
-                <p v-if="errors.totalAmount" class="invalid">{{ errors.totalAmount }}</p>
-            </div>            
+            </div>         
 
         </div>
+
+        <div v-if="orderItems.length" class="card-header">
+
+            <h3>
+                Order Items
+            </h3>
+
+            <BaseButton
+                id="add-order-item"
+                name="add-order-item"
+                label="Add Item"
+                size="sm"
+                @click="showAddItemModal = true"
+            >
+                <template #icon>
+                <Plus size="20" />
+                </template>
+            </BaseButton>
+
+        </div>        
+
+        <OrderItemTable
+            :items="orderItems"
+            :loading="false"
+            @edit="handleEditOrderItem"
+            @delete="handleDeleteOrderItem"
+        >        
+            <template #actions>
+
+                <BaseButton
+                label="Add First Item"
+                type="button"
+                @click="showAddItemModal = true"
+                />
+
+            </template>        
+        </OrderItemTable>   
 
         <div class="form-group">
             <BaseTextArea
                 name="notes"
                 id="notes"
                 :required=false
-                label="Notes"
+                label="Order Notes"
                 v-model="fields.notes.value"
                 :error="errors.notes"
-                placeholder="Enter notes"
+                placeholder="Enter any notes for the order (optional)"
             />
             <p v-if="errors.notes" class="invalid">{{ errors.notes }}</p>
-        </div>     
+        </div>            
 
         <div class="form-actions">
 
             <BaseButton 
-                :label="'Save Draft'" 
+                :label="orderItems.length > 0 ? 'Save Draft' : 'Save Draft (No Items)'" 
                 :loading="loading" 
                 variant="secondary"  
+                type="button"
                 @click="saveDraft" 
             />
 
             <BaseButton 
                 :label="submitLabel" 
                 :loading="loading"  
+                :disabled="orderItems.length === 0"
                 variant="primary" 
+                type="button"
                 @click="postOrder"
-                />
-            </div>
+            />
+        </div>
 
     </form>
+
+    <AddOrderItemModal
+        :open="showAddItemModal"
+        :loading="false"
+        :mode="editingOrderItem ? 'edit' : 'new'"
+        :initial-values="editingOrderItem"
+        @close="closeOrderItemModal"
+        @submit="handleOrderItemSubmit" 
+    /> 
+
+    <BaseConfirmationModal
+        v-if="itemToDelete"
+        v-model="showDeleteItemModal"
+        title="Delete Order Item"
+        :message="`Are you sure you want to remove ${itemToDelete.productName} from this order?`"
+        confirm-text="Delete Item"
+        cancel-text="Keep Item"
+        @confirm="confirmDeleteOrderItem"
+    />    
 </template>
