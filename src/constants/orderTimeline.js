@@ -15,7 +15,7 @@ export const ORDER_TIMELINE = [
   },
   {
     key: 'postedAt',
-    title: 'Order posted for approval',
+    title: 'Order posted successfully',
     icon: Send,
     color: 'info',
   },
