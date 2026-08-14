@@ -7,7 +7,7 @@ const SORT_FIELD_MAP = {
   orderNumber: 'order_number',
   customerName: 'customers(name)',
   customerId: 'customer_id',
-  totalAmount: 'total_amount',
+  grandTotal: 'total_amount',
   status: 'status',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
@@ -17,7 +17,7 @@ export const ORDER_FIELDS = {
   id: 'id',
   orderNumber: 'order_number',
   customerId: 'customer_id',
-  totalAmount: 'total_amount',
+  grandTotal: 'total_amount',
   status: 'status',
   createdAt: 'created_at',
   updatedAt: 'updated_at',
@@ -29,7 +29,7 @@ function mapOrder(order) {
     orderNumber: order.order_number,
     customerId: order.customer_id,
     customerName: order.customers?.name ?? '',
-    totalAmount: order.total_amount,
+    grandTotal: order.total_amount,
     status: order.status,
     notes: order.notes,
 
@@ -171,6 +171,25 @@ export async function updateOrder(id, order) {
   const data = await apiClient.patch(
     `${RESOURCE_PATH}?id=eq.${id}`, 
     apiOrder,
+    {
+      headers: {
+        Prefer: 'return=representation',
+      },
+    }
+  )
+
+  return mapOrder(data[0])
+}
+
+export async function updateOrderGrandTotal(
+  orderId,
+  grandTotal
+) {
+  const data = await apiClient.patch(
+    `${RESOURCE_PATH}?id=eq.${orderId}`,
+    {
+      total_amount: grandTotal,
+    },
     {
       headers: {
         Prefer: 'return=representation',
