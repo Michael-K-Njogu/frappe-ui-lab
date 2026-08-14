@@ -3,7 +3,7 @@ import BaseFormLabel from './BaseFormLabel.vue'
 
 defineProps({
     modelValue: {
-        type: String,
+        type: [String, Number, null],
         default: ''
     },
     options: {
@@ -37,19 +37,23 @@ defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+function handleChange(event) {
+  emit('update:modelValue', event.target.value)
+}
 </script>
 
 <template>
     <div class="base-select-wrapper">
 
-        <FormLabel :label="label" :for="id" v-if="showLabel" />
+        <BaseFormLabel :label="label" :for="id" v-if="showLabel" />
 
         <select
             class="base-select"
             :name="name"
             :id="id"
             :value="modelValue"
-            @change="emit('update:modelValue', $event.target.value)"
+            @change="handleChange"
         >
             <option value="">{{ allOptionsSelectedText }}</option>
             <option
