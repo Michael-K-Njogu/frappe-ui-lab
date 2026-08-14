@@ -1,18 +1,31 @@
 <script setup>
 import { ref, onMounted } from 'vue'
-import { getCustomers } from '../services/customerService'
 import { useRouter } from 'vue-router'
-import { createOrderSchema } from '../validation/orderSchema.js'
-import OrderForm from '../components/orders/OrderForm.vue'
-import { createOrder } from '../services/orderService'
-import PageTitle from '../components/PageTitle.vue'
-import { useToast } from '../composables/useToast'
+
 import { ORDER_STATUS } from '../constants/orderStatuses.js'
+
+import { calculateGrandTotal } from '../business/orderCalculations.js'
+
+import { createOrderSchema } from '../validation/orderSchema.js'
+
+import { useToast } from '../composables/useToast'
+import { useOrderItems } from '../composables/useOrderItems'
+
+import { getCustomers } from '../services/customerService'
+import { createOrder, updateOrderGrandTotal } from '../services/orderService'
+
+import PageTitle from '../components/PageTitle.vue'
+import OrderForm from '../components/orders/OrderForm.vue'
+
 
 const router = useRouter()
 const { success, error: showError } = useToast()
 const customerOptions = ref([])
 const saving = ref(false)
+
+const {
+  addOrderItem,
+} = useOrderItems()
 
 async function loadCustomers() {
   try {
@@ -24,6 +37,7 @@ async function loadCustomers() {
     customerOptions.value = data.map(customer => ({
       label: customer.name,
       value: customer.id,
+      meta: `${customer.customerType} · ${customer.creditLimit}`,
     }))
 
   } catch (err) {
@@ -39,16 +53,42 @@ async function saveOrder(values, status) {
   saving.value = true
 
   try {
+    const {
+      orderItems = [],
+      ...orderValues
+    } = values
+
     const order = {
-      ...values,
+      ...orderValues,
       status,
-    }     
+    }
 
     if (status === ORDER_STATUS.PENDING) {
       order.postedAt = new Date().toISOString()
-    }    
+    }
 
     const createdOrder = await createOrder(order)
+
+    for (const item of orderItems) {
+      await addOrderItem({
+        orderId: createdOrder.id,
+        productId: item.productId,
+        sku: item.sku,
+        productName: item.productName,
+        unit: item.unit,
+        quantity: item.quantity,
+        unitPrice: item.unitPrice,
+        discount: item.discount,
+        lineTotal: item.lineTotal,
+      })
+    }
+
+    const grandTotal = calculateGrandTotal(orderItems)
+    
+    await updateOrderGrandTotal(
+      createdOrder.id, 
+      grandTotal
+    )
 
     success(
       `Order ${createdOrder.orderNumber} created successfully.`
@@ -57,7 +97,7 @@ async function saveOrder(values, status) {
     await router.push({
       name: 'orders',
     })
-    
+
   } catch (err) {
     console.error(err)
     showError(err.message)
@@ -71,6 +111,7 @@ async function saveDraft(values) {
     values,
     ORDER_STATUS.DRAFT
   )
+  console.log('Draft saved:', values)
 }
 
 async function postOrder(values) {
@@ -88,7 +129,7 @@ async function postOrder(values) {
         :customer-options="customerOptions"
         :validation-schema="createOrderSchema"
         :loading="saving"
-        submit-label="Create Order"
+        submit-label="Submit Order"
         @save-draft="saveDraft"
         @post-order="postOrder"
     />
