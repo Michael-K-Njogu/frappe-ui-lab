@@ -134,7 +134,7 @@ const fields = {
             <div class="form-group" v-if="props.showTerms">
                 
                 <input :class="{ 'is-invalid': errors.acceptedTerms }" type="checkbox" v-model="fields.acceptedTerms.value" name="acceptedTerms" id="acceptedTerms" />
-                <FormLabel label="Accept Terms and Conditions" for="acceptedTerms" required inline />
+                <BaseFormLabel label="Accept Terms and Conditions" for="acceptedTerms" required inline />
                 <p v-if="errors.acceptedTerms" class="invalid">{{ errors.acceptedTerms }}</p>
             </div>
 
