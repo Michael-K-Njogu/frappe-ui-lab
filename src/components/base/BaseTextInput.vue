@@ -1,7 +1,7 @@
 <script setup>
 import BaseFormLabel from './BaseFormLabel.vue'
 
-defineProps({
+const props = defineProps({
     modelValue: {
         type: [String, Number],
         default: ''
@@ -41,11 +41,23 @@ defineProps({
 })
 
 const emit = defineEmits(['update:modelValue'])
+
+function handleInput(event) {
+    let value = event.target.value
+
+    if (props.type === 'number') {
+        value = event.target.value === ''
+            ? null
+            : event.target.valueAsNumber
+    }
+
+    emit('update:modelValue', value)
+}
 </script>
 
 <template>
     <div class="base-text-input-wrapper">
-        <FormLabel :label="label" :for="id" :required="required" />
+        <BaseFormLabel :label="label" :for="id" :required="required" />
         <input
             :type="type"
             :name="name"
@@ -53,7 +65,7 @@ const emit = defineEmits(['update:modelValue'])
             :placeholder="placeholder"
             :value="modelValue"
             :autocomplete="autocomplete"
-            @input="emit('update:modelValue', $event.target.value)"
+            @input="handleInput"
         />
     </div>
 </template>
