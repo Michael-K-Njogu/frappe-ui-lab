@@ -9,6 +9,7 @@ import { PRODUCT_UNITS } from '../../constants/productUnits'
 import BaseTextInput from '../base/BaseTextInput.vue'
 import BaseTextArea from '../base/BaseTextArea.vue'
 import BaseSelect from '../base/BaseSelect.vue'
+import BaseSearchableSelect from '../base/BaseSearchableSelect.vue'
 import BaseButton from '../base/BaseButton.vue'
 import BaseFormContainer from '../base/BaseFormContainer.vue'
 import BaseFormSection from '../base/BaseFormSection.vue'
@@ -138,6 +139,7 @@ const fields = {
                     <div class="form-row">
 
                         <div class="form-group">
+                            <!--
                             <BaseSelect
                                 name="category"
                                 id="category"
@@ -147,6 +149,17 @@ const fields = {
                                 :class="{ 'is-invalid': errors.category }"
                                 label="Product Category"
                                 :options="PRODUCT_CATEGORIES"
+                            />
+                            <p v-if="errors.category" class="invalid">{{ errors.category }}</p>
+                            -->
+                            <BaseSearchableSelect
+                                v-model="fields.category.value"
+                                label="Product Category"
+                                :options="PRODUCT_CATEGORIES"
+                                :error="errors.category"
+                                :class="{ 'is-invalid': errors.category }"
+                                placeholder="Search categories..."
+                                all-options-selected-text="Select a category"
                             />
                             <p v-if="errors.category" class="invalid">{{ errors.category }}</p>
                         </div>
