@@ -1,7 +1,22 @@
 import { ref, watch, onMounted } from 'vue'
 import { getProducts } from '../services/productService'
 
-export function useProducts(filters) {
+export function useProducts(
+  filters = {
+    query: '',
+    category: '',
+    status: '',
+    sort: {
+      field: 'name',
+      direction: 'asc',
+    },
+    pagination: {
+      currentPage: 1,
+      pageSize: 1000,
+      totalItems: 0,
+    },
+  }
+) {
   const products = ref([])
   const loading = ref(false)
   const error = ref(null)
@@ -33,14 +48,6 @@ export function useProducts(filters) {
   async function refresh() {
     await loadProducts()
   }
-
-  watch(
-    filters,
-    loadProducts,
-    {
-      deep: true,
-    }
-  )
 
   onMounted(loadProducts)
 
