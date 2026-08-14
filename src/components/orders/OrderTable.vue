@@ -95,11 +95,11 @@ function getOrderStatusVariant(status) {
                     <th>
                         <button
                             class="sort-button"
-                            @click="$emit('sort', 'totalAmount')"
+                            @click="$emit('sort', 'grandTotal')"
                         >
-                            Total
+                            Grand Total
                             <component
-                                v-if="sort.field === 'totalAmount'"
+                                v-if="sort.field === 'grandTotal'"
                                 :is="sort.direction === 'asc' ? ArrowUp : ArrowDown"
                                 size="14"
                             />
@@ -131,7 +131,7 @@ function getOrderStatusVariant(status) {
                     </td>
                     <td>{{ order.customerName }}</td>
                     <td>{{ formatDate(order.createdAt) }}</td>
-                    <td>{{ formatCurrency(order.totalAmount) }}</td>
+                    <td>{{ formatCurrency(order.grandTotal) }}</td>
                     <td>
                         <BaseBadge :variant="getOrderStatusVariant(order.status)">
                             {{ order.status }}
@@ -139,6 +139,7 @@ function getOrderStatusVariant(status) {
                     </td>
                     <td class="row-actions">
                         <button 
+                            v-if="!canEditOrder(order)"
                             :aria-label="`View Order: ${order.orderNumber}`" 
                             :title="`View Order: ${order.orderNumber}`" 
                             @click="$emit('view', order.id)" 
