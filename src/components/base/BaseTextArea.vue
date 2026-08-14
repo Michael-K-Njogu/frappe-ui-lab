@@ -37,7 +37,7 @@ const emit = defineEmits(['update:modelValue'])
 
 <template>
     <div class="base-text-area-wrapper">
-        <FormLabel :label="label" :for="id" :required="required" />
+        <BaseFormLabel :label="label" :for="id" :required="required" />
         <textarea
             :value="modelValue"
             :rows="rows"
