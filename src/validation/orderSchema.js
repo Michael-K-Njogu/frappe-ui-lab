@@ -5,14 +5,6 @@ const baseOrderSchema = z.object({
     .string()
     .min(1, { message: 'Please select a customer from the list' }),
 
-  status: z
-    .string()
-    .min(1, { message: 'Please select a status' }),
-
-  totalAmount: z
-    .number({ invalid_type_error: 'Total amount must be a number' })
-    .positive({ message: 'Total amount must be a positive number' }),
-
   notes: z
     .string()
     .optional(),
