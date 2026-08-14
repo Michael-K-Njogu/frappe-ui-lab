@@ -93,18 +93,6 @@ const {
     <p v-if="error">
         {{ error }}
     </p>
-
-    <!--
-    <Alert
-        v-if="customer && !canDelete"
-        :message="`This customer cannot be deleted because they have existing orders.`"
-        type="info"
-    >
-        <template #icon>    
-            <Info size="24" />
-        </template>
-    </Alert>   
-    -->  
     
     <CustomerCard
         v-if="customer"
