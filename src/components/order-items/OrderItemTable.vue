@@ -13,6 +13,11 @@ const props = defineProps({
     type: Boolean,
     default: false,
   },    
+
+  editable: {
+    type: Boolean,
+    default: false,
+  }
   
 })
 
@@ -49,7 +54,7 @@ const emit = defineEmits([
             <th>Unit Price</th>
             <th>Discount</th>
             <th>Line Total</th>
-            <th></th>
+            <th v-if="editable"></th>
         </tr>
     </thead>
 
@@ -84,7 +89,7 @@ const emit = defineEmits([
                 {{ formatCurrency(item.lineTotal) }}
             </td>
 
-            <td>
+            <td v-if="editable">
                 <div class="row-actions">
                     <button 
                         @click="$emit('edit', item)"
