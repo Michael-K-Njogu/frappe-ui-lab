@@ -1,22 +1,85 @@
 import { z } from 'zod';
 
+const customerImageSchema = z
+  .union([
+    z.string().url(),
+    z.instanceof(File),
+  ])
+  .refine(
+    value => {
+      if (value instanceof File) {
+        return value.size <= 2 * 1024 * 1024
+      }
+
+      return true
+    },
+    {
+      message: 'Image size must be less than or equal to 2MB',
+    }
+  )
+  .nullable()
+  .optional()
+
 const baseCustomerSchema = z.object({
   name: z
     .string()
-    .min(1, { message: 'Name is required' }),
+    .min(1, { message: 'Customer / Business Name is required' }),
 
   email: z
     .string()
     .email({ message: 'Invalid email address' }),
 
+  phonePrimary: z
+    .string()
+    .regex(/^\+?[1-9]\d{1,14}$/, { message: 'Invalid phone number' }),
+
+  phoneSecondary: z
+    .string()
+    .regex(
+      /^\+?[1-9]\d{1,14}$/,
+      { message: 'Invalid phone number' }
+    )
+    .optional()
+    .or(z.literal('')),
+
+  region: z
+    .string()
+    .min(1, { message: 'Please select a region' }),
+  
+  city: z
+    .string()
+    .min(1, { message: 'City or town is required' }),
+
+    contactPerson: z
+    .string()
+    .min(1, { message: 'Contact person is required' }),
+
+  deliveryAddress: z
+    .string()
+    .min(1, { message: 'Delivery address is required' }),
+
   creditLimit: z
-    .number({ invalid_type_error: 'Credit limit must be a number' })
-    .positive({ message: 'Credit limit must be a positive number' })
-    .max(100000, { message: 'Credit limit cannot exceed 100,000' }),
+    .number({ invalid_type_error: 'Credit limit must be a number between 0 and 500,000' })
+    .min(0, { message: 'Credit limit must be at least 0' })
+    .max(500000, { message: 'Credit limit cannot exceed 500,000' }),
+
+  creditStatus: z
+    .string()
+    .min(1, { message: 'Please select a credit status' }),
+
+  vatNumber: z
+    .string()
+    .min(1, { message: 'VAT number is required for invoices' }),
 
   customerType: z
     .string()
     .min(1, { message: 'Please select a customer type' }),
+
+  sector: z
+    .string()
+    .min(1, { message: 'Please select a sector' }),
+
+  image: customerImageSchema,
 
 });
 
