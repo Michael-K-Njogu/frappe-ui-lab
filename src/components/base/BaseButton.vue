@@ -20,6 +20,10 @@ defineProps({
         type: String,
         default: '',
     },
+    loading: {
+        type: Boolean,
+        default: false,
+    },
 })
 </script>
 
