@@ -139,19 +139,6 @@ const fields = {
                     <div class="form-row">
 
                         <div class="form-group">
-                            <!--
-                            <BaseSelect
-                                name="category"
-                                id="category"
-                                all-options-selected-text="-- Select Category --"
-                                v-model="fields.category.value"
-                                :error="errors.category"
-                                :class="{ 'is-invalid': errors.category }"
-                                label="Product Category"
-                                :options="PRODUCT_CATEGORIES"
-                            />
-                            <p v-if="errors.category" class="invalid">{{ errors.category }}</p>
-                            -->
                             <BaseSearchableSelect
                                 v-model="fields.category.value"
                                 label="Product Category"
