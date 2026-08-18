@@ -1,5 +1,6 @@
 @import './styles/variables.css';
 @import './styles/customer.css';
+@import './styles/orders.css';
 
 * {
   box-sizing: border-box;
