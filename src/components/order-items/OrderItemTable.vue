@@ -1,7 +1,15 @@
 <script setup>
+import { computed } from 'vue'
+
 import { formatCurrency } from '../../utils/formatters.js'
-import { SquarePen, Trash2, Package } from '@lucide/vue'
+import { calculateGrandTotal } from '../../business/orderCalculations.js'
+
 import BaseEmptyState from '../base/BaseEmptyState.vue'
+import { SquarePen, Trash2, Package } from '@lucide/vue'
+
+const grandTotal = computed(() =>
+    calculateGrandTotal(props.items)
+)
 
 const props = defineProps({
   items: {
@@ -108,5 +116,38 @@ const emit = defineEmits([
             </td>
         </tr>
     </tbody>
+    <tfoot v-if="items.length">
+        <tr class="order-total-row">
+            <td :colspan="editable ? 5 : 4">
+                Grand Total
+            </td>
+
+            <td>
+                {{ formatCurrency(grandTotal) }}
+            </td>
+        </tr>
+    </tfoot>    
 </table>
 </template>
+
+<style scoped>
+.order-total-row {
+    border-top: 2px solid var(--border-color);
+}
+
+.order-total-row td {
+    padding: 1rem;
+    font-weight: 600;
+}
+
+.order-total-row td:first-child {
+    text-align: right;
+    color: var(--text-secondary);
+}
+
+.order-total-row td:last-child {
+    font-size: 1.05rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
+</style>
