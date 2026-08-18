@@ -11,7 +11,7 @@ import { createOrderSchema } from '../validation/orderSchema.js'
 import { useToast } from '../composables/useToast'
 import { useOrderItems } from '../composables/useOrderItems'
 
-import { getCustomers } from '../services/customerService'
+import { getCustomers, getCustomerAccountSummary } from '../services/customerService'
 import { createOrder, updateOrderGrandTotal } from '../services/orderService'
 
 import PageTitle from '../components/PageTitle.vue'
@@ -21,6 +21,8 @@ import OrderForm from '../components/orders/OrderForm.vue'
 const router = useRouter()
 const { success, error: showError } = useToast()
 const customerOptions = ref([])
+const customerAccount = ref(null)
+const loadingCustomerAccount = ref(false)
 const saving = ref(false)
 
 const {
@@ -48,6 +50,30 @@ async function loadCustomers() {
 onMounted(() => {
   loadCustomers()
 })
+
+// Load customer account information when a customer is selected
+async function loadCustomerAccount(customerId) {
+    customerAccount.value = null
+
+    if (!customerId) {
+        return
+    }
+
+    loadingCustomerAccount.value = true
+
+    try {
+        customerAccount.value =
+            await getCustomerAccountSummary(customerId)
+    } catch (err) {
+        console.error(err)
+        showError(
+            err.message ||
+            'Unable to load customer account information.'
+        )
+    } finally {
+        loadingCustomerAccount.value = false
+    }
+}
 
 async function saveOrder(values, status) {
   saving.value = true
@@ -127,10 +153,13 @@ async function postOrder(values) {
 
     <OrderForm
         :customer-options="customerOptions"
+        :customer-account="customerAccount"
+        :loading-customer-account="loadingCustomerAccount"
         :validation-schema="createOrderSchema"
         :loading="saving"
-        submit-label="Submit Order"
+        submit-label="Create Order"
         @save-draft="saveDraft"
         @post-order="postOrder"
+        @customer-change="loadCustomerAccount"
     />
 </template>
