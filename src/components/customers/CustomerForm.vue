@@ -17,7 +17,7 @@ import BaseFormSection from '../base/BaseFormSection.vue'
 
 import Alert from '../Alert.vue'
 
-import { User, Mail, Truck, CreditCard, Handshake, Info } from '@lucide/vue'
+import { User, Mail, Truck, CreditCard, Handshake, Info, LoaderCircle } from '@lucide/vue'
 
 const props = defineProps({
 
@@ -393,12 +393,16 @@ const fields = {
                 />
 
                 <BaseButton 
-                    :label="props.submitLabel" 
+                    :label="props.loading ? 'Saving Customer...' : props.submitLabel"
                     :loading="props.loading"  
                     :disabled="props.loading"
                     variant="primary" 
                     type="submit"
-                />
+                >
+                    <template #icon v-if="props.loading">
+                        <LoaderCircle class="is-loading" size="16" />
+                    </template>
+                </BaseButton>
 
             </div>
 
