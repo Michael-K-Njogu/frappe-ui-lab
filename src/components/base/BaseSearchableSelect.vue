@@ -21,7 +21,7 @@ const props = defineProps({
 
     placeholder: {
         type: String,
-        default: 'Search customers...'
+        default: 'Search...'
     },
 
     allOptionsSelectedText: {
