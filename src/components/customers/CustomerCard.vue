@@ -25,6 +25,7 @@ function getInitials(name) {
 </script>
 
 <template>
+
   <section class="customer-card">
 
     <div class="card customer-details">
@@ -32,21 +33,22 @@ function getInitials(name) {
       <div class="customer-details__left">
 
         <div class="avatar avatar--large">
-          <User size="48" />
+          <img v-if="customer.image" :src="customer.image" :alt="customer.name" />
+          <span v-else>{{ getInitials(customer.name) }}</span>
         </div>
 
           <h2>{{ customer.name }}</h2>
 
           <ul>
             <li>
-              <RouterLink :to="`mailto:${customer.email}`" class="card-icon">
+              <a :href="`mailto:${customer.email}`" class="card-icon">
                 <Mail size="16" />
-              </RouterLink>
+              </a>
             </li>
             <li>
-              <RouterLink :to="`tel:${customer.phone}`" class="card-icon">
+              <a :href="`tel:${customer.phonePrimary}`" class="card-icon">
                 <Phone size="16" />
-              </RouterLink>
+              </a>
             </li>
             <li>
               <RouterLink :to="`/customers/${customer.id}`" class="card-icon">
@@ -84,13 +86,18 @@ function getInitials(name) {
 
       <div class="info-group">
         <h4 class="info-label">Phone:</h4>
-        <p class="info-value">+254 710 570 983</p>
+        <p class="info-value">{{ customer.phonePrimary }}</p>
       </div>
 
       <div class="info-group">
-        <h4 class="info-label">Primary Address:</h4>
-        <p class="info-value">123 Main St, Nairobi, Kenya</p> 
+        <h4 class="info-label">Delivery Address:</h4>
+        <p class="info-value">{{ customer.deliveryAddress }}</p> 
       </div>
+
+      <div class="info-group">
+        <h4 class="info-label">City:</h4>
+        <p class="info-value">{{ customer.city }}</p> 
+      </div>      
 
       <div class="info-group">
         <h4 class="info-label">Date Created:</h4>
@@ -108,74 +115,5 @@ function getInitials(name) {
 </template>
 
 <style scoped>
-.info-group {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  margin-bottom: 8px;
-}
 
-.info-label {
-  margin-bottom: 0;
-}
-
-.info-value {
-  margin: 0;
-}
-
-ul {
-  list-style: none;
-  padding: 0;
-  display: flex;
-  gap: 8px;
-}
-
-.card-icon {
-  border: 1px solid var(--border-colour-default);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  width: 40px;
-  height: 40px;
-  border-radius: 50%;
-  background-color: var(--bg-colour-default);
-  color: var(--text-colour-secondary);
-}
-
-.customer-card {
-    display: flex;
-    align-items: flex-start;
-    font-size: 14px;
-    gap: 1rem;
-}
-
-.avatar {
-    color: var(--text-colour-secondary);
-    font-size: 2.5rem;
-    width: 120px;
-    height: 120px;
-    border-radius: 50%;
-    background-color: var(--bg-colour-default);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    margin-bottom: 12px;
-}
-
-.customer-orders {
-    flex: 1;
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
-
-.customer-details__left {
-    align-items: center;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    min-width: 240px;
-    gap: 8px;
-    text-align: center;
-}
 </style>
