@@ -11,11 +11,11 @@ export async function uploadCustomerImage(
     throw new Error('A valid image file is required.')
   }
 
-  const extension =
-    file.name.split('.').pop()?.toLowerCase() || 'jpg'
+    const extension =
+        file.name.split('.').pop()?.toLowerCase() || 'jpg'
 
-  const filePath =
-    `${customerId}/logo-${crypto.randomUUID()}.${extension}`
+    const filePath =
+        `${customerId}/logo-${crypto.randomUUID()}.${extension}`
 
   const response = await fetch(
     `${SUPABASE_URL}/storage/v1/object/${CUSTOMER_IMAGE_BUCKET}/${filePath}`,
@@ -52,4 +52,81 @@ export async function uploadCustomerImage(
   }
 
   return `${SUPABASE_URL}/storage/v1/object/public/${CUSTOMER_IMAGE_BUCKET}/${filePath}`
+}
+
+export async function replaceCustomerImage(
+    customerId,
+    file
+) {
+    return uploadCustomerImage(
+        customerId,
+        file
+    )
+}
+
+export async function deleteCustomerImage(imageUrl) {
+    if (!imageUrl) return
+
+    const marker =
+        `/storage/v1/object/public/${CUSTOMER_IMAGE_BUCKET}/`
+
+    const markerIndex = imageUrl.indexOf(marker)
+
+    if (markerIndex === -1) {
+        throw new Error('Invalid customer image URL.')
+    }
+
+    const filePath =
+        imageUrl.substring(
+            markerIndex + marker.length
+        )
+
+    const response = await fetch(
+        `${SUPABASE_URL}/storage/v1/object/${CUSTOMER_IMAGE_BUCKET}/${filePath}`,
+        {
+            method: 'DELETE',
+            headers: {
+                apikey: API_KEY,
+                Authorization: `Bearer ${API_KEY}`,
+            },
+        }
+    )
+
+    const data =
+        response.status === 204
+            ? null
+            : await response.json()
+
+    if (!response.ok) {
+        const message =
+            data?.message ||
+            data?.error ||
+            ''
+
+        if (
+            response.status === 404 ||
+            message.toLowerCase().includes('object not found')
+        ) {
+            console.warn(
+                'Customer image was already absent from storage:',
+                filePath
+            )
+
+            return
+        }
+
+        console.error(
+            'Customer image deletion failed:',
+            {
+                status: response.status,
+                data,
+                filePath,
+            }
+        )
+
+        throw new Error(
+            message ||
+            `Image deletion failed (${response.status}).`
+        )
+    }
 }
