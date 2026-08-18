@@ -5,6 +5,7 @@ import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 
 import { calculateLineTotal } from '../../business/orderItemCalculations.js'
+import { formatCurrency } from '../../utils/formatters.js'
 
 import BaseFormSection from '../base/BaseFormSection.vue'
 import BaseFormLabel from '../base/BaseFormLabel.vue'
@@ -52,6 +53,16 @@ const props = defineProps({
         type: Object,
         required: true,
     },
+
+    customerAccount: {
+        type: Object,
+        default: null,
+    },
+
+    loadingCustomerAccount: {
+        type: Boolean,
+        default: false,
+    },    
 })
 
 const showAddItemModal = ref(false)
@@ -63,7 +74,8 @@ const orderItems = ref([...props.initialOrderItems])
 const emit = defineEmits([
   'post-order',
   'save-draft',
-  'delete-order'
+  'delete-order',
+  'customer-change',
 ])
 
 const {
@@ -141,6 +153,13 @@ watch(
 )
 
 watch(
+    () => fields.customerId.value,
+    (customerId) => {
+        emit('customer-change', customerId)
+    }
+)
+
+watch(
     () => props.initialOrderItems,
     (items) => {
         orderItems.value = [...items]
@@ -214,6 +233,54 @@ function handleOrderItemSubmit(values) {
                     all-options-selected-text="Select a customer"
                 />                
                 <p v-if="errors.customerId" class="invalid">{{ errors.customerId }}</p>
+
+                <div
+                    v-if="loadingCustomerAccount"
+                    class="customer-account-summary is-loading"
+                >
+                    <span>Loading account information...</span>
+                </div>
+
+                <div
+                    v-else-if="customerAccount"
+                    class="customer-account-summary"
+                >
+                    <div class="account-summary-item">
+                        <span class="account-summary-label">
+                            Credit Limit
+                        </span>
+
+                        <span class="account-summary-value">
+                            {{ formatCurrency(customerAccount.creditLimit) }}
+                        </span>
+                    </div>
+
+                    <div class="account-summary-item">
+                        <span class="account-summary-label">
+                            Current Balance
+                        </span>
+
+                        <span class="account-summary-value">
+                            {{ formatCurrency(customerAccount.currentBalance) }}
+                        </span>
+                    </div>
+
+                    <div class="account-summary-item">
+                        <span class="account-summary-label">
+                            Available Credit
+                        </span>
+
+                        <span
+                            class="account-summary-value"
+                            :class="{
+                                'is-negative':
+                                    customerAccount.availableCredit < 0
+                            }"
+                        >
+                            {{ formatCurrency(customerAccount.availableCredit) }}
+                        </span>
+                    </div>
+                </div>                
             </div>         
 
         </div>
@@ -309,3 +376,45 @@ function handleOrderItemSubmit(values) {
         @confirm="confirmDeleteOrderItem"
     />    
 </template>
+
+<style scoped>
+.customer-account-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 0.75rem;
+    border: 1px solid var(--border-color);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.account-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+}
+
+.account-summary-item + .account-summary-item {
+    border-left: 1px solid var(--border-color);
+}
+
+.account-summary-label {
+    font-size: 0.75rem;
+    color: var(--text-secondary);
+}
+
+.account-summary-value {
+    font-weight: 600;
+}
+
+.account-summary-value.is-negative {
+    color: var(--color-danger);
+}
+
+.customer-account-summary.is-loading {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+</style>
