@@ -1,14 +1,17 @@
 <script setup>
 import { ref, computed } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
+
+import { canDeleteCustomer } from '../business/customerPermissions'
 import { useCustomer } from '../composables/useCustomer'
 import { useToast } from '../composables/useToast'
+
 import PageTitle from '../components/PageTitle.vue'
 import { ArrowLeft, Pencil, Trash2, Info } from '@lucide/vue'
 import CustomerCard from '../components/customers/CustomerCard.vue'
+import BaseButton from '../components/base/BaseButton.vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
-import { canDeleteCustomer } from '../business/customerPermissions'
 import Alert from '../components/Alert.vue'
 
 const open = ref(false)
@@ -79,14 +82,17 @@ const {
                 Edit Customer
             </RouterLink>
 
-            <button 
+            <BaseButton
                 v-if="customer && canDelete"
-                class="btn btn-danger" 
+                label="Delete Customer"
+                variant="danger"
                 @click="confirmDeleteCustomer"
-            >
-                <Trash2 size="16" />
-                Delete Customer
-            </button>
+            >   
+                <template #icon>
+                    <Trash2 size="16" />
+                </template>
+            </BaseButton>
+
         </template>
     </PageTitle>
 
