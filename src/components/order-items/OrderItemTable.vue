@@ -129,25 +129,3 @@ const emit = defineEmits([
     </tfoot>    
 </table>
 </template>
-
-<style scoped>
-.order-total-row {
-    border-top: 2px solid var(--border-color);
-}
-
-.order-total-row td {
-    padding: 1rem;
-    font-weight: 600;
-}
-
-.order-total-row td:first-child {
-    text-align: right;
-    color: var(--text-secondary);
-}
-
-.order-total-row td:last-child {
-    font-size: 1.05rem;
-    font-weight: 700;
-    white-space: nowrap;
-}
-</style>
