@@ -4,10 +4,16 @@ defineProps({
     type: String,
     required: false,
   },
-    description: {
-        type: String,
-        default: '',
-    },
+  
+  description: {
+    type: String,
+    default: '',
+  },
+
+  icon: {
+    type: String,
+    required: false,
+  },
 })
 </script>
 
@@ -16,9 +22,10 @@ defineProps({
     <section class="form-section">
         <div class="form-section__header">
 
-            <h3 class="form-section__title">
-                {{ title }}
-            </h3>
+            <div class="form-section__title">
+                <slot name="icon" />
+                <h4>{{ title }}</h4>
+            </div>
 
             <p v-if="description" class="form-section__description">
                 {{ description }}
@@ -35,15 +42,3 @@ defineProps({
     </section>
 
 </template>
-
-<style scoped>
-.form-section__header {
-    margin-bottom: 1rem;
-}
-
-.form-section__description {
-    font-size: 0.875rem;
-    color: var(--text-colour-secondary);
-    margin-top: 0.25rem;
-}
-</style>
