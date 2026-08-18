@@ -52,8 +52,6 @@ export async function createOrderItem(orderItem) {
 export async function updateOrderItem(id, updates) {
     const apiOrderItem = mapOrderItemToApi(updates)
 
-    console.log('PATCH payload:', apiOrderItem)
-
     const data = await apiClient.patch(
         `${RESOURCE_PATH}?id=eq.${id}`,
         apiOrderItem,
