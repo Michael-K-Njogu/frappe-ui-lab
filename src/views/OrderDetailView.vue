@@ -189,14 +189,7 @@ async function createOrderItem(values) {
     if (existingItem) {
       
       const mergedQuantity = Number(existingItem.quantity) + Number(values.quantity)
-      const mergedDiscount = Number(existingItem.discount) + Number(values.discount)
-      
-      console.log({
-          existingQuantity: existingItem.quantity,
-          newQuantity: values.quantity,
-          mergedQuantity,
-          mergedDiscount,
-      })      
+      const mergedDiscount = Number(existingItem.discount) + Number(values.discount)    
 
       await saveOrderItem(existingItem.id, {
         ...existingItem,
