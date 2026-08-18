@@ -1,15 +1,22 @@
 <script setup>
+import { ref } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
+
 import { updateCustomerSchema } from '../validation/customerSchema.js'
-import CustomerForm from '../components/customers/CustomerForm.vue'
 import { useCustomer } from '../composables/useCustomer.js'
 import { updateCustomer } from '../services/customerService.js'
+import { deleteCustomerImage } from '../services/storageService.js'
+
+import BaseButton from '../components/base/BaseButton.vue'
+import CustomerForm from '../components/customers/CustomerForm.vue'
 import PageTitle from '../components/PageTitle.vue'
 import { useToast } from '../composables/useToast.js'
 
 const router = useRouter()
 const route = useRoute()
-const { success, error } = useToast()
+const { success, error: showError } = useToast()
+const saving = ref(false)
+
 
 const {
   customer,
@@ -18,6 +25,8 @@ const {
 } = useCustomer(route.params.id)
 
 async function saveCustomer(values) {
+  if (saving.value) return
+  saving.value = true
   try {
     const updatedCustomer = await updateCustomer(
       route.params.id,
@@ -36,7 +45,13 @@ async function saveCustomer(values) {
     })
   } catch (err) {
     console.error(err)
-    error('Failed to update customer')
+
+    showError(
+        err.message ||
+        'Failed to update customer.'
+    )
+  } finally {
+    saving.value = false
   }
 }
 
@@ -46,13 +61,14 @@ async function saveCustomer(values) {
     <PageTitle title="Edit Customer" :has-back-button="true" />
 
     <p v-if="loading">Loading...</p>
-    <p v-if="fetchError">{{ fetchError.message }}</p>
 
     <CustomerForm
         v-else-if="customer"
         :validation-schema="updateCustomerSchema"
         :submit-label="'Update Customer'"
         :initial-values="customer"
+        :loading="saving"
         @submit="saveCustomer"
     />
+
 </template>
