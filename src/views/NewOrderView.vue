@@ -137,7 +137,6 @@ async function saveDraft(values) {
     values,
     ORDER_STATUS.DRAFT
   )
-  console.log('Draft saved:', values)
 }
 
 async function postOrder(values) {
