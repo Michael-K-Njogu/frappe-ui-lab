@@ -1,0 +1,61 @@
+/* Styles for the orders module */
+
+.customer-account-summary {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    margin-top: 0.75rem;
+    border: 1px solid var(--border-colour-default);
+    border-radius: 0.5rem;
+    overflow: hidden;
+}
+
+.account-summary-item {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+    padding: 0.75rem 1rem;
+}
+
+.account-summary-item + .account-summary-item {
+    border-left: 1px solid var(--border-colour-default);
+}
+
+.account-summary-label {
+    font-size: 0.75rem;
+    color: var(--text-colour-secondary);
+}
+
+.account-summary-value {
+    font-weight: 600;
+}
+
+.account-summary-value.is-negative {
+    color: var(--text-colour-danger);
+}
+
+.customer-account-summary.is-loading {
+    display: block;
+    padding: 0.75rem 1rem;
+    color: var(--text-colour-secondary);
+    font-size: 0.875rem;
+}
+
+.order-total-row {
+    border-top: 2px solid var(--border-color);
+}
+
+.order-total-row td {
+    padding: 1rem;
+    font-weight: 600;
+}
+
+.order-total-row td:first-child {
+    text-align: right;
+    color: var(--text-secondary);
+}
+
+.order-total-row td:last-child {
+    font-size: 1.05rem;
+    font-weight: 700;
+    white-space: nowrap;
+}
