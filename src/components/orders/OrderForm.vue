@@ -1,10 +1,11 @@
 <script setup>
-import { watch, ref } from 'vue'
+import { watch, ref, computed } from 'vue'
 
 import { useForm } from 'vee-validate'
 import { toTypedSchema } from '@vee-validate/zod'
 
 import { calculateLineTotal } from '../../business/orderItemCalculations.js'
+import { calculateProjectedBalance, calculateProjectedAvailableCredit } from '../../business/customerAccountCalculations.js'
 import { formatCurrency } from '../../utils/formatters.js'
 
 import BaseFormSection from '../base/BaseFormSection.vue'
@@ -63,6 +64,11 @@ const props = defineProps({
         type: Boolean,
         default: false,
     },    
+
+    editable: {
+        type: Boolean,
+        default: false,
+    }
 })
 
 const showAddItemModal = ref(false)
@@ -70,6 +76,37 @@ const editingOrderItem = ref(null)
 const showDeleteItemModal = ref(false)
 const itemToDelete = ref(null)
 const orderItems = ref([...props.initialOrderItems])
+
+const orderGrandTotal = computed(() => {
+    return orderItems.value.reduce(
+        (total, item) =>
+            total + Number(item.lineTotal || 0),
+        0
+    )
+})
+
+const projectedBalance = computed(() => {
+    if (!props.customerAccount) {
+        return 0
+    }
+
+    return calculateProjectedBalance(
+        props.customerAccount.currentBalance,
+        orderGrandTotal.value
+    )
+})
+
+const projectedAvailableCredit = computed(() => {
+    if (!props.customerAccount) {
+        return 0
+    }
+
+    return calculateProjectedAvailableCredit(
+        props.customerAccount.creditLimit,
+        props.customerAccount.currentBalance,
+        orderGrandTotal.value
+    )
+})
 
 const emit = defineEmits([
   'post-order',
@@ -236,7 +273,7 @@ function handleOrderItemSubmit(values) {
 
                 <div
                     v-if="loadingCustomerAccount"
-                    class="customer-account-summary is-loading"
+                    class="customer-account-summary"
                 >
                     <span>Loading account information...</span>
                 </div>
@@ -267,7 +304,11 @@ function handleOrderItemSubmit(values) {
 
                     <div class="account-summary-item">
                         <span class="account-summary-label">
-                            Available Credit
+                            {{
+                                orderGrandTotal > 0
+                                    ? 'Available Credit After Order'
+                                    : 'Available Credit'
+                            }}                           
                         </span>
 
                         <span
@@ -277,7 +318,13 @@ function handleOrderItemSubmit(values) {
                                     customerAccount.availableCredit < 0
                             }"
                         >
-                            {{ formatCurrency(customerAccount.availableCredit) }}
+                            {{
+                                formatCurrency(
+                                    orderGrandTotal > 0
+                                        ? projectedAvailableCredit
+                                        : customerAccount.availableCredit
+                                )
+                            }}                            
                         </span>
                     </div>
                 </div>                
@@ -308,15 +355,16 @@ function handleOrderItemSubmit(values) {
         <OrderItemTable
             :items="orderItems"
             :loading="false"
+            :editable="editable"
             @edit="handleEditOrderItem"
             @delete="handleDeleteOrderItem"
         >        
             <template #actions>
 
                 <BaseButton
-                label="Add First Item"
-                type="button"
-                @click="showAddItemModal = true"
+                    label="Add First Item"
+                    type="button"
+                    @click="showAddItemModal = true"
                 />
 
             </template>        
@@ -376,45 +424,3 @@ function handleOrderItemSubmit(values) {
         @confirm="confirmDeleteOrderItem"
     />    
 </template>
-
-<style scoped>
-.customer-account-summary {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    margin-top: 0.75rem;
-    border: 1px solid var(--border-color);
-    border-radius: 0.5rem;
-    overflow: hidden;
-}
-
-.account-summary-item {
-    display: flex;
-    flex-direction: column;
-    gap: 0.25rem;
-    padding: 0.75rem 1rem;
-}
-
-.account-summary-item + .account-summary-item {
-    border-left: 1px solid var(--border-color);
-}
-
-.account-summary-label {
-    font-size: 0.75rem;
-    color: var(--text-secondary);
-}
-
-.account-summary-value {
-    font-weight: 600;
-}
-
-.account-summary-value.is-negative {
-    color: var(--color-danger);
-}
-
-.customer-account-summary.is-loading {
-    display: block;
-    padding: 0.75rem 1rem;
-    color: var(--text-secondary);
-    font-size: 0.875rem;
-}
-</style>
