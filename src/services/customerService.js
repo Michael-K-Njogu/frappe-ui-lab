@@ -1,29 +1,65 @@
 import { apiClient } from '../api/apiClient'
+import { ORDER_STATUS } from '../constants/orderStatuses'
+import { uploadCustomerImage } from './storageService'
 
 const SORT_FIELD_MAP = {
   name: 'name',
   email: 'email',
   customerType: 'customer_type',
+  sector: 'sector',
+  region: 'region',
   creditLimit: 'credit_limit',
   createdAt: 'created_at',
 }
 
 export const CUSTOMER_FIELDS = {
   id: 'id',
+
   name: 'name',
-  email: 'email',
-  creditLimit: 'credit_limit',
   customerType: 'customer_type',
+  sector: 'sector',  
+  region: 'region',  
+  vatNumber: 'vat_number',  
+
+  contactPerson: 'contact_person',  
+  phonePrimary: 'phone_primary',
+  phoneSecondary: 'phone_secondary',
+  email: 'email',  
+
+  deliveryAddress: 'delivery_address',  
+  city: 'city',
+
+  creditLimit: 'credit_limit',  
+  creditStatus: 'credit_status',
+
+  image: 'image_url',
+
   createdAt: 'created_at',
 }
 
 function mapCustomer(customer) {
   return {
     id: customer.id,
+
     name: customer.name,
-    email: customer.email,
-    creditLimit: customer.credit_limit,
     customerType: customer.customer_type,
+    sector: customer.sector,
+    region: customer.region,
+    vatNumber: customer.vat_number,    
+
+    contactPerson: customer.contact_person,
+    phonePrimary: customer.phone_primary,
+    phoneSecondary: customer.phone_secondary,
+    email: customer.email,
+
+    deliveryAddress: customer.delivery_address,
+    city: customer.city,
+
+    creditLimit: customer.credit_limit,
+    creditStatus: customer.credit_status,
+
+    image: customer.image_url || null,
+
     createdAt: customer.created_at,
     orderCount: customer.orders?.[0]?.count ?? 0,
   }
@@ -32,9 +68,22 @@ function mapCustomer(customer) {
 function mapCustomerToApi(customer) {
   return {
     name: customer.name,
-    email: customer.email,
-    credit_limit: customer.creditLimit,
     customer_type: customer.customerType,
+    sector: customer.sector,
+    region: customer.region,
+    vat_number: customer.vatNumber,
+
+    contact_person: customer.contactPerson,
+    phone_primary: customer.phonePrimary,
+    phone_secondary: customer.phoneSecondary,
+    email: customer.email,
+
+    delivery_address: customer.deliveryAddress,
+    city: customer.city,
+
+    credit_limit: customer.creditLimit,
+    credit_status: customer.creditStatus,
+
   }
 } 
 
@@ -117,6 +166,53 @@ export async function getCustomerById(id) {
     : null
 }
 
+export async function getCustomerAccountSummary(customerId) {
+  const params = new URLSearchParams()
+
+  params.set(
+    'select',
+    'credit_limit,orders(total_amount,status)'
+  )
+
+  params.set(
+    'id',
+    `eq.${customerId}`
+  )
+
+  const { data } = await apiClient.getRaw(
+    `/customers?${params.toString()}`
+  )
+
+  const customer = data[0]
+
+  if (!customer) {
+    throw new Error('Customer not found.')
+  }
+
+  const creditLimit = Number(
+    customer.credit_limit || 0
+  )
+
+  const currentBalance = (customer.orders || [])
+    .filter(
+      order => order.status === ORDER_STATUS.COMPLETED
+    )
+    .reduce(
+      (total, order) =>
+        total + Number(order.total_amount || 0),
+      0
+    )
+
+  const availableCredit =
+    creditLimit - currentBalance
+
+  return {
+    creditLimit,
+    currentBalance,
+    availableCredit,
+  }
+}
+
 export async function createCustomer(customer) {
   const createdCustomers = await apiClient.post(
     '/customers',
@@ -128,7 +224,36 @@ export async function createCustomer(customer) {
     }
   )
 
-  return mapCustomer(createdCustomers[0])
+  const createdCustomer = createdCustomers[0]
+
+  if (!createdCustomer) {
+    throw new Error('Customer could not be created.')
+  }
+
+  let imageUrl = null
+
+  if (customer.image instanceof File) {
+    imageUrl = await uploadCustomerImage(
+      createdCustomer.id,
+      customer.image
+    )
+
+    const updatedCustomers = await apiClient.patch(
+      `/customers?id=eq.${createdCustomer.id}`,
+      {
+        image_url: imageUrl,
+      },
+      {
+        headers: {
+          Prefer: 'return=representation',
+        },
+      }
+    )
+
+    return mapCustomer(updatedCustomers[0])
+  }
+
+  return mapCustomer(createdCustomer)
 }
 
 export async function updateCustomer(id, customer) { 
