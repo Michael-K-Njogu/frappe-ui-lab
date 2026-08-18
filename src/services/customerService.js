@@ -1,6 +1,6 @@
 import { apiClient } from '../api/apiClient'
 import { ORDER_STATUS } from '../constants/orderStatuses'
-import { uploadCustomerImage } from './storageService'
+import { uploadCustomerImage, deleteCustomerImage } from './storageService'
 
 const SORT_FIELD_MAP = {
   name: 'name',
@@ -256,11 +256,41 @@ export async function createCustomer(customer) {
   return mapCustomer(createdCustomer)
 }
 
-export async function updateCustomer(id, customer) { 
+export async function updateCustomer(id, customer) {
+  const existingCustomer = await getCustomerById(id)
+
+  if (!existingCustomer) {
+    throw new Error('Customer not found.')
+  }
+
+  const oldImageUrl = existingCustomer.image
+
+  const hasNewImage =
+      customer.image instanceof File
+
+  const imageWasRemoved =
+      customer.image === null &&
+      !!oldImageUrl
+
+  let newImageUrl = oldImageUrl
+
+  if (customer.image === null) {
+      newImageUrl = null
+  }
+
+  if (hasNewImage) {
+      newImageUrl = await uploadCustomerImage(
+          id,
+          customer.image
+      )
+  }
 
   const updatedCustomers = await apiClient.patch(
     `/customers?id=eq.${id}`,
-    mapCustomerToApi(customer),
+    {
+      ...mapCustomerToApi(customer),
+      image_url: newImageUrl,
+    },
     {
       headers: {
         Prefer: 'return=representation',
@@ -268,7 +298,24 @@ export async function updateCustomer(id, customer) {
     }
   )
 
-   return mapCustomer(updatedCustomers[0])
+  const updatedCustomer =
+    updatedCustomers[0]
+
+  // Delete previous image only after DB update succeeds
+  if (
+    hasNewImage &&
+    oldImageUrl &&
+    oldImageUrl !== newImageUrl
+  ) {
+    await deleteCustomerImage(oldImageUrl)
+  }
+
+  // Delete image when user explicitly removed it
+  if (imageWasRemoved) {
+    await deleteCustomerImage(oldImageUrl)
+  }
+
+  return mapCustomer(updatedCustomer)
 }
 
 export async function deleteCustomer(id) {
