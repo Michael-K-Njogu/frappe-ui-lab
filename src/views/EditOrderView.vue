@@ -5,17 +5,17 @@ import { useRoute, useRouter } from 'vue-router'
 import { ORDER_STATUS } from '../constants/orderStatuses.js'
 
 import { calculateGrandTotal } from '../business/orderCalculations.js'
+import { canEditOrder } from '../business/orderPermissions.js'
 
 import { updateOrderSchema } from '../validation/orderSchema.js'
 
 import { useToast } from '../composables/useToast'
 import { useOrder } from '../composables/useOrder'
 import { useOrderItems } from '../composables/useOrderItems'
-
 import { getOrderById } from '../services/orderService'
 import { updateOrder } from '../services/orderService'
-import { getCustomers } from '../services/customerService'
 import { getOrderItemsByOrder } from '../services/orderItemService'
+import { getCustomers, getCustomerAccountSummary } from '../services/customerService'
 
 import PageTitle from '../components/PageTitle.vue'
 import OrderForm from '../components/orders/OrderForm.vue'
@@ -29,12 +29,38 @@ const orderItems = ref([])
 const originalOrderItems = ref([])
 const loading = ref(true)
 const saving = ref(false)
+const customerAccount = ref(null)
+const loadingCustomerAccount = ref(false)
 
 const {
     addOrderItem,
     saveOrderItem,
     removeOrderItem,
 } = useOrderItems()
+
+async function loadCustomerAccount(customerId) {
+    customerAccount.value = null
+
+    if (!customerId) {
+        return
+    }
+
+    loadingCustomerAccount.value = true
+
+    try {
+        customerAccount.value =
+            await getCustomerAccountSummary(customerId)
+    } catch (err) {
+        console.error(err)
+
+        showError(
+            err.message ||
+            'Unable to load customer account information.'
+        )
+    } finally {
+        loadingCustomerAccount.value = false
+    }
+}
 
 async function loadCustomers() {
   try {
@@ -59,6 +85,10 @@ async function loadOrder() {
 
     try {
         order.value = await getOrderById(route.params.id)
+
+        await loadCustomerAccount(
+            order.value.customerId
+        )        
 
         const items = await getOrderItemsByOrder(
             order.value.id
@@ -240,7 +270,10 @@ function deleteItem(item) {
         :initial-values="order"
         :initial-order-items="orderItems"
         :customer-options="customerOptions"
+        :customer-account="customerAccount"
+        :loading-customer-account="loadingCustomerAccount"
         :validation-schema="updateOrderSchema"
+        :editable="canEditOrder(order)"
         submit-label="Submit Order"
         :loading="saving"
         @post-order="postOrder"
