@@ -6,7 +6,7 @@ import AppSidebarNav from '../components/AppSidebarNav.vue'
   <div class="layout">
     <AppSidebarNav />
     <main>
-      <header class="header">
+      <header class="top-bar-header">
         DDS Enterprise Application
       </header>
       <div class="content">
