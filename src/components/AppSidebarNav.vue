@@ -7,7 +7,8 @@ import appLogo from '../assets/dds-logo.png'
 <template>
   <aside class="sidebar">
     <div class="sidebar-header">
-      <img :src="appLogo" alt="App Logo" class="app-logo" />
+      <!--<img :src="appLogo" alt="App Logo" class="app-logo" />-->
+      Mikey's Mini-ERP
     </div>
     <nav class="sidebar-nav">
       <SidebarNavItem v-for="item in navigation" :key="item.to" v-bind="item" />
