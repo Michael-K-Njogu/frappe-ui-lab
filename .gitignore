@@ -10,7 +10,21 @@ lerna-debug.log*
 node_modules
 dist
 dist-ssr
-*.local
+.vite
+.cache
+
+# Environment files
+.env
+.env.*
+!.env.example
+
+# Test and coverage output
+coverage
+test-results
+playwright-report
+
+# TypeScript build metadata
+*.tsbuildinfo
 
 # Editor directories and files
 .vscode/*
@@ -23,5 +37,3 @@ dist-ssr
 *.sln
 *.sw?
 
-.env
-.env.local
