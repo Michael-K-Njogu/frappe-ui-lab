@@ -1,5 +1,5 @@
 <script setup>
-import { ref, computed } from 'vue'
+import { ref, computed, watch } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useToast } from '../composables/useToast'
@@ -7,6 +7,7 @@ import { useOrder } from '../composables/useOrder'
 import { useOrderItems } from '../composables/useOrderItems'
 
 import { updateOrder, deleteOrder, transitionOrder, updateOrderGrandTotal } from '../services/orderService'
+import { getCustomerById } from '../services/customerService'
 
 import { ORDER_STATUS, ORDER_STATUS_TIMESTAMP_FIELD } from '../constants/orderStatuses.js'
 import { canTransitionTo } from '../business/orderTransitions'
@@ -23,7 +24,10 @@ import BaseSkeleton from '../components/base/BaseSkeleton.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 
-import { Play, CheckCheck, Plus, Printer, Share2 } from '@lucide/vue'
+import InvoiceDocument from '../components/invoices/InvoiceDocument.vue'
+import InvoicePreviewPanel from '../components/invoices/InvoicePreviewPanel.vue'
+
+import { Play, CheckCheck, Plus, Printer, Share2, Eye } from '@lucide/vue'
 
 const ACTION = {
   EDIT: 'edit',
@@ -32,6 +36,7 @@ const ACTION = {
   START_PROCESSING: 'start-processing',
   COMPLETE: 'complete',
   CANCEL: 'cancel',
+  PREVIEW: 'preview',
   PRINT: 'print',
   SHARE: 'share',
 }
@@ -42,6 +47,12 @@ const { info, error: showError } = useToast()
 const showCancelModal = ref(false)
 const showAddItemModal = ref(false)
 const showDeleteModal = ref(false)
+const showInvoicePreview = ref(false)
+const customer = ref(null)
+
+function previewInvoice() {
+  showInvoicePreview.value = true
+}
 
 async function performTransition(status, title, message) {
     if (!order.value) return
@@ -143,6 +154,34 @@ const {
     deleting,  
     refresh
 } = useOrder(route.params.id)
+
+watch(
+    () => order.value?.customerId,
+    async (customerId) => {
+        if (!customerId) {
+            customer.value = null
+            return
+        }
+
+        try {
+            customer.value =
+                await getCustomerById(customerId)
+        } catch (err) {
+            console.error(
+                'Failed to load customer:',
+                err
+            )
+
+            showError(
+                err.message ||
+                'Unable to load customer information.'
+            )
+        }
+    },
+    {
+        immediate: true,
+    }
+)
 
 const {
   orderItems,
@@ -281,12 +320,19 @@ const actionButtons = computed(() => {
         visible: actions.value.canCancel,
     },
     {
-        id: ACTION.PRINT,
-        label: 'Print',
+        id: ACTION.PREVIEW,
+        label: 'Preview',
         variant: 'secondary',
+        visible: actions.value.canPreview,
+        icon: Eye,
+    },
+    {
+        id: ACTION.PRINT,
+        label: 'Export / Print',
+        variant: 'primary',
         visible: actions.value.canPrint,
         icon: Printer,
-    },
+    },    
     {
         id: ACTION.SHARE,
         label: 'Share',
@@ -323,6 +369,10 @@ function handleAction(actionId) {
 
     case ACTION.COMPLETE:
       completeOrder()
+      break
+
+    case ACTION.PREVIEW:
+      previewInvoice()
       break
 
     case ACTION.CANCEL:
@@ -483,5 +533,14 @@ const pageTitle = computed(() => {
     @close="showAddItemModal = false"
     @submit="createOrderItem"
   />   
+
+  <InvoicePreviewPanel
+      v-if="order"
+      :open="showInvoicePreview"
+      :order="order"
+      :items="orderItems"
+      :customer="customer"
+      @close="showInvoicePreview = false"
+  />
 
 </template>
