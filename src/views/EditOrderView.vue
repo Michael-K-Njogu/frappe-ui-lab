@@ -205,6 +205,10 @@ async function postOrder(values) {
 function deleteItem(item) {
   success(`${item.productName} removed from the order.`)
 }
+
+function handleClearAllItems() {
+  success('All items removed from the order.')
+}
 </script>
 
 <template>
@@ -228,5 +232,6 @@ function deleteItem(item) {
     @post-order="postOrder"
     @save-draft="saveDraft"
     @delete-item="deleteItem"
+    @clear-items="handleClearAllItems"
   />
 </template>
