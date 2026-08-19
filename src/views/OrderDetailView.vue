@@ -24,6 +24,12 @@ import {
   calculateGrandTotal,
   calculateTotalItems,
 } from '../business/orderCalculations'
+import {
+  notifyOrderPosted,
+  notifyOrderProcessing,
+  notifyOrderCompleted,
+  notifyOrderCanceled,
+} from '../business/orderNotifications'
 import { printInvoice } from '../utils/printInvoice.js'
 
 import PageTitle from '../components/PageTitle.vue'
@@ -75,7 +81,7 @@ function handlePrintInvoice() {
   }
 }
 
-async function performTransition(status, title, message) {
+async function performTransition(status, title, message, notify) {
   if (!order.value) return
 
   if (!canTransitionTo(order.value.status, status)) {
@@ -97,6 +103,14 @@ async function performTransition(status, title, message) {
 
     await transitionOrder(updatedOrder, status)
 
+    if (notify) {
+      try {
+        await notify(updatedOrder)
+      } catch (notificationError) {
+        console.error('Failed to create notification:', notificationError)
+      }
+    }
+
     info(message, {
       title,
     })
@@ -115,6 +129,7 @@ async function postOrder() {
     ORDER_STATUS.PENDING,
     'Order Posted',
     `Order ${order.value.orderNumber} has been posted for approval.`,
+    notifyOrderPosted,
   )
 }
 
@@ -123,6 +138,7 @@ async function startProcessing() {
     ORDER_STATUS.PROCESSING,
     'Order Updated',
     `Order ${order.value.orderNumber} is now processing.`,
+    notifyOrderProcessing,
   )
 }
 
@@ -131,6 +147,7 @@ async function completeOrder() {
     ORDER_STATUS.COMPLETED,
     'Order Completed',
     `Order ${order.value.orderNumber} has been completed.`,
+    notifyOrderCompleted,
   )
 }
 
@@ -139,6 +156,7 @@ async function cancelOrder() {
     ORDER_STATUS.CANCELED,
     'Order Canceled',
     `Order ${order.value.orderNumber} has been canceled.`,
+    notifyOrderCanceled,
   )
 
   showCancelModal.value = false
