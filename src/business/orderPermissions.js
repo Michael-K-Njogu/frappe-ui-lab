@@ -24,7 +24,7 @@ export function canPrintOrder(order) {
   return order.status === ORDER_STATUS.COMPLETED
 }
 
-export function canShareOrder(order) {
+export function canPreviewInvoice(order) {
   return order.status === ORDER_STATUS.COMPLETED
 }
 
@@ -49,7 +49,7 @@ export function getAvailableActions(order) {
     canCancel: canCancelOrder(order),
     canPost: canPostOrder(order),
     canPrint: canPrintOrder(order),
-    canShare: canShareOrder(order),
+    canPreview: canPreviewInvoice(order),
     canStartProcessing: canStartProcessing(order),
     canComplete: canCompleteOrder(order),
   }
