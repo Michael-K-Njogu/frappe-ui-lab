@@ -14,6 +14,7 @@ import { canTransitionTo } from '../business/orderTransitions'
 import { getAvailableActions } from '../business/orderPermissions'
 import { calculateLineTotal } from '../business/orderItemCalculations.js'
 import { calculateSubtotal, calculateDiscount, calculateGrandTotal, calculateTotalItems,} from '../business/orderCalculations'
+import { printInvoice } from '../utils/printInvoice.js'
 
 import PageTitle from '../components/PageTitle.vue'
 import OrderCard from '../components/orders/OrderCard.vue'
@@ -52,6 +53,19 @@ const customer = ref(null)
 
 function previewInvoice() {
   showInvoicePreview.value = true
+}
+
+function handlePrintInvoice() {
+    try {
+        printInvoice()
+    } catch (err) {
+        console.error(err)
+
+        showError(
+            err.message ||
+            'Unable to print invoice.'
+        )
+    }
 }
 
 async function performTransition(status, title, message) {
@@ -375,6 +389,10 @@ function handleAction(actionId) {
       previewInvoice()
       break
 
+    case ACTION.PRINT:
+      handlePrintInvoice()
+      break
+
     case ACTION.CANCEL:
       showCancelModal.value = true
       break
@@ -543,4 +561,19 @@ const pageTitle = computed(() => {
       @close="showInvoicePreview = false"
   />
 
+  <div id="invoice-print-container">
+      <InvoiceDocument
+          v-if="order && customer"
+          :order="order"
+          :items="orderItems"
+          :customer="customer"
+      />
+  </div>  
+
 </template>
+
+<style scoped>
+#invoice-print-container {
+    display: none;
+}
+</style>
