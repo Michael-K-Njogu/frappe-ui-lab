@@ -12,15 +12,7 @@ const TOAST_DURATION = {
 }
 
 export function useToast() {
-
-  function addToast({
-    message,
-    type,
-    title = '',
-    dismissable = true,
-    duration = 3000,
-  }) {
-
+  function addToast({ message, type, title = '', dismissable = true, duration = 3000 }) {
     const toast = {
       id: crypto.randomUUID(),
       title,
@@ -77,9 +69,7 @@ export function useToast() {
   }
 
   function removeToast(id) {
-    const index = state.toasts.findIndex(
-      toast => toast.id === id
-    )
+    const index = state.toasts.findIndex((toast) => toast.id === id)
 
     if (index !== -1) {
       state.toasts.splice(index, 1)

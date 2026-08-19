@@ -10,126 +10,114 @@ export function useCustomerFilters() {
     customerType: '',
     sort: {
       field: 'name',
-      direction: 'asc'
+      direction: 'asc',
     },
     pagination: {
       currentPage: 1,
       pageSize: 10,
-      totalItems: 0
-    }
+      totalItems: 0,
+    },
   })
 
   function parseFiltersFromUrl() {
     return {
-        query: route.query.q ?? '',
+      query: route.query.q ?? '',
 
-        customerType: route.query.type ?? '',
+      customerType: route.query.type ?? '',
 
-        sortField:
-        route.query.sort ?? 'createdAt',
+      sortField: route.query.sort ?? 'createdAt',
 
-        sortDirection:
-        route.query.direction ?? 'desc',
+      sortDirection: route.query.direction ?? 'desc',
 
-        currentPage:
-        Number(route.query.page) || 1,
+      currentPage: Number(route.query.page) || 1,
 
-        pageSize:
-        Number(route.query.pageSize) || 10,
+      pageSize: Number(route.query.pageSize) || 10,
     }
-}
-
-function initializeFiltersFromUrl() {
-  const parsed = parseFiltersFromUrl()
-
-  filters.query = parsed.query
-  filters.customerType = parsed.customerType
-  filters.sort.field = parsed.sortField
-  filters.sort.direction = parsed.sortDirection
-  filters.pagination.currentPage = parsed.currentPage
-  filters.pagination.pageSize = parsed.pageSize
-
-}
-
-function serializeFilters() {
-  return {
-    q: filters.query || undefined,
-    type: filters.customerType || undefined,
-    sort: filters.sort.field === 'createdAt' ? undefined : filters.sort.field,
-    direction: filters.sort.direction === 'desc' ? undefined : filters.sort.direction,
-    page: filters.pagination.currentPage !== 1 ? filters.pagination.currentPage : undefined,
-    pageSize: filters.pagination.pageSize !== 10 ? filters.pagination.pageSize : undefined
   }
-}
 
-function syncFiltersToUrl() {
-  watch(
-    () => ({
-      query: filters.query,
-      customerType: filters.customerType,
+  function initializeFiltersFromUrl() {
+    const parsed = parseFiltersFromUrl()
 
-      sortField: filters.sort.field,
-      sortDirection: filters.sort.direction,
+    filters.query = parsed.query
+    filters.customerType = parsed.customerType
+    filters.sort.field = parsed.sortField
+    filters.sort.direction = parsed.sortDirection
+    filters.pagination.currentPage = parsed.currentPage
+    filters.pagination.pageSize = parsed.pageSize
+  }
 
-      currentPage:
-        filters.pagination.currentPage,
-
-      pageSize:
-        filters.pagination.pageSize,
-    }),
-
-    () => {
-      router.replace({
-        query: serializeFilters(),
-      })
-    },
-    {
-      deep: true,
-      immediate: true
+  function serializeFilters() {
+    return {
+      q: filters.query || undefined,
+      type: filters.customerType || undefined,
+      sort: filters.sort.field === 'createdAt' ? undefined : filters.sort.field,
+      direction: filters.sort.direction === 'desc' ? undefined : filters.sort.direction,
+      page: filters.pagination.currentPage !== 1 ? filters.pagination.currentPage : undefined,
+      pageSize: filters.pagination.pageSize !== 10 ? filters.pagination.pageSize : undefined,
     }
-  )
-}
+  }
 
-function resetPageWhenDatasetChanges() {
-  watch(
-    () => ({
-      query: filters.query,
+  function syncFiltersToUrl() {
+    watch(
+      () => ({
+        query: filters.query,
+        customerType: filters.customerType,
 
-      customerType:
-        filters.customerType,
+        sortField: filters.sort.field,
+        sortDirection: filters.sort.direction,
 
-      pageSize:
-        filters.pagination.pageSize,
-    }),
-    () => {
-      filters.pagination.currentPage = 1  
-    }
-  )
-}
+        currentPage: filters.pagination.currentPage,
 
-const hasActiveFilters = computed(() => {
-  return Boolean(
-    filters.query ||
-    filters.customerType
-  )
-})
+        pageSize: filters.pagination.pageSize,
+      }),
 
-const clearFilters = () => {
-  filters.query = ''
-  filters.customerType = ''
-  filters.sort.field = 'createdAt'
-  filters.sort.direction = 'desc'
-  filters.pagination.currentPage = 1
-  filters.pagination.pageSize = 10
-}
+      () => {
+        router.replace({
+          query: serializeFilters(),
+        })
+      },
+      {
+        deep: true,
+        immediate: true,
+      },
+    )
+  }
 
-initializeFiltersFromUrl()
-syncFiltersToUrl()
-resetPageWhenDatasetChanges()
+  function resetPageWhenDatasetChanges() {
+    watch(
+      () => ({
+        query: filters.query,
+
+        customerType: filters.customerType,
+
+        pageSize: filters.pagination.pageSize,
+      }),
+      () => {
+        filters.pagination.currentPage = 1
+      },
+    )
+  }
+
+  const hasActiveFilters = computed(() => {
+    return Boolean(filters.query || filters.customerType)
+  })
+
+  const clearFilters = () => {
+    filters.query = ''
+    filters.customerType = ''
+    filters.sort.field = 'createdAt'
+    filters.sort.direction = 'desc'
+    filters.pagination.currentPage = 1
+    filters.pagination.pageSize = 10
+  }
+
+  initializeFiltersFromUrl()
+  syncFiltersToUrl()
+  resetPageWhenDatasetChanges()
 
   return {
     filters,
     hasActiveFilters,
-    clearFilters
+    clearFilters,
   }
 }

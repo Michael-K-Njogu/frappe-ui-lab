@@ -1,19 +1,19 @@
 import { ref, watch, onUnmounted } from 'vue'
 
 export function useDebounce(source, delay = 300) {
-    const debounced = ref(source.value)
+  const debounced = ref(source.value)
 
-    let timeoutId = null
+  let timeoutId = null
 
-    watch(source, (newValue, _, onCleanup) => {
+  watch(source, (newValue, _, onCleanup) => {
     const timeoutId = setTimeout(() => {
-        debounced.value = newValue
+      debounced.value = newValue
     }, delay)
 
     onCleanup(() => {
-        clearTimeout(timeoutId)
+      clearTimeout(timeoutId)
     })
-    })
+  })
 
-    return debounced
+  return debounced
 }

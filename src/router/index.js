@@ -94,7 +94,7 @@ const router = createRouter({
           path: 'products/:id/edit',
           name: 'product-edit',
           component: () => import('../views/ProductEditView.vue'),
-        }
+        },
       ],
     },
   ],

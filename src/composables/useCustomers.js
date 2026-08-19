@@ -8,9 +8,7 @@ export function useCustomers(filters) {
   const error = ref(null)
   const abortController = ref(null)
 
-  const debouncedSearchTerm = useDebounce(
-    toRef(filters, 'query')
-  )
+  const debouncedSearchTerm = useDebounce(toRef(filters, 'query'))
 
   const customerQueryOptions = computed(() => ({
     query: debouncedSearchTerm.value,
@@ -22,10 +20,9 @@ export function useCustomers(filters) {
   }))
 
   async function fetchCustomers() {
-
     if (abortController.value) {
       abortController.value.abort()
-    }    
+    }
 
     const controller = new AbortController()
     abortController.value = controller
@@ -34,38 +31,31 @@ export function useCustomers(filters) {
     error.value = null
 
     try {
+      const { data, total: totalItems } = await getCustomers({
+        query: debouncedSearchTerm.value,
+        customerType: filters.customerType,
+        sort: filters.sort,
+        page: filters.pagination.currentPage,
+        pageSize: filters.pagination.pageSize,
+        signal: controller.signal,
+      })
 
-    const { data, total: totalItems } = await getCustomers({
-      query: debouncedSearchTerm.value,
-      customerType: filters.customerType,
-      sort: filters.sort,
-      page: filters.pagination.currentPage,
-      pageSize: filters.pagination.pageSize,
-      signal: controller.signal
-    })
-
-    customers.value = data
-    filters.pagination.totalItems = totalItems
-
+      customers.value = data
+      filters.pagination.totalItems = totalItems
     } catch (err) {
       if (err.name !== 'AbortError') {
         error.value = err.message || 'An error occurred while fetching customers.'
       }
     } finally {
-
       if (abortController.value === controller) {
         loading.value = false
       }
-    }   
+    }
   }
 
-  watch(
-    customerQueryOptions,
-    fetchCustomers,
-    {
-      immediate: true,
-    }
-  )
+  watch(customerQueryOptions, fetchCustomers, {
+    immediate: true,
+  })
 
   return {
     customers,

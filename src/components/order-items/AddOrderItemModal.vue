@@ -30,34 +30,31 @@ const props = defineProps({
 
 const isEditMode = computed(() => props.mode === 'edit')
 
-const emit = defineEmits([
-  'close',
-  'submit',
-])
+const emit = defineEmits(['close', 'submit'])
 </script>
 
 <template>
-    <BaseModal
-        :open="open"
-        :title="isEditMode ? 'Edit Order Item' : 'Add Product to Order'"
-        :no-padding="true"
-        :show-footer="false"
-        @close="$emit('close')"
-    >
-        <template #body>
-          <OrderItemForm
-              :validation-schema="createOrderItemSchema"
-              :loading="loading"
-              :mode="mode"
-              :initial-values="initialValues"
-              :submit-label="isEditMode ? 'Save Changes' : 'Add Item'"
-              @submit="$emit('submit', $event)"
-              @cancel="$emit('close')"
-          />
-        </template>
+  <BaseModal
+    :open="open"
+    :title="isEditMode ? 'Edit Order Item' : 'Add Product to Order'"
+    :no-padding="true"
+    :show-footer="false"
+    @close="$emit('close')"
+  >
+    <template #body>
+      <OrderItemForm
+        :validation-schema="createOrderItemSchema"
+        :loading="loading"
+        :mode="mode"
+        :initial-values="initialValues"
+        :submit-label="isEditMode ? 'Save Changes' : 'Add Item'"
+        @submit="$emit('submit', $event)"
+        @cancel="$emit('close')"
+      />
+    </template>
 
-        <template #footer>
-            <slot />
-        </template>
-    </BaseModal>
+    <template #footer>
+      <slot />
+    </template>
+  </BaseModal>
 </template>

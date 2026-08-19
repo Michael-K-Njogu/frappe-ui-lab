@@ -14,22 +14,13 @@ import { useSorting } from '../composables/useSorting'
 import { useCustomerFilters } from '../composables/useCustomerFilters'
 import CustomerTableSkeleton from '../components/customers/CustomerTableSkeleton.vue'
 import BaseEmptyState from '../components/base/BaseEmptyState.vue'
-import Alert  from '../components/Alert.vue'
+import Alert from '../components/Alert.vue'
 
 const router = useRouter()
 
-const {
-  filters,
-  hasActiveFilters,
-  clearFilters
-} = useCustomerFilters()
+const { filters, hasActiveFilters, clearFilters } = useCustomerFilters()
 
-const {
-    customers,
-    loading,
-    error,
-    refresh
-} = useCustomers(filters)
+const { customers, loading, error, refresh } = useCustomers(filters)
 
 const refreshing = ref(false)
 
@@ -44,14 +35,10 @@ async function handleRefresh() {
 }
 
 function viewCustomer(id) {
-    router.push({ name: 'customer-details', params: { id } })
+  router.push({ name: 'customer-details', params: { id } })
 }
 
-const { 
-  sortBy, 
-  isSorted, 
-  sortIcon 
-} = useSorting(filters.sort)
+const { sortBy, isSorted, sortIcon } = useSorting(filters.sort)
 
 function handlePageChange(page) {
   filters.pagination.currentPage = page
@@ -65,44 +52,35 @@ const emptyState = computed(() => {
   if (hasActiveFilters.value) {
     return {
       title: 'No matching customers found',
-      description: 'No customers match your search criteria. Please adjust your filters and try again.',
-      type: 'filter'
+      description:
+        'No customers match your search criteria. Please adjust your filters and try again.',
+      type: 'filter',
     }
-  } else if(error.value) {
+  } else if (error.value) {
     return {
       title: 'Failed to load customers',
       description: 'An error occurred while trying to load customer data. Please try again.',
-      type: 'error' 
+      type: 'error',
     }
   } else {
     return {
       title: 'No customers available',
-      description: 'Looks like you haven\'t added any customers yet. Create your first customer to get started.',
-      type: 'initial'
+      description:
+        "Looks like you haven't added any customers yet. Create your first customer to get started.",
+      type: 'initial',
     }
   }
 })
-
 </script>
 
 <template>
   <PageTitle title="Customers">
     <template #actions>
-      <button
-        class="btn btn-secondary"
-        :disabled="refreshing"
-        @click="handleRefresh"
-      >
-        <RefreshCw 
-          :size="16" 
-          :class="{ 'is-loading': refreshing }"
-        />
+      <button class="btn btn-secondary" :disabled="refreshing" @click="handleRefresh">
+        <RefreshCw :size="16" :class="{ 'is-loading': refreshing }" />
         {{ refreshing ? 'Refreshing' : 'Refresh' }}
       </button>
-      <RouterLink
-        :to="{ name: 'customer-new' }"
-        class="btn btn-primary"
-      >
+      <RouterLink :to="{ name: 'customer-new' }" class="btn btn-primary">
         <Plus size="16" />
         Add Customer
       </RouterLink>
@@ -110,10 +88,7 @@ const emptyState = computed(() => {
   </PageTitle>
 
   <div class="toolbar">
-    <BaseSearchInput
-      v-model="filters.query"
-      placeholder="Search customers..."
-    />
+    <BaseSearchInput v-model="filters.query" placeholder="Search customers..." />
 
     <BaseSelect
       name="customerType"
@@ -129,124 +104,72 @@ const emptyState = computed(() => {
 
   <div class="data-table-container" v-else-if="!loading && !error && customers.length > 0">
     <table class="data-table">
-    <thead>
-      <tr>
-        <th>
-          <button
-            class="sort-button"
-            @click="sortBy('name')"
-          >
-            Name
-              <component
-                v-if="isSorted('name')"
-                :is="sortIcon('name')"
-                size="14"
-              />
-          </button>
-        </th>
-        <th>
-          <button
-            class="sort-button"
-            @click="sortBy('email')"
-          >
-            Email
-              <component
-                v-if="isSorted('email')"
-                :is="sortIcon('email')"
-                size="14"
-              />
-          </button>
-        </th>
-        <th>
-          <button
-            class="sort-button"
-            @click="sortBy('creditLimit')"
-          >
-            Credit Limit
-              <component
-                v-if="isSorted('creditLimit')"
-                :is="sortIcon('creditLimit')"
-                size="14"
-              />
-          </button>
-        </th>
-        <th>
-          <button
-            class="sort-button"
-            @click="sortBy('customerType')"
-          >
-            Customer Type
-              <component
-                v-if="isSorted('customerType')"
-                :is="sortIcon('customerType')"
-                size="14"
-              />
-          </button>
-        </th>
-        <th>
-          <button
-            class="sort-button"
-            @click="sortBy('createdAt')"
-          >
-            Created At
-              <component
-                v-if="isSorted('createdAt')"
-                :is="sortIcon('createdAt')"
-                size="14"
-              />
-          </button>
-        </th>
-      </tr>
-    </thead>
-    <tbody>
-      <tr
-        v-for="customer in customers"
-        :key="customer.id"
-        @click="viewCustomer(customer.id)"
-        class="clickable-row"
-      >
-        <td>{{ customer.name }}</td>
-        <td>{{ customer.email }}</td>
-        <td>{{ formatCurrency(customer.creditLimit) }}</td>
-        <td>{{ getCustomerTypeLabel(customer.customerType) }}</td>
-        <td>{{ formatDate(customer.createdAt) }}</td>
-      </tr>
-    </tbody>
-  </table>
+      <thead>
+        <tr>
+          <th>
+            <button class="sort-button" @click="sortBy('name')">
+              Name
+              <component v-if="isSorted('name')" :is="sortIcon('name')" size="14" />
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" @click="sortBy('email')">
+              Email
+              <component v-if="isSorted('email')" :is="sortIcon('email')" size="14" />
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" @click="sortBy('creditLimit')">
+              Credit Limit
+              <component v-if="isSorted('creditLimit')" :is="sortIcon('creditLimit')" size="14" />
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" @click="sortBy('customerType')">
+              Customer Type
+              <component v-if="isSorted('customerType')" :is="sortIcon('customerType')" size="14" />
+            </button>
+          </th>
+          <th>
+            <button class="sort-button" @click="sortBy('createdAt')">
+              Created At
+              <component v-if="isSorted('createdAt')" :is="sortIcon('createdAt')" size="14" />
+            </button>
+          </th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr
+          v-for="customer in customers"
+          :key="customer.id"
+          @click="viewCustomer(customer.id)"
+          class="clickable-row"
+        >
+          <td>{{ customer.name }}</td>
+          <td>{{ customer.email }}</td>
+          <td>{{ formatCurrency(customer.creditLimit) }}</td>
+          <td>{{ getCustomerTypeLabel(customer.customerType) }}</td>
+          <td>{{ formatDate(customer.createdAt) }}</td>
+        </tr>
+      </tbody>
+    </table>
 
-  <BasePagination
-    :current-page="filters.pagination.currentPage"
-    :page-size="filters.pagination.pageSize"
-    :total-items="filters.pagination.totalItems"
-    @update:currentPage="handlePageChange"
-    @update:pageSize="handlePageSizeChange"
-  /> 
-
+    <BasePagination
+      :current-page="filters.pagination.currentPage"
+      :page-size="filters.pagination.pageSize"
+      :total-items="filters.pagination.totalItems"
+      @update:currentPage="handlePageChange"
+      @update:pageSize="handlePageSizeChange"
+    />
   </div>
 
-  <BaseEmptyState
-    v-else
-    :title="emptyState.title"
-    :description="emptyState.description"
-  >
-
+  <BaseEmptyState v-else :title="emptyState.title" :description="emptyState.description">
     <template #icon>
+      <UsersRound v-if="emptyState.type === 'initial'" size="48" />
 
-      <UsersRound 
-        v-if="emptyState.type === 'initial'"
-        size="48" 
-      />
+      <SearchX v-if="emptyState.type === 'filter'" size="48" />
 
-      <SearchX 
-        v-if="emptyState.type === 'filter'"
-        size="48"
-      />
-
-      <CircleAlert 
-        v-else-if="emptyState.type === 'error'"
-        size="48"
-      />
-
+      <CircleAlert v-else-if="emptyState.type === 'error'" size="48" />
     </template>
 
     <template #actions>
@@ -259,25 +182,15 @@ const emptyState = computed(() => {
         Add Customer
       </RouterLink>
 
-      <button
-        v-if="emptyState.type === 'filter'"
-        class="btn btn-secondary"
-        @click="clearFilters"
-      >
+      <button v-if="emptyState.type === 'filter'" class="btn btn-secondary" @click="clearFilters">
         Clear Filters
       </button>
 
-      <BaseButton 
-        v-else-if="emptyState.type === 'error'"
-        label="Retry"
-        @click="refresh"
-      >
+      <BaseButton v-else-if="emptyState.type === 'error'" label="Retry" @click="refresh">
         <template #icon>
           <RefreshCw size="16" />
         </template>
       </BaseButton>
     </template>
-
-  </BaseEmptyState>  
-
+  </BaseEmptyState>
 </template>

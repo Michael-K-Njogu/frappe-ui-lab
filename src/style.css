@@ -36,7 +36,12 @@ main {
   margin-left: 250px;
 }
 
-h1, h2, h3, h4, h5, h6 {
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
   font-weight: 500;
   margin: 0;
 }
@@ -164,7 +169,7 @@ h1 {
 
 .btn {
   cursor: pointer;
-  display: inline-flex; 
+  display: inline-flex;
   align-items: center;
   justify-content: center;
   gap: 8px;
@@ -251,8 +256,12 @@ h1 {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+  0% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(360deg);
+  }
 }
 
 .sort-button {
@@ -355,10 +364,10 @@ h1 {
 }
 
 .form-section__description {
-    color: var(--text-colour-secondary);
-    font-size: 14px;
-    margin-top: 4px;
-    margin-bottom: 0;
+  color: var(--text-colour-secondary);
+  font-size: 14px;
+  margin-top: 4px;
+  margin-bottom: 0;
 }
 
 .form-grid {
@@ -401,7 +410,12 @@ label {
   padding-top: 16px;
 }
 
-input[type="text"], input[type="number"], input[type="email"], input[type="tel"], select, textarea {
+input[type='text'],
+input[type='number'],
+input[type='email'],
+input[type='tel'],
+select,
+textarea {
   padding: 12px;
   border: 1px solid var(--border-colour-default);
   border-radius: 4px;
@@ -409,7 +423,9 @@ input[type="text"], input[type="number"], input[type="email"], input[type="tel"]
   width: 100%;
 }
 
-.is-invalid select, .is-invalid textarea, .is-invalid input {
+.is-invalid select,
+.is-invalid textarea,
+.is-invalid input {
   border-color: var(--border-danger);
   border-width: 2px;
 }
@@ -423,7 +439,7 @@ select {
   padding-right: 36px; /* Add right padding so text doesn't overlap the icon */
 
   /* Inject the new custom arrow icon via background-image */
-  background-image: url("data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==");
+  background-image: url('data:image/svg+xml;base64,PHN2ZyB4bWxucz0iaHR0cDovL3d3dy53My5vcmcvMjAwMC9zdmciIHdpZHRoPSIyNCIgaGVpZ2h0PSIyNCIgdmlld0JveD0iMCAwIDI0IDI0IiBmaWxsPSJub25lIiBzdHJva2U9ImN1cnJlbnRDb2xvciIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiIHN0cm9rZS1saW5lam9pbj0icm91bmQiIGNsYXNzPSJsdWNpZGUgbHVjaWRlLWNoZXZyb24tZG93bi1pY29uIGx1Y2lkZS1jaGV2cm9uLWRvd24iPjxwYXRoIGQ9Im02IDkgNiA2IDYtNiIvPjwvc3ZnPg==');
   background-repeat: no-repeat;
   background-position: right 12px center; /* Align the icon to the right side */
   background-size: 16px; /* Size your arrow icon appropriately */
@@ -514,7 +530,8 @@ th {
   background-color: var(--bg-warning-muted);
 }
 
-th, td {
+th,
+td {
   text-align: left;
   font-size: 14px;
   padding: 12px;
@@ -541,7 +558,8 @@ th, td {
   gap: 8px;
 }
 
-.pagination-summary, .pagination-page-info {
+.pagination-summary,
+.pagination-page-info {
   color: var(--text-colour-secondary);
   font-size: 14px;
 }
@@ -675,7 +693,7 @@ th, td {
   display: flex;
   flex-direction: column;
   gap: 12px;
-  z-index: 9999; 
+  z-index: 9999;
 }
 
 .toast {
@@ -692,7 +710,7 @@ th, td {
 .toast__header {
   display: flex;
   align-items: flex-start;
-  gap: .75rem;
+  gap: 0.75rem;
 }
 
 .toast__message {
@@ -801,7 +819,7 @@ th, td {
   flex-direction: column;
   align-items: center;
   justify-content: center;
-  gap: 8px  ;
+  gap: 8px;
   padding: 40px;
   text-align: center;
 }
@@ -907,7 +925,8 @@ th, td {
   color: var(--text-colour-secondary);
 }
 
-.badge--success, .badge--completed {
+.badge--success,
+.badge--completed {
   background-color: var(--bg-success-muted);
   color: var(--text-colour-success);
 }
@@ -917,12 +936,15 @@ th, td {
   color: var(--text-colour-danger);
 }
 
-.badge--warning, .badge--pending {
+.badge--warning,
+.badge--pending {
   background-color: var(--bg-warning-muted);
   color: var(--text-colour-warning);
 }
 
-.badge--info, .badge--default, .badge--processing {
+.badge--info,
+.badge--default,
+.badge--processing {
   background-color: var(--bg-info-muted);
   color: var(--text-colour-info);
 }

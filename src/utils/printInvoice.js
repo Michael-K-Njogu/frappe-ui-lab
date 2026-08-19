@@ -1,35 +1,21 @@
 export function printInvoice() {
-    const invoice = document.querySelector(
-        '#invoice-print-container .invoice-document'
-    )
+  const invoice = document.querySelector('#invoice-print-container .invoice-document')
 
-    if (!invoice) {
-        throw new Error(
-            'Invoice document is not available for printing.'
-        )
-    }
+  if (!invoice) {
+    throw new Error('Invoice document is not available for printing.')
+  }
 
-    const printWindow = window.open(
-        '',
-        '_blank',
-        'width=900,height=1200'
-    )
+  const printWindow = window.open('', '_blank', 'width=900,height=1200')
 
-    if (!printWindow) {
-        throw new Error(
-            'Unable to open the print window. Please allow pop-ups and try again.'
-        )
-    }
+  if (!printWindow) {
+    throw new Error('Unable to open the print window. Please allow pop-ups and try again.')
+  }
 
-    const styles = Array.from(
-        document.querySelectorAll(
-            'link[rel="stylesheet"], style'
-        )
-    )
-        .map(element => element.outerHTML)
-        .join('\n')
+  const styles = Array.from(document.querySelectorAll('link[rel="stylesheet"], style'))
+    .map((element) => element.outerHTML)
+    .join('\n')
 
-    printWindow.document.write(`
+  printWindow.document.write(`
         <!DOCTYPE html>
         <html>
             <head>
@@ -110,13 +96,12 @@ export function printInvoice() {
         </html>
     `)
 
-    printWindow.document.close()
+  printWindow.document.close()
 
-    printWindow.focus()
+  printWindow.focus()
 
-    setTimeout(() => {
-        printWindow.print()
-        printWindow.close()
-    }, 250)    
-
+  setTimeout(() => {
+    printWindow.print()
+    printWindow.close()
+  }, 250)
 }

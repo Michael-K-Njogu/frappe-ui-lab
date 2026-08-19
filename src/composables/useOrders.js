@@ -8,9 +8,7 @@ export function useOrders(filters) {
   const error = ref(null)
   const abortController = ref(null)
 
-  const debouncedSearchTerm = useDebounce(
-    toRef(filters, 'query')
-  )
+  const debouncedSearchTerm = useDebounce(toRef(filters, 'query'))
 
   const orderQueryOptions = computed(() => ({
     query: debouncedSearchTerm.value,
@@ -22,7 +20,6 @@ export function useOrders(filters) {
   }))
 
   async function fetchOrders() {
-
     if (abortController.value) {
       abortController.value.abort()
     }
@@ -34,39 +31,31 @@ export function useOrders(filters) {
     error.value = null
 
     try {
-
       const { data, total: totalItems } = await getOrders({
         query: debouncedSearchTerm.value,
         status: filters.status,
         sort: filters.sort,
         page: filters.pagination.currentPage,
         pageSize: filters.pagination.pageSize,
-        signal: controller.signal
+        signal: controller.signal,
       })
 
       orders.value = data
       filters.pagination.totalItems = totalItems
-
     } catch (err) {
       if (err.name !== 'AbortError') {
         error.value = err.message || 'An error occurred while fetching orders.'
       }
     } finally {
-
       if (abortController.value === controller) {
         loading.value = false
       }
-
-    }   
+    }
   }
-  
-    watch(
-        orderQueryOptions, 
-        fetchOrders,
-        { 
-            immediate: true 
-        }
-    )
+
+  watch(orderQueryOptions, fetchOrders, {
+    immediate: true,
+  })
 
   return {
     orders,

@@ -16,14 +16,11 @@ async function saveProduct(values) {
   try {
     const product = await createProduct(values)
 
-    success(
-      `Product ${product.name} created successfully.`
-    )
+    success(`Product ${product.name} created successfully.`)
 
     await router.push({
       name: 'products',
     })
-
   } catch (err) {
     showError(err.message)
   }
@@ -31,12 +28,11 @@ async function saveProduct(values) {
 </script>
 
 <template>
-    <PageTitle title="New Product" :has-back-button="true" />
+  <PageTitle title="New Product" :has-back-button="true" />
 
-    <ProductForm
-        :validation-schema="createProductSchema"
-        @submit="saveProduct"
-        @cancel="() => router.back()"
-    />
-
+  <ProductForm
+    :validation-schema="createProductSchema"
+    @submit="saveProduct"
+    @cancel="() => router.back()"
+  />
 </template>

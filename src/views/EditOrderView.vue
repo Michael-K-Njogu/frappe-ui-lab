@@ -32,34 +32,26 @@ const saving = ref(false)
 const customerAccount = ref(null)
 const loadingCustomerAccount = ref(false)
 
-const {
-    addOrderItem,
-    saveOrderItem,
-    removeOrderItem,
-} = useOrderItems()
+const { addOrderItem, saveOrderItem, removeOrderItem } = useOrderItems()
 
 async function loadCustomerAccount(customerId) {
-    customerAccount.value = null
+  customerAccount.value = null
 
-    if (!customerId) {
-        return
-    }
+  if (!customerId) {
+    return
+  }
 
-    loadingCustomerAccount.value = true
+  loadingCustomerAccount.value = true
 
-    try {
-        customerAccount.value =
-            await getCustomerAccountSummary(customerId)
-    } catch (err) {
-        console.error(err)
+  try {
+    customerAccount.value = await getCustomerAccountSummary(customerId)
+  } catch (err) {
+    console.error(err)
 
-        showError(
-            err.message ||
-            'Unable to load customer account information.'
-        )
-    } finally {
-        loadingCustomerAccount.value = false
-    }
+    showError(err.message || 'Unable to load customer account information.')
+  } finally {
+    loadingCustomerAccount.value = false
+  }
 }
 
 async function loadCustomers() {
@@ -69,216 +61,172 @@ async function loadCustomers() {
       pageSize: 1000,
     })
 
-    customerOptions.value = data.map(customer => ({
+    customerOptions.value = data.map((customer) => ({
       label: customer.name,
       value: customer.id,
       meta: `${customer.customerType} · ${customer.creditLimit}`,
     }))
-
   } catch (err) {
     showError(err.message)
   }
 }
 
 async function loadOrder() {
-    loading.value = true
+  loading.value = true
 
-    try {
-        order.value = await getOrderById(route.params.id)
+  try {
+    order.value = await getOrderById(route.params.id)
 
-        await loadCustomerAccount(
-            order.value.customerId
-        )        
+    await loadCustomerAccount(order.value.customerId)
 
-        const items = await getOrderItemsByOrder(
-            order.value.id
-        )
+    const items = await getOrderItemsByOrder(order.value.id)
 
-        orderItems.value = items
+    orderItems.value = items
 
-        originalOrderItems.value = items.map(item => ({
-            ...item,
-        }))
-
-    } catch (err) {
-        console.error(err)
-        showError(err.message)
-    } finally {
-        loading.value = false
-    }
+    originalOrderItems.value = items.map((item) => ({
+      ...item,
+    }))
+  } catch (err) {
+    console.error(err)
+    showError(err.message)
+  } finally {
+    loading.value = false
+  }
 }
 
 async function saveOrderItems(items) {
-    const originalItemsById = new Map(
-        originalOrderItems.value.map(item => [
-            item.id,
-            item,
-        ])
-    )
+  const originalItemsById = new Map(originalOrderItems.value.map((item) => [item.id, item]))
 
-    const currentItemIds = new Set(
-        items
-            .filter(item => !item.isTemporary)
-            .map(item => item.id)
-    )
+  const currentItemIds = new Set(items.filter((item) => !item.isTemporary).map((item) => item.id))
 
-    // 1. Delete items that existed originally but
-    // are no longer present in the form.
-    for (const originalItem of originalOrderItems.value) {
-        if (!currentItemIds.has(originalItem.id)) {
-            await removeOrderItem(originalItem.id)
-        }
+  // 1. Delete items that existed originally but
+  // are no longer present in the form.
+  for (const originalItem of originalOrderItems.value) {
+    if (!currentItemIds.has(originalItem.id)) {
+      await removeOrderItem(originalItem.id)
+    }
+  }
+
+  // 2. Create new items or update existing items.
+  for (const item of items) {
+    // New item
+    if (item.isTemporary) {
+      const { id, isTemporary, ...itemData } = item
+
+      await addOrderItem({
+        ...itemData,
+        orderId: order.value.id,
+      })
+
+      continue
     }
 
-    // 2. Create new items or update existing items.
-    for (const item of items) {
-        // New item
-        if (item.isTemporary) {
-            const {
-                id,
-                isTemporary,
-                ...itemData
-            } = item
+    const originalItem = originalItemsById.get(item.id)
 
-            await addOrderItem({
-                ...itemData,
-                orderId: order.value.id,
-            })
-
-            continue
-        }
-
-        const originalItem = originalItemsById.get(item.id)
-
-        if (!originalItem) {
-            continue
-        }
-
-        // Existing item — check whether anything changed
-        const hasChanged =
-            Number(item.quantity) !== Number(originalItem.quantity) ||
-            Number(item.discount || 0) !== Number(originalItem.discount || 0) ||
-            Number(item.lineTotal || 0) !== Number(originalItem.lineTotal || 0)
-
-        if (hasChanged) {
-            await saveOrderItem(item.id, {
-                quantity: item.quantity,
-                discount: item.discount,
-                lineTotal: item.lineTotal,
-            })
-        }
+    if (!originalItem) {
+      continue
     }
+
+    // Existing item — check whether anything changed
+    const hasChanged =
+      Number(item.quantity) !== Number(originalItem.quantity) ||
+      Number(item.discount || 0) !== Number(originalItem.discount || 0) ||
+      Number(item.lineTotal || 0) !== Number(originalItem.lineTotal || 0)
+
+    if (hasChanged) {
+      await saveOrderItem(item.id, {
+        quantity: item.quantity,
+        discount: item.discount,
+        lineTotal: item.lineTotal,
+      })
+    }
+  }
 } // end of saveOrderItems
 
 async function saveOrder(values, status) {
-    saving.value = true
+  saving.value = true
 
-    try {
-        const { orderItems: items = [], ...orderValues } = values
+  try {
+    const { orderItems: items = [], ...orderValues } = values
 
-        await updateOrder(
-            order.value.id,
-            {
-                ...orderValues,
-                status,
-                ...(status === ORDER_STATUS.PENDING
-                    ? { postedAt: new Date().toISOString() }
-                    : {}),
-            }
-        )
+    await updateOrder(order.value.id, {
+      ...orderValues,
+      status,
+      ...(status === ORDER_STATUS.PENDING ? { postedAt: new Date().toISOString() } : {}),
+    })
 
-        await saveOrderItems(items)
+    await saveOrderItems(items)
 
-        const allOrderItems = await getOrderItemsByOrder(
-            order.value.id
-        )
+    const allOrderItems = await getOrderItemsByOrder(order.value.id)
 
-        const grandTotal = calculateGrandTotal(allOrderItems)
+    const grandTotal = calculateGrandTotal(allOrderItems)
 
-        await updateOrder(
-            order.value.id,
-            {
-                totalAmount: grandTotal,
-            }
-        )
+    await updateOrder(order.value.id, {
+      totalAmount: grandTotal,
+    })
 
-        success(
-            status === ORDER_STATUS.PENDING
-                ? `Order ${order.value.orderNumber} posted successfully.`
-                : `Order ${order.value.orderNumber} saved successfully.`
-        )
+    success(
+      status === ORDER_STATUS.PENDING
+        ? `Order ${order.value.orderNumber} posted successfully.`
+        : `Order ${order.value.orderNumber} saved successfully.`,
+    )
 
-        router.push({
-            name: 'orders',
-        })
-
-    } catch (err) {
-        console.error(err)
-        showError(
-            err.message ||
-            'An error occurred while updating the order.'
-        )
-    } finally {
-        saving.value = false
-    }
+    router.push({
+      name: 'orders',
+    })
+  } catch (err) {
+    console.error(err)
+    showError(err.message || 'An error occurred while updating the order.')
+  } finally {
+    saving.value = false
+  }
 }
 
 onMounted(async () => {
-    loading.value = true
+  loading.value = true
 
-    try {
-        await Promise.all([
-            loadCustomers(),
-            loadOrder()
-        ])
-    } catch (err) {
-        console.error(err)
-    } finally {
-        loading.value = false
-    }
+  try {
+    await Promise.all([loadCustomers(), loadOrder()])
+  } catch (err) {
+    console.error(err)
+  } finally {
+    loading.value = false
+  }
 })
 
 async function saveDraft(values) {
-    await saveOrder(
-        values,
-        ORDER_STATUS.DRAFT
-    )
+  await saveOrder(values, ORDER_STATUS.DRAFT)
 }
 
 async function postOrder(values) {
-    await saveOrder(
-        values,
-        ORDER_STATUS.PENDING
-    )
+  await saveOrder(values, ORDER_STATUS.PENDING)
 }
 
 function deleteItem(item) {
-    success(`${item.productName} removed from the order.`)
+  success(`${item.productName} removed from the order.`)
 }
 </script>
 
 <template>
+  <PageTitle :title="`Edit Order #${order ? order.orderNumber : ''}`" :has-back-button="true" />
 
-    <PageTitle :title="`Edit Order #${order ? order.orderNumber : ''}`" :has-back-button="true" />
+  <div v-if="loading">
+    <p>Loading order...</p>
+  </div>
 
-    <div v-if="loading">
-        <p>Loading order...</p>
-    </div>
-
-    <OrderForm
-        v-if="order"
-        :initial-values="order"
-        :initial-order-items="orderItems"
-        :customer-options="customerOptions"
-        :customer-account="customerAccount"
-        :loading-customer-account="loadingCustomerAccount"
-        :validation-schema="updateOrderSchema"
-        :editable="canEditOrder(order)"
-        submit-label="Submit Order"
-        :loading="saving"
-        @post-order="postOrder"
-        @save-draft="saveDraft"
-        @delete-item="deleteItem"
-    />
-
+  <OrderForm
+    v-if="order"
+    :initial-values="order"
+    :initial-order-items="orderItems"
+    :customer-options="customerOptions"
+    :customer-account="customerAccount"
+    :loading-customer-account="loadingCustomerAccount"
+    :validation-schema="updateOrderSchema"
+    :editable="canEditOrder(order)"
+    submit-label="Submit Order"
+    :loading="saving"
+    @post-order="postOrder"
+    @save-draft="saveDraft"
+    @delete-item="deleteItem"
+  />
 </template>

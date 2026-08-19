@@ -41,7 +41,6 @@ function mapOrder(order) {
     processingStartedAt: order.processing_started_at,
     completedAt: order.completed_at,
     canceledAt: order.canceled_at,
-
   }
 }
 
@@ -57,7 +56,7 @@ function mapOrderToApi(order) {
     posted_at: order.postedAt,
     processing_started_at: order.processingStartedAt,
     completed_at: order.completedAt,
-    canceled_at: order.canceledAt,    
+    canceled_at: order.canceledAt,
   }
 }
 
@@ -77,15 +76,12 @@ export async function getOrders({
   params.set('limit', pageSize)
 
   params.set(
-    'select', 
-    '*,customers(id,name)' // Select all order fields and include customer details
+    'select',
+    '*,customers(id,name)', // Select all order fields and include customer details
   )
 
   if (query) {
-    params.set(
-      'or',
-      `(order_number.ilike.*${query}*)`
-    )
+    params.set('or', `(order_number.ilike.*${query}*)`)
   }
 
   if (status) {
@@ -96,28 +92,20 @@ export async function getOrders({
     const sortField = SORT_FIELD_MAP[sort.field]
 
     if (sortField) {
-      params.set(
-        'order',
-        `${sortField}.${sort.direction}`
-      )
+      params.set('order', `${sortField}.${sort.direction}`)
     }
   }
 
-  const { data, response } = await apiClient.getRaw(
-    `${RESOURCE_PATH}?${params.toString()}`,
-    {
-      headers: {
-        Prefer: 'count=exact',
-      },
-      signal,
-    }
-  )
+  const { data, response } = await apiClient.getRaw(`${RESOURCE_PATH}?${params.toString()}`, {
+    headers: {
+      Prefer: 'count=exact',
+    },
+    signal,
+  })
 
   const contentRange = response.headers.get('content-range')
 
-  const total = contentRange
-    ? Number(contentRange.split('/')[1])
-    : 0
+  const total = contentRange ? Number(contentRange.split('/')[1]) : 0
 
   return {
     data: data.map(mapOrder),
@@ -128,20 +116,11 @@ export async function getOrders({
 export async function getOrderById(id, { signal } = {}) {
   const params = new URLSearchParams()
 
-  params.set(
-    'select',
-    '*,customers(id,name)'
-  )
+  params.set('select', '*,customers(id,name)')
 
-  params.set(
-    'id',
-    `eq.${id}`
-  )
+  params.set('id', `eq.${id}`)
 
-  const { data } = await apiClient.getRaw(
-    `${RESOURCE_PATH}?${params.toString()}`,
-    { signal }
-  )
+  const { data } = await apiClient.getRaw(`${RESOURCE_PATH}?${params.toString()}`, { signal })
 
   return mapOrder(data[0])
 }
@@ -152,15 +131,11 @@ export async function createOrder(order) {
     orderNumber: order.orderNumber ?? generateOrderNumber(),
   })
 
-  const data = await apiClient.post(
-    RESOURCE_PATH, 
-    apiOrder,
-    {
-      headers: {
-        Prefer: 'return=representation',
-      },
-    }
-  )
+  const data = await apiClient.post(RESOURCE_PATH, apiOrder, {
+    headers: {
+      Prefer: 'return=representation',
+    },
+  })
 
   return mapOrder(data[0])
 }
@@ -168,23 +143,16 @@ export async function createOrder(order) {
 export async function updateOrder(id, order) {
   const apiOrder = mapOrderToApi(order)
 
-  const data = await apiClient.patch(
-    `${RESOURCE_PATH}?id=eq.${id}`, 
-    apiOrder,
-    {
-      headers: {
-        Prefer: 'return=representation',
-      },
-    }
-  )
+  const data = await apiClient.patch(`${RESOURCE_PATH}?id=eq.${id}`, apiOrder, {
+    headers: {
+      Prefer: 'return=representation',
+    },
+  })
 
   return mapOrder(data[0])
 }
 
-export async function updateOrderGrandTotal(
-  orderId,
-  grandTotal
-) {
+export async function updateOrderGrandTotal(orderId, grandTotal) {
   const data = await apiClient.patch(
     `${RESOURCE_PATH}?id=eq.${orderId}`,
     {
@@ -194,14 +162,13 @@ export async function updateOrderGrandTotal(
       headers: {
         Prefer: 'return=representation',
       },
-    }
+    },
   )
 
   return mapOrder(data[0])
 }
 
 export async function transitionOrder(order, status) {
-
   return updateOrder(order.id, {
     ...order,
     status,
@@ -209,8 +176,5 @@ export async function transitionOrder(order, status) {
 }
 
 export async function deleteOrder(id) {
-  await apiClient.delete(
-    `${RESOURCE_PATH}?id=eq.${id}`
-  )
-}   
-
+  await apiClient.delete(`${RESOURCE_PATH}?id=eq.${id}`)
+}

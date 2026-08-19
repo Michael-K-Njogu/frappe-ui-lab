@@ -1,15 +1,9 @@
-import {
-    CirclePlus,
-    Send,
-    Package,
-    CheckCircle2,
-    Ban,
-} from '@lucide/vue'
+import { CirclePlus, Send, Package, CheckCircle2, Ban } from '@lucide/vue'
 
 export const ORDER_TIMELINE = [
   {
     key: 'createdAt',
-    title: order => `Order ${order.orderNumber} created`,
+    title: (order) => `Order ${order.orderNumber} created`,
     icon: CirclePlus,
     color: 'primary',
   },

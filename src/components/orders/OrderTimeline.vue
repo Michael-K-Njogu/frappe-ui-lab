@@ -11,16 +11,11 @@ const props = defineProps({
 })
 
 const timeline = computed(() => {
-  return ORDER_TIMELINE
-    .map(event => ({
+  return ORDER_TIMELINE.map((event) => ({
     ...event,
-    title:
-        typeof event.title === 'function'
-        ? event.title(props.order)
-        : event.title,
+    title: typeof event.title === 'function' ? event.title(props.order) : event.title,
     timestamp: props.order[event.key],
-    }))
-    .filter(event => event.timestamp)
+  })).filter((event) => event.timestamp)
 })
 </script>
 
@@ -31,26 +26,14 @@ const timeline = computed(() => {
     </div>
 
     <div class="card-body">
-
-      <div
-        v-for="event in timeline"
-        :key="event.key"
-        class="timeline-item"
-      >
-
+      <div v-for="event in timeline" :key="event.key" class="timeline-item">
         <div :class="`timeline-marker ${event.color}`">
-          <component
-            :is="event.icon"
-            :size="16"
-            :class="`timeline-icon ${event.color}`"
-          />
+          <component :is="event.icon" :size="16" :class="`timeline-icon ${event.color}`" />
         </div>
 
         <div class="timeline-content">
           <p>{{ event.title }}</p>
           <div class="timeline-date">
-
-
             <span class="timeline-date-absolute">
               {{ formatDate(event.timestamp) }}
             </span>
@@ -60,9 +43,7 @@ const timeline = computed(() => {
             </span>
           </div>
         </div>
-
       </div>
-
     </div>
   </div>
 </template>

@@ -17,19 +17,19 @@ export const CUSTOMER_FIELDS = {
 
   name: 'name',
   customerType: 'customer_type',
-  sector: 'sector',  
-  region: 'region',  
-  vatNumber: 'vat_number',  
+  sector: 'sector',
+  region: 'region',
+  vatNumber: 'vat_number',
 
-  contactPerson: 'contact_person',  
+  contactPerson: 'contact_person',
   phonePrimary: 'phone_primary',
   phoneSecondary: 'phone_secondary',
-  email: 'email',  
+  email: 'email',
 
-  deliveryAddress: 'delivery_address',  
+  deliveryAddress: 'delivery_address',
   city: 'city',
 
-  creditLimit: 'credit_limit',  
+  creditLimit: 'credit_limit',
   creditStatus: 'credit_status',
 
   image: 'image_url',
@@ -45,7 +45,7 @@ function mapCustomer(customer) {
     customerType: customer.customer_type,
     sector: customer.sector,
     region: customer.region,
-    vatNumber: customer.vat_number,    
+    vatNumber: customer.vat_number,
 
     contactPerson: customer.contact_person,
     phonePrimary: customer.phone_primary,
@@ -83,42 +83,32 @@ function mapCustomerToApi(customer) {
 
     credit_limit: customer.creditLimit,
     credit_status: customer.creditStatus,
-
   }
-} 
+}
 
 export async function getCustomers({
   query = '',
   customerType = '',
-  sort = { 
-    field: 'createdAt', 
-    direction: 'desc' 
+  sort = {
+    field: 'createdAt',
+    direction: 'desc',
   },
   page = 1,
   pageSize = 10,
-  signal
+  signal,
 } = {}) {
-
   const params = new URLSearchParams()
   const offset = (page - 1) * pageSize
   params.set('offset', offset)
   params.set('limit', pageSize)
-  params.set(
-    'select',
-    '*, orders(count)'
-  )
-  
+  params.set('select', '*, orders(count)')
+
   if (query) {
-    params.set(
-      'or',
-      `(name.ilike.*${query}*,email.ilike.*${query}*)`
-    )
+    params.set('or', `(name.ilike.*${query}*,email.ilike.*${query}*)`)
   }
 
   if (customerType) {
-    params.set(
-      CUSTOMER_FIELDS.customerType,
-      `eq.${customerType}`)
+    params.set(CUSTOMER_FIELDS.customerType, `eq.${customerType}`)
   }
 
   const dbSortField = SORT_FIELD_MAP[sort.field]
@@ -127,25 +117,19 @@ export async function getCustomers({
     const dbSortField = SORT_FIELD_MAP[sort.field]
 
     if (dbSortField) {
-      params.set(
-        'order',
-        `${dbSortField}.${sort.direction}`
-      )
+      params.set('order', `${dbSortField}.${sort.direction}`)
     }
   }
 
-  const { data, response } = await apiClient.getRaw(
-    `/customers?${params.toString()}`,
-    {
-      headers: {
-        Prefer: 'count=exact',
-      },
-      signal,
-    }
-  )  
+  const { data, response } = await apiClient.getRaw(`/customers?${params.toString()}`, {
+    headers: {
+      Prefer: 'count=exact',
+    },
+    signal,
+  })
 
   const contentRange = response.headers.get('content-range')
-  const total = contentRange 
+  const total = contentRange
     ? Number(contentRange.split('/')[1]) // Extract total count from content-range header
     : 0 // Default to 0 if content-range header is not present
 
@@ -153,35 +137,22 @@ export async function getCustomers({
     data: data.map(mapCustomer),
     total,
   }
-  
 }
 
 export async function getCustomerById(id) {
-  const customers = await apiClient.get(
-    `/customers?id=eq.${id}&select=*,orders(count)`
-  )
-  
-  return customers.length > 0 
-    ? mapCustomer(customers[0]) 
-    : null
+  const customers = await apiClient.get(`/customers?id=eq.${id}&select=*,orders(count)`)
+
+  return customers.length > 0 ? mapCustomer(customers[0]) : null
 }
 
 export async function getCustomerAccountSummary(customerId) {
   const params = new URLSearchParams()
 
-  params.set(
-    'select',
-    'credit_limit,orders(total_amount,status)'
-  )
+  params.set('select', 'credit_limit,orders(total_amount,status)')
 
-  params.set(
-    'id',
-    `eq.${customerId}`
-  )
+  params.set('id', `eq.${customerId}`)
 
-  const { data } = await apiClient.getRaw(
-    `/customers?${params.toString()}`
-  )
+  const { data } = await apiClient.getRaw(`/customers?${params.toString()}`)
 
   const customer = data[0]
 
@@ -189,22 +160,13 @@ export async function getCustomerAccountSummary(customerId) {
     throw new Error('Customer not found.')
   }
 
-  const creditLimit = Number(
-    customer.credit_limit || 0
-  )
+  const creditLimit = Number(customer.credit_limit || 0)
 
   const currentBalance = (customer.orders || [])
-    .filter(
-      order => order.status === ORDER_STATUS.COMPLETED
-    )
-    .reduce(
-      (total, order) =>
-        total + Number(order.total_amount || 0),
-      0
-    )
+    .filter((order) => order.status === ORDER_STATUS.COMPLETED)
+    .reduce((total, order) => total + Number(order.total_amount || 0), 0)
 
-  const availableCredit =
-    creditLimit - currentBalance
+  const availableCredit = creditLimit - currentBalance
 
   return {
     creditLimit,
@@ -214,15 +176,11 @@ export async function getCustomerAccountSummary(customerId) {
 }
 
 export async function createCustomer(customer) {
-  const createdCustomers = await apiClient.post(
-    '/customers',
-    mapCustomerToApi(customer),
-    {
-      headers: {
-        Prefer: 'return=representation',
-      },
-    }
-  )
+  const createdCustomers = await apiClient.post('/customers', mapCustomerToApi(customer), {
+    headers: {
+      Prefer: 'return=representation',
+    },
+  })
 
   const createdCustomer = createdCustomers[0]
 
@@ -233,10 +191,7 @@ export async function createCustomer(customer) {
   let imageUrl = null
 
   if (customer.image instanceof File) {
-    imageUrl = await uploadCustomerImage(
-      createdCustomer.id,
-      customer.image
-    )
+    imageUrl = await uploadCustomerImage(createdCustomer.id, customer.image)
 
     const updatedCustomers = await apiClient.patch(
       `/customers?id=eq.${createdCustomer.id}`,
@@ -247,7 +202,7 @@ export async function createCustomer(customer) {
         headers: {
           Prefer: 'return=representation',
         },
-      }
+      },
     )
 
     return mapCustomer(updatedCustomers[0])
@@ -265,24 +220,18 @@ export async function updateCustomer(id, customer) {
 
   const oldImageUrl = existingCustomer.image
 
-  const hasNewImage =
-      customer.image instanceof File
+  const hasNewImage = customer.image instanceof File
 
-  const imageWasRemoved =
-      customer.image === null &&
-      !!oldImageUrl
+  const imageWasRemoved = customer.image === null && !!oldImageUrl
 
   let newImageUrl = oldImageUrl
 
   if (customer.image === null) {
-      newImageUrl = null
+    newImageUrl = null
   }
 
   if (hasNewImage) {
-      newImageUrl = await uploadCustomerImage(
-          id,
-          customer.image
-      )
+    newImageUrl = await uploadCustomerImage(id, customer.image)
   }
 
   const updatedCustomers = await apiClient.patch(
@@ -295,18 +244,13 @@ export async function updateCustomer(id, customer) {
       headers: {
         Prefer: 'return=representation',
       },
-    }
+    },
   )
 
-  const updatedCustomer =
-    updatedCustomers[0]
+  const updatedCustomer = updatedCustomers[0]
 
   // Delete previous image only after DB update succeeds
-  if (
-    hasNewImage &&
-    oldImageUrl &&
-    oldImageUrl !== newImageUrl
-  ) {
+  if (hasNewImage && oldImageUrl && oldImageUrl !== newImageUrl) {
     await deleteCustomerImage(oldImageUrl)
   }
 

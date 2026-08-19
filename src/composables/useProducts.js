@@ -15,7 +15,7 @@ export function useProducts(
       pageSize: 1000,
       totalItems: 0,
     },
-  }
+  },
 ) {
   const products = ref([])
   const loading = ref(false)
@@ -37,7 +37,6 @@ export function useProducts(
 
       products.value = result.data
       filters.pagination.totalItems = result.total
-
     } catch (err) {
       error.value = err.message
     } finally {

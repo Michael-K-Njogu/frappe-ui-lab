@@ -4,7 +4,7 @@ defineProps({
     type: String,
     required: false,
   },
-  
+
   description: {
     type: String,
     default: '',
@@ -18,27 +18,22 @@ defineProps({
 </script>
 
 <template>
+  <section class="form-section">
+    <div class="form-section__header">
+      <div class="form-section__title">
+        <slot name="icon" />
+        <h4>{{ title }}</h4>
+      </div>
 
-    <section class="form-section">
-        <div class="form-section__header">
+      <p v-if="description" class="form-section__description">
+        {{ description }}
+      </p>
 
-            <div class="form-section__title">
-                <slot name="icon" />
-                <h4>{{ title }}</h4>
-            </div>
+      <slot name="actions" />
+    </div>
 
-            <p v-if="description" class="form-section__description">
-                {{ description }}
-            </p>
-
-            <slot name="actions" />
-
-        </div>  
-
-        <div class="form-section__content">
-            <slot name="content"/>
-        </div>
-
-    </section>
-
+    <div class="form-section__content">
+      <slot name="content" />
+    </div>
+  </section>
 </template>

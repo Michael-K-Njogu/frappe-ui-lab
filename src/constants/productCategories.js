@@ -17,7 +17,7 @@ export const PRODUCT_CATEGORIES = [
   },
 ]
 
-export const PRODUCT_CATEGORY_OPTIONS = PRODUCT_CATEGORIES.map(category => ({
+export const PRODUCT_CATEGORY_OPTIONS = PRODUCT_CATEGORIES.map((category) => ({
   label: category.label,
   value: category.label,
 }))

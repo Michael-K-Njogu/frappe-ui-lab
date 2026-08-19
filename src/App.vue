@@ -1,6 +1,5 @@
 <script setup>
-import ToastContainer from './components/toast/ToastContainer.vue';
-
+import ToastContainer from './components/toast/ToastContainer.vue'
 </script>
 
 <template>

@@ -76,53 +76,35 @@ export async function getProducts({
   params.set('select', '*')
 
   if (query) {
-    params.set(
-      'or',
-      `(sku.ilike.*${query}*,name.ilike.*${query}*)`
-    )
+    params.set('or', `(sku.ilike.*${query}*,name.ilike.*${query}*)`)
   }
 
   if (category) {
-    params.set(
-      'category',
-      `eq.${category}`
-    )
+    params.set('category', `eq.${category}`)
   }
 
   if (status) {
-    params.set(
-      'status',
-      `eq.${status}`
-    )
+    params.set('status', `eq.${status}`)
   }
 
   if (sort) {
     const sortField = SORT_FIELD_MAP[sort.field]
 
     if (sortField) {
-      params.set(
-        'order',
-        `${sortField}.${sort.direction}`
-      )
+      params.set('order', `${sortField}.${sort.direction}`)
     }
   }
 
-  const { data, response } = await apiClient.getRaw(
-    `${RESOURCE_PATH}?${params.toString()}`,
-    {
-      headers: {
-        Prefer: 'count=exact',
-      },
-      signal,
-    }
-  )
+  const { data, response } = await apiClient.getRaw(`${RESOURCE_PATH}?${params.toString()}`, {
+    headers: {
+      Prefer: 'count=exact',
+    },
+    signal,
+  })
 
-  const contentRange =
-    response.headers.get('content-range')
+  const contentRange = response.headers.get('content-range')
 
-  const total = contentRange
-    ? Number(contentRange.split('/')[1])
-    : 0
+  const total = contentRange ? Number(contentRange.split('/')[1]) : 0
 
   return {
     data: data.map(mapProduct),
@@ -133,20 +115,11 @@ export async function getProducts({
 export async function getProductById(id, { signal } = {}) {
   const params = new URLSearchParams()
 
-  params.set(
-    'id',
-    `eq.${id}`
-  )
+  params.set('id', `eq.${id}`)
 
-  params.set(
-    'select',
-    '*'
-  )
+  params.set('select', '*')
 
-  const { data } = await apiClient.getRaw(
-    `${RESOURCE_PATH}?${params.toString()}`,
-    { signal }
-  )
+  const { data } = await apiClient.getRaw(`${RESOURCE_PATH}?${params.toString()}`, { signal })
 
   return mapProduct(data[0])
 }
@@ -154,15 +127,11 @@ export async function getProductById(id, { signal } = {}) {
 export async function createProduct(product) {
   const apiProduct = mapProductToApi(product)
 
-  const data = await apiClient.post(
-    RESOURCE_PATH,
-    apiProduct,
-    {
-      headers: {
-        Prefer: 'return=representation',
-      },
-    }
-  )
+  const data = await apiClient.post(RESOURCE_PATH, apiProduct, {
+    headers: {
+      Prefer: 'return=representation',
+    },
+  })
 
   return mapProduct(data[0])
 }
@@ -170,21 +139,15 @@ export async function createProduct(product) {
 export async function updateProduct(id, product) {
   const apiProduct = mapProductToApi(product)
 
-  const data = await apiClient.patch(
-    `${RESOURCE_PATH}?id=eq.${id}`,
-    apiProduct,
-    {
-      headers: {
-        Prefer: 'return=representation',
-      },
-    }
-  )
+  const data = await apiClient.patch(`${RESOURCE_PATH}?id=eq.${id}`, apiProduct, {
+    headers: {
+      Prefer: 'return=representation',
+    },
+  })
 
   return mapProduct(data[0])
 }
 
 export async function deleteProduct(id) {
-  await apiClient.delete(
-    `${RESOURCE_PATH}?id=eq.${id}`
-  )
+  await apiClient.delete(`${RESOURCE_PATH}?id=eq.${id}`)
 }

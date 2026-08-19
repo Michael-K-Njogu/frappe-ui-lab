@@ -10,10 +10,7 @@ export function canDeleteOrder(order) {
 }
 
 export function canCancelOrder(order) {
-    return canTransitionTo(
-        order.status,
-        ORDER_STATUS.CANCELED
-    )
+  return canTransitionTo(order.status, ORDER_STATUS.CANCELED)
 }
 
 export function canPostOrder(order) {
@@ -29,17 +26,11 @@ export function canPreviewInvoice(order) {
 }
 
 export function canStartProcessing(order) {
-  return canTransitionTo(
-    order.status, 
-    ORDER_STATUS.PROCESSING
-  )
+  return canTransitionTo(order.status, ORDER_STATUS.PROCESSING)
 }
 
 export function canCompleteOrder(order) {
-  return canTransitionTo(
-    order.status, 
-    ORDER_STATUS.COMPLETED
-  )
+  return canTransitionTo(order.status, ORDER_STATUS.COMPLETED)
 }
 
 export function getAvailableActions(order) {

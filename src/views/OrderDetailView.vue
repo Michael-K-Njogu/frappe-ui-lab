@@ -6,14 +6,24 @@ import { useToast } from '../composables/useToast'
 import { useOrder } from '../composables/useOrder'
 import { useOrderItems } from '../composables/useOrderItems'
 
-import { updateOrder, deleteOrder, transitionOrder, updateOrderGrandTotal } from '../services/orderService'
+import {
+  updateOrder,
+  deleteOrder,
+  transitionOrder,
+  updateOrderGrandTotal,
+} from '../services/orderService'
 import { getCustomerById } from '../services/customerService'
 
 import { ORDER_STATUS, ORDER_STATUS_TIMESTAMP_FIELD } from '../constants/orderStatuses.js'
 import { canTransitionTo } from '../business/orderTransitions'
 import { getAvailableActions } from '../business/orderPermissions'
 import { calculateLineTotal } from '../business/orderItemCalculations.js'
-import { calculateSubtotal, calculateDiscount, calculateGrandTotal, calculateTotalItems,} from '../business/orderCalculations'
+import {
+  calculateSubtotal,
+  calculateDiscount,
+  calculateGrandTotal,
+  calculateTotalItems,
+} from '../business/orderCalculations'
 import { printInvoice } from '../utils/printInvoice.js'
 
 import PageTitle from '../components/PageTitle.vue'
@@ -56,66 +66,55 @@ function previewInvoice() {
 }
 
 function handlePrintInvoice() {
-    try {
-        printInvoice()
-    } catch (err) {
-        console.error(err)
+  try {
+    printInvoice()
+  } catch (err) {
+    console.error(err)
 
-        showError(
-            err.message ||
-            'Unable to print invoice.'
-        )
-    }
+    showError(err.message || 'Unable to print invoice.')
+  }
 }
 
 async function performTransition(status, title, message) {
-    if (!order.value) return
+  if (!order.value) return
 
-    if (!canTransitionTo(order.value.status, status)) {
-        showError(
-            `Order cannot be changed from ${order.value.status} to ${status}.`
-        )
-        return
+  if (!canTransitionTo(order.value.status, status)) {
+    showError(`Order cannot be changed from ${order.value.status} to ${status}.`)
+    return
+  }
+
+  try {
+    const updatedOrder = {
+      ...order.value,
+      status,
     }
 
-    try {
-        const updatedOrder = {
-            ...order.value,
-            status,
-        }
+    const timestampField = ORDER_STATUS_TIMESTAMP_FIELD[status]
 
-        const timestampField =
-            ORDER_STATUS_TIMESTAMP_FIELD[status]
-
-        if (timestampField) {
-            updatedOrder[timestampField] =
-                new Date().toISOString()
-        }
-
-        await transitionOrder(
-            updatedOrder,
-            status
-        )
-
-        info(message, {
-            title,
-        })
-
-        await router.push({
-            name: 'orders',
-        })
-
-    } catch (err) {
-        console.error(err)
-        showError(err.message)
+    if (timestampField) {
+      updatedOrder[timestampField] = new Date().toISOString()
     }
+
+    await transitionOrder(updatedOrder, status)
+
+    info(message, {
+      title,
+    })
+
+    await router.push({
+      name: 'orders',
+    })
+  } catch (err) {
+    console.error(err)
+    showError(err.message)
+  }
 }
 
 async function postOrder() {
   await performTransition(
     ORDER_STATUS.PENDING,
     'Order Posted',
-    `Order ${order.value.orderNumber} has been posted for approval.`
+    `Order ${order.value.orderNumber} has been posted for approval.`,
   )
 }
 
@@ -123,7 +122,7 @@ async function startProcessing() {
   await performTransition(
     ORDER_STATUS.PROCESSING,
     'Order Updated',
-    `Order ${order.value.orderNumber} is now processing.`
+    `Order ${order.value.orderNumber} is now processing.`,
   )
 }
 
@@ -131,7 +130,7 @@ async function completeOrder() {
   await performTransition(
     ORDER_STATUS.COMPLETED,
     'Order Completed',
-    `Order ${order.value.orderNumber} has been completed.`
+    `Order ${order.value.orderNumber} has been completed.`,
   )
 }
 
@@ -139,7 +138,7 @@ async function cancelOrder() {
   await performTransition(
     ORDER_STATUS.CANCELED,
     'Order Canceled',
-    `Order ${order.value.orderNumber} has been canceled.`
+    `Order ${order.value.orderNumber} has been canceled.`,
   )
 
   showCancelModal.value = false
@@ -161,40 +160,27 @@ async function handleDeleteOrder() {
   }
 }
 
-const { 
-    order, 
-    loading, 
-    error, 
-    deleting,  
-    refresh
-} = useOrder(route.params.id)
+const { order, loading, error, deleting, refresh } = useOrder(route.params.id)
 
 watch(
-    () => order.value?.customerId,
-    async (customerId) => {
-        if (!customerId) {
-            customer.value = null
-            return
-        }
-
-        try {
-            customer.value =
-                await getCustomerById(customerId)
-        } catch (err) {
-            console.error(
-                'Failed to load customer:',
-                err
-            )
-
-            showError(
-                err.message ||
-                'Unable to load customer information.'
-            )
-        }
-    },
-    {
-        immediate: true,
+  () => order.value?.customerId,
+  async (customerId) => {
+    if (!customerId) {
+      customer.value = null
+      return
     }
+
+    try {
+      customer.value = await getCustomerById(customerId)
+    } catch (err) {
+      console.error('Failed to load customer:', err)
+
+      showError(err.message || 'Unable to load customer information.')
+    }
+  },
+  {
+    immediate: true,
+  },
 )
 
 const {
@@ -209,44 +195,33 @@ const {
   refresh: refreshOrderItems,
 } = useOrderItems(route.params.id)
 
-const subtotal = computed(() =>
-  calculateSubtotal(orderItems.value)
-)
+const subtotal = computed(() => calculateSubtotal(orderItems.value))
 
-const totalDiscount = computed(() =>
-  calculateDiscount(orderItems.value)
-)
+const totalDiscount = computed(() => calculateDiscount(orderItems.value))
 
-const grandTotal = computed(() =>
-  calculateGrandTotal(orderItems.value)
-)
+const grandTotal = computed(() => calculateGrandTotal(orderItems.value))
 
-const totalItems = computed(() =>
-  calculateTotalItems(orderItems.value)
-)
+const totalItems = computed(() => calculateTotalItems(orderItems.value))
 
 const lineTotal = computed(() =>
   calculateLineTotal({
     quantity: quantity.value,
     unitPrice: unitPrice.value,
     discount: discount.value,
-  })
+  }),
 )
 
 async function createOrderItem(values) {
   try {
-    const existingItem = orderItems.value.find(
-      item => item.productId === values.productId
-    )
+    const existingItem = orderItems.value.find((item) => item.productId === values.productId)
 
     if (existingItem) {
-      
       const mergedQuantity = Number(existingItem.quantity) + Number(values.quantity)
-      const mergedDiscount = Number(existingItem.discount) + Number(values.discount)    
+      const mergedDiscount = Number(existingItem.discount) + Number(values.discount)
 
       await saveOrderItem(existingItem.id, {
         ...existingItem,
-        
+
         quantity: mergedQuantity,
 
         discount: mergedDiscount,
@@ -261,7 +236,6 @@ async function createOrderItem(values) {
       info('Product quantity updated successfully.', {
         title: 'Order Updated',
       })
-
     } else {
       await addOrderItem({
         ...values,
@@ -276,7 +250,6 @@ async function createOrderItem(values) {
     await refreshOrderTotals()
 
     showAddItemModal.value = false
-
   } catch (err) {
     showError(err.message)
     console.error('Error creating order item:', err)
@@ -284,11 +257,11 @@ async function createOrderItem(values) {
 }
 
 const actions = computed(() => {
-    if (!order.value) {
-        return {}
-    }
+  if (!order.value) {
+    return {}
+  }
 
-    return getAvailableActions(order.value) 
+  return getAvailableActions(order.value)
 })
 
 const actionButtons = computed(() => {
@@ -296,70 +269,69 @@ const actionButtons = computed(() => {
 
   return [
     {
-        id: ACTION.EDIT,
-        label: 'Edit',
-        variant: 'secondary',
-        visible: actions.value.canEdit,
+      id: ACTION.EDIT,
+      label: 'Edit',
+      variant: 'secondary',
+      visible: actions.value.canEdit,
     },
     {
-        id: ACTION.DELETE,
-        label: 'Delete',
-        variant: 'danger',
-        visible: actions.value.canDelete,
+      id: ACTION.DELETE,
+      label: 'Delete',
+      variant: 'danger',
+      visible: actions.value.canDelete,
     },
     {
-        id: ACTION.POST,
-        label: 'Post Order',
-        variant: 'primary',
-        visible: actions.value.canPost,
+      id: ACTION.POST,
+      label: 'Post Order',
+      variant: 'primary',
+      visible: actions.value.canPost,
     },
     {
-        id: ACTION.START_PROCESSING,
-        label: 'Start Processing',
-        variant: 'primary',
-        visible: actions.value.canStartProcessing,
-        icon: Play,
+      id: ACTION.START_PROCESSING,
+      label: 'Start Processing',
+      variant: 'primary',
+      visible: actions.value.canStartProcessing,
+      icon: Play,
     },
     {
-        id: ACTION.COMPLETE,
-        label: 'Complete Order',
-        variant: 'primary',
-        visible: actions.value.canComplete,
-        icon: CheckCheck,
+      id: ACTION.COMPLETE,
+      label: 'Complete Order',
+      variant: 'primary',
+      visible: actions.value.canComplete,
+      icon: CheckCheck,
     },
     {
-        id: ACTION.CANCEL,
-        label: 'Cancel Order',
-        variant: 'danger',
-        visible: actions.value.canCancel,
+      id: ACTION.CANCEL,
+      label: 'Cancel Order',
+      variant: 'danger',
+      visible: actions.value.canCancel,
     },
     {
-        id: ACTION.PREVIEW,
-        label: 'Preview',
-        variant: 'secondary',
-        visible: actions.value.canPreview,
-        icon: Eye,
+      id: ACTION.PREVIEW,
+      label: 'Preview',
+      variant: 'secondary',
+      visible: actions.value.canPreview,
+      icon: Eye,
     },
     {
-        id: ACTION.PRINT,
-        label: 'Export / Print',
-        variant: 'primary',
-        visible: actions.value.canPrint,
-        icon: Printer,
-    },    
+      id: ACTION.PRINT,
+      label: 'Export / Print',
+      variant: 'primary',
+      visible: actions.value.canPrint,
+      icon: Printer,
+    },
     {
-        id: ACTION.SHARE,
-        label: 'Share',
-        variant: 'secondary',
-        visible: actions.value.canShare,  
-        icon: Share2,
-    }
-  ].filter(action => action.visible)
+      id: ACTION.SHARE,
+      label: 'Share',
+      variant: 'secondary',
+      visible: actions.value.canShare,
+      icon: Share2,
+    },
+  ].filter((action) => action.visible)
 })
 
 function handleAction(actionId) {
   switch (actionId) {
-
     case ACTION.EDIT:
       router.push({
         name: 'order-edit',
@@ -403,89 +375,62 @@ function handleAction(actionId) {
 }
 
 const summary = computed(() => ({
-    totalItems: calculateTotalItems(orderItems.value),
-    subtotal: calculateSubtotal(orderItems.value),
-    totalDiscount: calculateDiscount(orderItems.value),
-    grandTotal: calculateGrandTotal(orderItems.value),
+  totalItems: calculateTotalItems(orderItems.value),
+  subtotal: calculateSubtotal(orderItems.value),
+  totalDiscount: calculateDiscount(orderItems.value),
+  grandTotal: calculateGrandTotal(orderItems.value),
 }))
 
 async function refreshOrderTotals() {
-  if(!order.value) return
+  if (!order.value) return
 
-  await updateOrderGrandTotal(
-    order.value.id,
-    grandTotal.value
-  )
+  await updateOrderGrandTotal(order.value.id, grandTotal.value)
 
   await refresh()
 }
 
 const pageTitle = computed(() => {
-    if (order.value?.orderNumber) {
-        return `Order #${order.value.orderNumber}`
-    } else if (loading.value) {
-        return 'Loading...'
-    } else {
-        return 'Order Details'
-    }
+  if (order.value?.orderNumber) {
+    return `Order #${order.value.orderNumber}`
+  } else if (loading.value) {
+    return 'Loading...'
+  } else {
+    return 'Order Details'
+  }
 })
 </script>
 
 <template>
-    <PageTitle 
-      :title="pageTitle"
-      :has-back-button="true"
+  <PageTitle :title="pageTitle" :has-back-button="true">
+    <template #actions>
+      <BaseButton
+        v-for="button in actionButtons"
+        :key="button.id"
+        :label="button.label"
+        :variant="button.variant"
+        :loading="loading"
+        @click="handleAction(button.id)"
       >
-        <template #actions>
-
-            <BaseButton
-                v-for="button in actionButtons"
-                :key="button.id"
-                :label="button.label"
-                :variant="button.variant"
-                :loading="loading"
-                @click="handleAction(button.id)"
-            >
-                <template
-                v-if="button.icon"
-                #icon
-                >
-                  <component
-                      :is="button.icon"
-                      size="20"
-                  />
-                </template>
-
-            </BaseButton>          
-            
+        <template v-if="button.icon" #icon>
+          <component :is="button.icon" size="20" />
         </template>
-    </PageTitle>
+      </BaseButton>
+    </template>
+  </PageTitle>
 
-    <div class="row">
+  <div class="row">
+    <div class="column">
+      <OrderCard v-if="order" :order="order" :summary="summary" />
+    </div>
 
-      <div class="column">
-        <OrderCard
-            v-if="order"
-            :order="order"    
-            :summary="summary"
-        />
-      </div>
+    <div class="column">
+      <OrderTimeline v-if="order" :order="order" />
+    </div>
+  </div>
 
-      <div class="column">
-        <OrderTimeline
-          v-if="order"
-          :order="order"
-        />   
-        </div>        
-      </div> 
-
-<div class="card">
-
-  <div class="card-header">
-
-      <h3>
-        Order Items
-      </h3>
+  <div class="card">
+    <div class="card-header">
+      <h3>Order Items</h3>
 
       <BaseButton
         v-if="actions.canEdit"
@@ -499,31 +444,16 @@ const pageTitle = computed(() => {
           <Plus size="20" />
         </template>
       </BaseButton>
+    </div>
 
+    <div class="card-body">
+      <OrderItemTable :items="orderItems" :loading="loadingOrderItems" :editable="actions.canEdit">
+        <template #actions>
+          <BaseButton label="Add First Item" @click="showAddItemModal = true" />
+        </template>
+      </OrderItemTable>
+    </div>
   </div>
-
-  <div class="card-body">
-
-    <OrderItemTable
-      :items="orderItems"
-      :loading="loadingOrderItems"
-      :editable="actions.canEdit"
-    >
-
-      <template #actions>
-
-        <BaseButton
-          label="Add First Item"
-          @click="showAddItemModal = true"
-        />
-
-      </template>
-
-    </OrderItemTable>
-
-  </div>
-
-</div>    
 
   <BaseConfirmationModal
     v-if="order"
@@ -533,7 +463,7 @@ const pageTitle = computed(() => {
     confirmText="Cancel Order"
     cancelText="Keep Order"
     @confirm="cancelOrder"
-  />    
+  />
 
   <BaseConfirmationModal
     v-if="order"
@@ -543,37 +473,36 @@ const pageTitle = computed(() => {
     confirmText="Delete Order"
     cancelText="Keep Order"
     @confirm="handleDeleteOrder"
-  />    
+  />
 
   <AddOrderItemModal
     :open="showAddItemModal"
     :loading="savingOrderItems"
     @close="showAddItemModal = false"
     @submit="createOrderItem"
-  />   
+  />
 
   <InvoicePreviewPanel
-      v-if="order"
-      :open="showInvoicePreview"
-      :order="order"
-      :items="orderItems"
-      :customer="customer"
-      @close="showInvoicePreview = false"
+    v-if="order"
+    :open="showInvoicePreview"
+    :order="order"
+    :items="orderItems"
+    :customer="customer"
+    @close="showInvoicePreview = false"
   />
 
   <div id="invoice-print-container">
-      <InvoiceDocument
-          v-if="order && customer"
-          :order="order"
-          :items="orderItems"
-          :customer="customer"
-      />
-  </div>  
-
+    <InvoiceDocument
+      v-if="order && customer"
+      :order="order"
+      :items="orderItems"
+      :customer="customer"
+    />
+  </div>
 </template>
 
 <style scoped>
 #invoice-print-container {
-    display: none;
+  display: none;
 }
 </style>

@@ -17,21 +17,13 @@ const route = useRoute()
 const { success, error: showError } = useToast()
 const saving = ref(false)
 
-
-const {
-  customer,
-  loading,
-  error: fetchError,
-} = useCustomer(route.params.id)
+const { customer, loading, error: fetchError } = useCustomer(route.params.id)
 
 async function saveCustomer(values) {
   if (saving.value) return
   saving.value = true
   try {
-    const updatedCustomer = await updateCustomer(
-      route.params.id,
-      values
-    )
+    const updatedCustomer = await updateCustomer(route.params.id, values)
 
     success(`Customer ${updatedCustomer.name} updated successfully.`, {
       title: 'Customer Updated',
@@ -46,29 +38,24 @@ async function saveCustomer(values) {
   } catch (err) {
     console.error(err)
 
-    showError(
-        err.message ||
-        'Failed to update customer.'
-    )
+    showError(err.message || 'Failed to update customer.')
   } finally {
     saving.value = false
   }
 }
-
 </script>
 
 <template>
-    <PageTitle title="Edit Customer" :has-back-button="true" />
+  <PageTitle title="Edit Customer" :has-back-button="true" />
 
-    <p v-if="loading">Loading...</p>
+  <p v-if="loading">Loading...</p>
 
-    <CustomerForm
-        v-else-if="customer"
-        :validation-schema="updateCustomerSchema"
-        :submit-label="'Update Customer'"
-        :initial-values="customer"
-        :loading="saving"
-        @submit="saveCustomer"
-    />
-
+  <CustomerForm
+    v-else-if="customer"
+    :validation-schema="updateCustomerSchema"
+    :submit-label="'Update Customer'"
+    :initial-values="customer"
+    :loading="saving"
+    @submit="saveCustomer"
+  />
 </template>

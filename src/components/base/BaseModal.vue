@@ -40,9 +40,7 @@ const props = defineProps({
   },
 })
 
-const emit = defineEmits([
-  'close',
-])
+const emit = defineEmits(['close'])
 
 function close() {
   emit('close')
@@ -70,7 +68,7 @@ watch(
       document.removeEventListener('keydown', onKeydown)
       document.body.style.overflow = ''
     }
-  }
+  },
 )
 
 onBeforeUnmount(() => {
@@ -80,70 +78,34 @@ onBeforeUnmount(() => {
 </script>
 
 <template>
-
-<Teleport to="body">
-
+  <Teleport to="body">
     <Transition name="modal">
+      <div v-if="open" class="modal-overlay" @click="onBackdropClick">
+        <div class="modal" :style="{ maxWidth: width }" @click.stop>
+          <div v-if="title || showCloseButton" class="modal-header">
+            <h2 class="modal-title">
+              {{ title }}
+            </h2>
 
-        <div
-            v-if="open"
-            class="modal-overlay"
-            @click="onBackdropClick"
-        >
+            <button v-if="showCloseButton" class="btn btn-icon btn-secondary" @click="close">
+              <X :size="20" />
+            </button>
+          </div>
 
-            <div
-                class="modal"
-                :style="{ maxWidth: width }"
-                @click.stop
-            >
+          <div :class="['modal-body', { 'modal-body-no-padding': noPadding }]">
+            <slot name="body" />
+          </div>
 
-                <div
-                    v-if="title || showCloseButton"
-                    class="modal-header"
-                >
-
-                    <h2 class="modal-title">
-
-                        {{ title }}
-
-                    </h2>
-
-                    <button
-                        v-if="showCloseButton"
-                        class="btn btn-icon btn-secondary"
-                        @click="close"
-                    >
-
-                        <X :size="20" />
-
-                    </button>
-
-                </div>
-
-                <div :class="['modal-body', { 'modal-body-no-padding': noPadding }]">
-
-                    <slot name="body" />
-
-                </div>
-
-                <div v-if="showFooter" class="modal-footer">
-
-                    <slot name="footer" />
-
-                </div>
-
-            </div>
-
+          <div v-if="showFooter" class="modal-footer">
+            <slot name="footer" />
+          </div>
         </div>
-
+      </div>
     </Transition>
-
-</Teleport>
-
+  </Teleport>
 </template>
 
 <style scoped>
-
 .modal-overlay {
   position: fixed;
   inset: 0;
@@ -162,12 +124,12 @@ onBeforeUnmount(() => {
 .modal {
   width: 100%;
   box-shadow: var(--shadow-lg);
-  transition: transform .2s ease;
+  transition: transform 0.2s ease;
 }
 
 .modal-enter-from .modal,
 .modal-leave-to .modal {
-  transform: scale(.96);
+  transform: scale(0.96);
 }
 
 .modal-header {
@@ -200,12 +162,11 @@ onBeforeUnmount(() => {
 
 .modal-enter-active,
 .modal-leave-active {
-  transition: opacity .2s ease;
+  transition: opacity 0.2s ease;
 }
 
 .modal-enter-from,
 .modal-leave-to {
   opacity: 0;
 }
-
 </style>

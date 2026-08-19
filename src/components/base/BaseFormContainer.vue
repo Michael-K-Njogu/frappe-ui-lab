@@ -1,8 +1,7 @@
-<script setup>
-</script>
+<script setup></script>
 
 <template>
-    <div class="form-container">
-        <slot />
-    </div>
+  <div class="form-container">
+    <slot />
+  </div>
 </template>

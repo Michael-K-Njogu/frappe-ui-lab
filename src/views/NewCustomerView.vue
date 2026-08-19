@@ -21,36 +21,29 @@ async function saveCustomer(values) {
   try {
     const customer = await createCustomer(values)
 
-    success(
-      `Customer ${customer.name} created successfully.`
-    )
+    success(`Customer ${customer.name} created successfully.`)
 
     await router.push({
       name: 'customers',
     })
-
   } catch (err) {
     console.error(err)
 
-    showError(
-      err.message || 'Failed to create customer'
-    )
-
+    showError(err.message || 'Failed to create customer')
   } finally {
     saving.value = false
   }
 }
-
 </script>
 
 <template>
-    <PageTitle title="New Customer" :has-back-button="true" />
+  <PageTitle title="New Customer" :has-back-button="true" />
 
-    <CustomerForm
-        :validation-schema="createCustomerSchema"
-        :submit-label="'Save Customer'"
-        :loading="saving"
-        :show-terms="true"
-        @submit="saveCustomer"
-    />
+  <CustomerForm
+    :validation-schema="createCustomerSchema"
+    :submit-label="'Save Customer'"
+    :loading="saving"
+    :show-terms="true"
+    @submit="saveCustomer"
+  />
 </template>
