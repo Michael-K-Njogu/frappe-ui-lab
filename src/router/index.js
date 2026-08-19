@@ -95,6 +95,11 @@ const router = createRouter({
           name: 'product-edit',
           component: () => import('../views/ProductEditView.vue'),
         },
+        {
+          path: '/notifications',
+          name: 'notifications',
+          component: () => import('../views/NotificationsView.vue'),
+        },
       ],
     },
   ],
