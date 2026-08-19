@@ -22,7 +22,7 @@ import BaseTextArea from '../base/BaseTextArea.vue'
 import OrderItemTable from '../order-items/OrderItemTable.vue'
 import AddOrderItemModal from '../order-items/AddOrderItemModal.vue'
 import BaseConfirmationModal from '../base/BaseConfirmationModal.vue'
-import { Info, Plus } from '@lucide/vue'
+import { Info, Plus, Trash2 } from '@lucide/vue'
 
 const props = defineProps({
   initialValues: {
@@ -79,6 +79,7 @@ const editingOrderItem = ref(null)
 const showDeleteItemModal = ref(false)
 const itemToDelete = ref(null)
 const orderItems = ref([...props.initialOrderItems])
+const showClearItemsModal = ref(false)
 
 const orderGrandTotal = computed(() => {
   return orderItems.value.reduce((total, item) => total + Number(item.lineTotal || 0), 0)
@@ -104,7 +105,13 @@ const projectedAvailableCredit = computed(() => {
   )
 })
 
-const emit = defineEmits(['post-order', 'save-draft', 'delete-order', 'customer-change'])
+const emit = defineEmits([
+  'post-order',
+  'save-draft',
+  'delete-order',
+  'customer-change',
+  'clear-items',
+])
 
 const {
   defineField,
@@ -166,6 +173,20 @@ function confirmDeleteOrderItem() {
   showDeleteItemModal.value = false
 
   emit('delete-item', item)
+}
+
+function handleClearAllItems() {
+  if (!orderItems.value.length) return
+
+  showClearItemsModal.value = true
+}
+
+function confirmClearAllItems() {
+  orderItems.value = []
+
+  showClearItemsModal.value = false
+
+  emit('clear-items')
 }
 
 watch(
@@ -295,17 +316,31 @@ function handleOrderItemSubmit(values) {
     <div v-if="orderItems.length" class="card-header">
       <h3>Order Items</h3>
 
-      <BaseButton
-        id="add-order-item"
-        name="add-order-item"
-        label="Add Item"
-        size="sm"
-        @click="showAddItemModal = true"
-      >
-        <template #icon>
-          <Plus size="20" />
-        </template>
-      </BaseButton>
+      <div class="order-items-header-actions">
+        <BaseButton
+          v-if="editable"
+          label="Clear All"
+          variant="danger"
+          size="sm"
+          @click="handleClearAllItems"
+        >
+          <template #icon>
+            <Trash2 size="16" />
+          </template>
+        </BaseButton>
+
+        <BaseButton
+          id="add-order-item"
+          name="add-order-item"
+          label="Add Item"
+          size="sm"
+          @click="showAddItemModal = true"
+        >
+          <template #icon>
+            <Plus size="16" />
+          </template>
+        </BaseButton>
+      </div>
     </div>
 
     <OrderItemTable
@@ -370,5 +405,14 @@ function handleOrderItemSubmit(values) {
     confirm-text="Delete Item"
     cancel-text="Keep Item"
     @confirm="confirmDeleteOrderItem"
+  />
+
+  <BaseConfirmationModal
+    v-model="showClearItemsModal"
+    title="Clear All Order Items"
+    message="Are you sure you want to remove all items from this order? This action cannot be undone."
+    confirm-text="Clear All"
+    cancel-text="Keep Items"
+    @confirm="confirmClearAllItems"
   />
 </template>
