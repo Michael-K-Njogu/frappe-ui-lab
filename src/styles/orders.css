@@ -59,3 +59,65 @@
     font-weight: 700;
     white-space: nowrap;
 }
+
+.invoice-preview-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: 1000;
+    background: rgb(0 0 0 / 0.35);
+    display: flex;
+    justify-content: flex-end;
+}
+
+.invoice-preview-panel {
+    background-color: var(--bg-colour-white);
+    width: min(720px, 100vw);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    box-shadow: -8px 0 24px rgb(0 0 0 / 0.12);
+}
+
+.invoice-preview-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 1rem 1.5rem;
+    border-bottom: 1px solid var(--border-color);
+}
+
+.invoice-preview-header h2 {
+    margin: 0;
+}
+
+.invoice-preview-header p {
+    margin: 0.25rem 0 0;
+    color: var(--text-secondary);
+    font-size: 0.875rem;
+}
+
+.invoice-preview-content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 2rem;
+}
+
+.invoice-panel-enter-active,
+.invoice-panel-leave-active {
+    transition: opacity 0.2s ease;
+}
+
+.invoice-panel-enter-active .invoice-preview-panel,
+.invoice-panel-leave-active .invoice-preview-panel {
+    transition: transform 0.25s ease;
+}
+
+.invoice-panel-enter-from,
+.invoice-panel-leave-to {
+    opacity: 0;
+}
+
+.invoice-panel-enter-from .invoice-preview-panel,
+.invoice-panel-leave-to .invoice-preview-panel {
+    transform: translateX(100%);
+}
