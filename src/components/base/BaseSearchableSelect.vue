@@ -176,7 +176,6 @@ onBeforeUnmount(() => {
         type="button"
         class="base-searchable-select-trigger"
         :aria-expanded="isOpen"
-        :aria-haspopup="listbox"
         @click="isOpen ? closeDropdown() : openDropdown()"
         @keydown="handleKeydown"
       >
