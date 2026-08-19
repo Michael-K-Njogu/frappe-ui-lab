@@ -1,5 +1,6 @@
 <script setup>
-import { ref, onMounted, onBeforeUnmount, useRouter } from 'vue'
+import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useRouter } from 'vue-router'
 
 import { Bell, CheckCheck } from '@lucide/vue'
 
