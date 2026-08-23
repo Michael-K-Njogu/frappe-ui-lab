@@ -6,8 +6,7 @@ import { calculateGrandTotal } from '../../business/orderCalculations.js'
 
 import BaseEmptyState from '../base/BaseEmptyState.vue'
 import { SquarePen, Trash2, Package } from '@lucide/vue'
-
-const grandTotal = computed(() => calculateGrandTotal(props.items))
+import BaseButton from '../base/BaseButton.vue'
 
 const props = defineProps({
   items: {
@@ -25,6 +24,8 @@ const props = defineProps({
     default: false,
   },
 })
+
+const grandTotal = computed(() => calculateGrandTotal(props.items))
 
 const emit = defineEmits(['edit', 'delete'])
 </script>
@@ -84,13 +85,31 @@ const emit = defineEmits(['edit', 'delete'])
 
         <td v-if="editable">
           <div class="row-actions">
-            <button @click="$emit('edit', item)" class="btn btn-sm btn-secondary btn-icon">
-              <SquarePen :size="16" />
-            </button>
+            <BaseButton
+              :aria-label="`Edit ${item.productName}`"
+              :title="`Edit ${item.productName}`"
+              variant="secondary"
+              size="sm"
+              @click="$emit('edit', item)"
+              class="btn-icon"
+            >
+              <template #icon>
+                <SquarePen :size="16" />
+              </template>
+            </BaseButton>
 
-            <button @click="$emit('delete', item)" class="btn btn-sm btn-danger btn-icon">
-              <Trash2 :size="16" />
-            </button>
+            <BaseButton
+              :aria-label="`Delete ${item.productName}`"
+              :title="`Remove ${item.productName}`"
+              variant="danger"
+              size="sm"
+              @click="$emit('delete', item)"
+              class="btn-icon"
+            >
+              <template #icon>
+                <Trash2 :size="16" />
+              </template>
+            </BaseButton>
           </div>
         </td>
       </tr>
