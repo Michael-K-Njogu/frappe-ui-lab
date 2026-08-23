@@ -39,12 +39,17 @@ building-materials business.
 - [x] Loading skeletons, confirmation modals, and toast notifications
 - [x] Customer account summaries and available-credit calculations
 - [x] Invoice preview and browser print support
+- [x] Order lifecycle timeline with completed, current, and upcoming stages
+- [x] Notification dropdown with unread counts and read-state actions
+- [x] Full notifications page with entity navigation and empty/error states
+- [x] Login, session initialization, protected routes, and sign-out
 - [x] Prettier formatting with format and format-check scripts
 
 ### Application Foundation
 
 - [x] Vue 3, Vite, and Vue Router application structure
-- [x] REST API service layer with browser mocking through MSW
+- [x] Supabase client and REST API service layer
+- [x] Browser mocking through MSW
 - [x] Local storage service and seeded development data
 - [x] Zod and Vee-Validate form validation
 - [x] Vitest test tooling configured
@@ -53,7 +58,6 @@ building-materials business.
 
 - [ ] Replace the Dashboard placeholder with operational metrics and recent activity
 - [ ] Expose invoice preview and printing through a dedicated invoice workflow
-- [ ] Complete the notifications experience and navigation
 - [ ] Add automated tests for services, composables, business rules, and key forms
 
 ## Phase 1: Operations
