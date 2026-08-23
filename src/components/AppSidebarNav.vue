@@ -1,19 +1,31 @@
 <script setup>
+import { computed } from 'vue'
+
 import { navigation } from '../config/navigation.js'
+import { usePermissions } from '../composables/usePermissions.js'
 
 import SidebarNavItem from '../components/SidebarNavItem.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 import { LogOut } from '@lucide/vue'
+
+const { hasPermission } = usePermissions()
+
+const visibleNavigation = computed(() =>
+  navigation.filter((item) => {
+    if (!item.permission) {
+      return true
+    }
+
+    return hasPermission(item.permission)
+  }),
+)
 </script>
 
 <template>
   <aside class="sidebar">
-    <div class="sidebar-header">
-      <!--<img :src="appLogo" alt="App Logo" class="app-logo" />-->
-      Mikey's Mini-ERP
-    </div>
+    <div class="sidebar-header">Mikey's Mini-ERP</div>
     <nav class="sidebar-nav">
-      <SidebarNavItem v-for="item in navigation" :key="item.to" v-bind="item" />
+      <SidebarNavItem v-for="item in visibleNavigation" :key="item.to" v-bind="item" />
     </nav>
 
     <div class="sidebar-footer">
