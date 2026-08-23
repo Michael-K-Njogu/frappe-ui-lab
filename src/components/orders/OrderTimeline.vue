@@ -11,11 +11,47 @@ const props = defineProps({
 })
 
 const timeline = computed(() => {
-  return ORDER_TIMELINE.map((event) => ({
-    ...event,
-    title: typeof event.title === 'function' ? event.title(props.order) : event.title,
-    timestamp: props.order[event.key],
-  })).filter((event) => event.timestamp)
+  return ORDER_TIMELINE.map((event) => {
+    const timestamp = props.order[event.key]
+
+    const statusByKey = {
+      createdAt: 'DRAFT',
+      postedAt: 'PENDING',
+      processingStartedAt: 'PROCESSING',
+      completedAt: 'COMPLETED',
+      canceledAt: 'CANCELED',
+    }
+
+    return {
+      ...event,
+      title: typeof event.title === 'function' ? event.title(props.order) : event.title,
+
+      timestamp,
+      status: statusByKey[event.key],
+
+      isCompleted: Boolean(timestamp),
+      isCurrent: statusByKey[event.key] === props.order.status,
+    }
+  }).filter((event) => {
+    // Always show the order creation event
+    if (event.key === 'createdAt') {
+      return true
+    }
+
+    // For cancelled orders, show only events that happened
+    // plus the cancellation event.
+    if (props.order.status === 'CANCELED') {
+      return Boolean(event.timestamp)
+    }
+
+    // Hide the cancellation path for non-cancelled orders
+    if (event.key === 'canceledAt') {
+      return false
+    }
+
+    // Show completed events and the next/current lifecycle stage
+    return true
+  })
 })
 </script>
 
@@ -26,21 +62,61 @@ const timeline = computed(() => {
     </div>
 
     <div class="card-body">
-      <div v-for="event in timeline" :key="event.key" class="timeline-item">
-        <div :class="`timeline-marker ${event.color}`">
-          <component :is="event.icon" :size="16" :class="`timeline-icon ${event.color}`" />
-        </div>
+      <div class="order-timeline">
+        <div
+          v-for="(event, index) in timeline"
+          :key="event.key"
+          class="timeline-item"
+          :class="{
+            'is-completed': event.isCompleted,
+            'is-current': event.isCurrent,
+            'is-upcoming': event.isUpcoming,
+          }"
+        >
+          <div class="timeline-track">
+            <div
+              class="timeline-marker"
+              :class="[
+                event.color,
+                {
+                  'is-completed': event.isCompleted,
+                  'is-current': event.isCurrent,
+                  'is-upcoming': event.isUpcoming,
+                },
+              ]"
+            >
+              <component :is="event.icon" :size="16" class="timeline-icon" />
+            </div>
 
-        <div class="timeline-content">
-          <p>{{ event.title }}</p>
-          <div class="timeline-date">
-            <span class="timeline-date-absolute">
-              {{ formatDate(event.timestamp) }}
-            </span>
+            <div
+              v-if="index < timeline.length - 1"
+              class="timeline-line"
+              :class="{
+                'is-completed': event.isCompleted,
+              }"
+            />
+          </div>
 
-            <span class="timeline-date-relative">
-              ({{ formatRelativeDate(event.timestamp) }})
-            </span>
+          <div class="timeline-content">
+            <div class="timeline-title-row">
+              <p class="timeline-title">
+                {{ event.title }}
+              </p>
+
+              <span v-if="event.isCurrent" class="timeline-current-label"> Current </span>
+            </div>
+
+            <div v-if="event.timestamp" class="timeline-date">
+              <span>
+                {{ formatDate(event.timestamp) }}
+              </span>
+
+              <span class="timeline-date-relative">
+                {{ formatRelativeDate(event.timestamp) }}
+              </span>
+            </div>
+
+            <p v-else-if="event.isUpcoming" class="timeline-pending">Not yet reached</p>
           </div>
         </div>
       </div>
