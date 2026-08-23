@@ -1,4 +1,5 @@
 import { createRouter, createWebHistory } from 'vue-router'
+import { useAuth } from '../composables/useAuth'
 
 import AppLayout from '../layouts/AppLayout.vue'
 
@@ -26,8 +27,20 @@ const router = createRouter({
   history: createWebHistory(),
   routes: [
     {
+      path: '/login',
+      name: 'login',
+      component: () => import('../views/LoginView.vue'),
+      meta: {
+        requiresAuth: false,
+        guestOnly: true,
+      },
+    },
+    {
       path: '/',
       component: AppLayout,
+      meta: {
+        requiresAuth: true,
+      },
 
       children: [
         {
@@ -103,6 +116,33 @@ const router = createRouter({
       ],
     },
   ],
+})
+
+router.beforeEach(async (to) => {
+  const { initialize, isAuthenticated } = useAuth()
+
+  await initialize()
+
+  const requiresAuth = to.matched.some((route) => route.meta.requiresAuth)
+
+  const guestOnly = to.matched.some((route) => route.meta.guestOnly)
+
+  if (requiresAuth && !isAuthenticated.value) {
+    return {
+      name: 'login',
+      query: {
+        redirect: to.fullPath,
+      },
+    }
+  }
+
+  if (guestOnly && isAuthenticated.value) {
+    return {
+      name: 'dashboard',
+    }
+  }
+
+  return true
 })
 
 export default router
