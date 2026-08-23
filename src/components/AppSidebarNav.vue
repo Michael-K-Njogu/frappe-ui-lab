@@ -1,7 +1,9 @@
 <script setup>
-import SidebarNavItem from '../components/SidebarNavItem.vue'
 import { navigation } from '../config/navigation.js'
-import appLogo from '../assets/dds-logo.png'
+
+import SidebarNavItem from '../components/SidebarNavItem.vue'
+import BaseButton from '../components/base/BaseButton.vue'
+import { LogOut } from '@lucide/vue'
 </script>
 
 <template>
@@ -13,5 +15,9 @@ import appLogo from '../assets/dds-logo.png'
     <nav class="sidebar-nav">
       <SidebarNavItem v-for="item in navigation" :key="item.to" v-bind="item" />
     </nav>
+
+    <div class="sidebar-footer">
+      <small>Version 1.0.0</small>
+    </div>
   </aside>
 </template>
