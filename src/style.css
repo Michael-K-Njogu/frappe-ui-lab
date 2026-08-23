@@ -30,11 +30,36 @@ body {
   z-index: 1000;
 }
 
+.top-bar-header-right {
+  display: flex;
+  align-items: center;
+}
+
+.user-menu-dropdown {
+  background-color: var(--bg-colour-white);
+  box-shadow: var(--shadow-default);
+  border: 1px solid var(--border-colour-default);
+  border-radius: 4px;
+  position: absolute;
+  top: 100%;
+  right: 0;
+  z-index: 100;
+  width: 17rem;
+}
+
+.user-menu-header {
+  border-bottom: 1px solid var(--border-colour-default);
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 16px;
+}
+
 .notification-menu {
   position: relative;
 }
 
-main {
+.main-content {
   display: flex;
   flex-direction: column;
   flex: 1;
@@ -61,7 +86,10 @@ h1 {
 }
 
 .content {
+  display: flex;
+  flex-direction: column;
   flex: 1;
+  gap: 24px;
   padding: 40px;
 }
 
@@ -69,6 +97,9 @@ h1 {
   background-color: var(--bg-colour-accent);
   border-right: 1px solid var(--border-colour-default);
   color: var(--text-colour-inverted);
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
   height: 100%;
   position: fixed;
   top: 0;
@@ -92,10 +123,11 @@ h1 {
 }
 
 .sidebar-nav {
+  flex: 1;
   gap: 8px;
   display: flex;
   flex-direction: column;
-  padding: 16px 20px;
+  padding: 24px 20px;
 }
 
 .sidebar-nav-item {
@@ -124,6 +156,11 @@ h1 {
 
 .sidebar-nav-item .lucide {
   color: var(--icon-colour-accent);
+}
+
+.sidebar-footer {
+  border-top: 1px solid rgba(255, 255, 255, 0.2);
+  padding: 16px 20px;
 }
 
 .page-title {
@@ -226,10 +263,31 @@ h1 {
   border: 1px solid var(--border-info);
 }
 
+.btn-primary:hover {
+  background-color: var(--btn-primary-bg-hover);
+}
+
+.btn-primary:disabled {
+  background-color: var(--btn-primary-bg-disabled);
+  border-color: var(--border-colour-default);
+  color: var(--text-colour-disabled);
+  cursor: not-allowed;
+}
+
 .btn-secondary {
   background-color: var(--btn-secondary-bg);
   color: var(--text-colour-default);
   border: 1px solid var(--border-colour-default);
+}
+
+.btn-secondary:hover {
+  background-color: var(--bg-info-muted);
+}
+
+.btn-secondary:disabled {
+  background-color: var(--bg-colour-white);
+  color: var(--text-colour-disabled);
+  cursor: not-allowed;
 }
 
 .btn-danger {
@@ -242,25 +300,10 @@ h1 {
   background-color: var(--btn-danger-bg-hover);
 }
 
-.btn-primary:hover {
-  background-color: var(--btn-primary-bg-hover);
-}
-
-.btn-primary:disabled {
-  background-color: var(--btn-primary-bg-disabled);
-  border-color: var(--border-colour-default);
-  color: var(--text-colour-disabled);
-  cursor: not-allowed;
-}
-
-.btn-secondary:hover {
-  background-color: var(--bg-info-muted);
-}
-
-.btn-secondary:disabled {
-  background-color: var(--bg-colour-white);
-  color: var(--text-colour-disabled);
-  cursor: not-allowed;
+.btn-ghost {
+  background-color: transparent;
+  color: var(--text-colour-inverted);
+  border: none;
 }
 
 .notification-trigger {
@@ -538,6 +581,7 @@ input[type='text'],
 input[type='number'],
 input[type='email'],
 input[type='tel'],
+input[type='password'],
 select,
 textarea {
   padding: 12px;

@@ -1,6 +1,7 @@
 :root {
   --text-colour-default: #171717;
   --text-colour-secondary: #737373;
+  --text-colour-tertiary: #a3a3a3;
   --text-colour-inverted: #ffffff;
   --text-colour-disabled: #737373;
 
@@ -42,7 +43,7 @@
 
   --shadow-default: 0px 4px 16px 0 rgba(0, 0, 0, 0.08);
 
-  --font-family-default: 'Inter', sans-serif;
+  --font-family-default: 'Google Sans', sans-serif;
 
   --font-size-default: 14px;
 
