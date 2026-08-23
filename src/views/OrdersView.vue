@@ -8,6 +8,8 @@ import { useSorting } from '../composables/useSorting'
 import { getOrders, deleteOrder } from '../services/orderService'
 import { ORDER_STATUS_OPTIONS } from '../constants/orderStatuses.js'
 import { useOrderFilters } from '../composables/useOrderFilters'
+import { usePermissions } from '../composables/usePermissions'
+import { PERMISSION } from '../constants/permissions'
 
 import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
@@ -27,10 +29,9 @@ const showDeleteModal = ref(false)
 const deleting = ref(false)
 const selectedOrder = ref(null)
 const refreshing = ref(false)
-
 const { filters, hasActiveFilters, clearFilters } = useOrderFilters()
-
 const { orders, loading, error, refresh } = useOrders(filters)
+const { hasPermission } = usePermissions()
 
 async function handleRefresh() {
   refreshing.value = true
@@ -47,11 +48,21 @@ function viewOrder(id) {
 }
 
 function confirmDelete(order) {
+  if (!hasPermission(PERMISSION.ORDER_DELETE)) {
+    showError('You do not have permission to delete orders.')
+    return
+  }
+
   selectedOrder.value = order
   showDeleteModal.value = true
 }
 
 async function handleDelete() {
+  if (!hasPermission(PERMISSION.ORDER_DELETE)) {
+    showError('You do not have permission to delete orders.')
+    return
+  }
+
   if (!selectedOrder.value) return
 
   const order = selectedOrder.value
@@ -82,6 +93,11 @@ function resetDeleteState() {
 }
 
 function editOrder(id) {
+  if (!hasPermission(PERMISSION.ORDER_EDIT)) {
+    showError('You do not have permission to edit orders.')
+    return
+  }
+
   router.push({ name: 'order-edit', params: { id } })
 }
 
@@ -96,7 +112,7 @@ function handlePageSizeChange(size) {
 }
 
 const emptyState = computed(() => {
-  if (hasActiveFilters) {
+  if (hasActiveFilters.value) {
     return {
       title: 'No orders found',
       description: 'Try adjusting your filters or clear them to see all orders.',
@@ -113,7 +129,7 @@ const viewState = computed(() => {
   if (loading.value) return 'loading'
   if (error.value) return 'error'
   if (orders.value.length > 0) return 'ready'
-  if (hasActiveFilters) return 'filtered-empty'
+  if (hasActiveFilters.value) return 'filtered-empty'
 
   return 'empty'
 })
@@ -123,16 +139,22 @@ const viewState = computed(() => {
   <PageTitle title="Orders">
     <template #actions>
       <BaseButton
-        :label="refreshing ? 'Refreshing' : 'Refresh'"
+        :label="refreshing ? 'Refreshing...' : 'Refresh'"
         variant="secondary"
+        :disabled="refreshing"
+        :class="{ 'is-loading': refreshing }"
         @click="handleRefresh"
       >
         <template #icon>
-          <RefreshCw size="16" :class="{ 'is-loading': refreshing }" />
+          <RefreshCw size="16" />
         </template>
       </BaseButton>
 
-      <BaseButton label="Create Order" @click="router.push({ name: 'order-new' })">
+      <BaseButton
+        v-if="hasPermission(PERMISSION.ORDER_CREATE)"
+        label="Create Order"
+        @click="router.push({ name: 'order-new' })"
+      >
         <template #icon>
           <Plus size="16" />
         </template>
@@ -160,6 +182,8 @@ const viewState = computed(() => {
     <OrderTable
       :orders="orders"
       :sort="filters.sort"
+      :can-delete="hasPermission(PERMISSION.ORDER_DELETE)"
+      :can-edit="hasPermission(PERMISSION.ORDER_EDIT)"
       @sort="sortBy"
       @view="viewOrder"
       @edit="editOrder"
@@ -190,7 +214,11 @@ const viewState = computed(() => {
     </template>
 
     <template #actions>
-      <RouterLink v-if="viewState === 'empty'" :to="{ name: 'order-new' }" class="btn btn-primary">
+      <RouterLink
+        v-if="viewState === 'empty' && hasPermission(PERMISSION.ORDER_CREATE)"
+        :to="{ name: 'order-new' }"
+        class="btn btn-primary"
+      >
         <Plus size="16" />
         Create New Order
       </RouterLink>
@@ -221,5 +249,3 @@ const viewState = computed(() => {
     </template>
   </BaseConfirmationModal>
 </template>
-
-<style scoped></style>
