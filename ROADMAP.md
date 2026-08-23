@@ -43,12 +43,15 @@ building-materials business.
 - [x] Notification dropdown with unread counts and read-state actions
 - [x] Full notifications page with entity navigation and empty/error states
 - [x] Login, session initialization, protected routes, and sign-out
+- [x] Role-aware navigation and action-level permission checks
 - [x] Prettier formatting with format and format-check scripts
 
 ### Application Foundation
 
 - [x] Vue 3, Vite, and Vue Router application structure
 - [x] Supabase client and REST API service layer
+- [x] Profile lookup service and permission definitions for Admin, Sales,
+      Operations, and Accounting roles
 - [x] Browser mocking through MSW
 - [x] Local storage service and seeded development data
 - [x] Zod and Vee-Validate form validation
@@ -105,8 +108,10 @@ building-materials business.
 
 ## Phase 3: Team and Governance
 
-- [ ] Authentication and user profiles
-- [ ] Role-based access for administrators, sales, and operations
+- [x] Basic authentication and session protection
+- [ ] User profile page and profile editing
+- [ ] User administration and role assignment
+- [ ] Expand role-based access controls across every module and workflow
 - [ ] Approval workflows for orders and credit limits
 - [ ] Activity audit log showing who changed what and when
 - [ ] Soft deletion and record recovery
