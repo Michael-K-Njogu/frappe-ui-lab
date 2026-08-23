@@ -1,3 +1,5 @@
+import { PERMISSION } from '../constants/permissions'
+
 import {
   LayoutDashboard,
   Users,
@@ -19,16 +21,19 @@ export const navigation = [
     title: 'Customers',
     icon: Users,
     to: '/customers',
+    permission: PERMISSION.CUSTOMER_VIEW,
   },
   {
     title: 'Orders',
     icon: ShoppingCart,
     to: '/orders',
+    permission: PERMISSION.ORDER_VIEW,
   },
   {
     title: 'Products',
     icon: Package,
     to: '/products',
+    permission: PERMISSION.PRODUCT_VIEW,
   },
   /*
   {
