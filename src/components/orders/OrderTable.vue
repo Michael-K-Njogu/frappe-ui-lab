@@ -7,18 +7,9 @@ import {
   canPrintOrder,
   getEditRestrictionReason,
 } from '../../business/orderPermissions.js'
-
+import BaseButton from '../base/BaseButton.vue'
 import BaseBadge from '../base/BaseBadge.vue'
-import {
-  Eye,
-  Pencil,
-  Trash2,
-  ArrowUp,
-  ArrowDown,
-  SquarePen,
-  MessageSquareText,
-  Printer,
-} from '@lucide/vue'
+import { Eye, Trash2, ArrowUp, ArrowDown, SquarePen, MessageSquareText, Printer } from '@lucide/vue'
 
 defineProps({
   orders: {
@@ -29,6 +20,15 @@ defineProps({
   sort: {
     type: Object,
     required: true,
+  },
+  canEdit: {
+    type: Boolean,
+    default: false,
+  },
+
+  canDelete: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -131,46 +131,59 @@ function getOrderStatusVariant(status) {
           </BaseBadge>
         </td>
         <td class="row-actions">
-          <button
-            v-if="!canEditOrder(order)"
+          <BaseButton
+            variant="secondary"
+            size="sm"
             :aria-label="`View Order: ${order.orderNumber}`"
             :title="`View Order: ${order.orderNumber}`"
             @click="$emit('view', order.id)"
-            class="btn btn-sm btn-secondary btn-icon"
+            class="btn-icon"
           >
-            <Eye size="16" />
-          </button>
+            <template #icon>
+              <Eye size="16" />
+            </template>
+          </BaseButton>
 
-          <button
-            v-if="canEditOrder(order)"
+          <BaseButton
+            v-if="canEdit && canEditOrder(order)"
+            variant="secondary"
+            size="sm"
             :disabled="!!getEditRestrictionReason(order)"
             :title="getEditRestrictionReason(order) || `Edit Order: ${order.orderNumber}`"
             :aria-label="`Edit Order: ${order.orderNumber}`"
             @click="$emit('edit', order.id)"
-            class="btn btn-sm btn-secondary btn-icon"
+            class="btn-icon"
           >
-            <SquarePen size="16" />
-          </button>
+            <template #icon>
+              <SquarePen size="16" />
+            </template>
+          </BaseButton>
 
-          <button
+          <BaseButton
+            variant="secondary"
+            size="sm"
             v-if="canPrintOrder(order)"
             :aria-label="`Print Order: ${order.orderNumber}`"
             :title="`Print Order: ${order.orderNumber}`"
             @click="$emit('print', order.id)"
-            class="btn btn-sm btn-secondary btn-icon"
+            class="btn-icon"
           >
-            <Printer size="16" />
-          </button>
+            <template #icon>
+              <Printer size="16" />
+            </template>
+          </BaseButton>
 
-          <button
-            v-if="canDeleteOrder(order)"
+          <BaseButton
+            v-if="canDelete && canDeleteOrder(order)"
             :aria-label="`Delete Order: ${order.orderNumber}`"
             :title="`Delete Order: ${order.orderNumber}`"
             @click="$emit('delete', order)"
-            class="btn btn-sm btn-icon btn-danger"
+            variant="danger"
+            size="sm"
+            class="btn-icon"
           >
             <Trash2 size="16" />
-          </button>
+          </BaseButton>
         </td>
       </tr>
     </tbody>
