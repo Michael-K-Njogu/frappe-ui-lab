@@ -1,28 +1,30 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+
+import { useRouter } from 'vue-router'
 import { useCustomers } from '../composables/useCustomers'
+import { useSorting } from '../composables/useSorting'
+import { useCustomerFilters } from '../composables/useCustomerFilters'
+import { getCustomerTypeLabel, customerTypes } from '../constants/customerTypes.js'
+import { formatCurrency, formatDate } from '../utils/formatters'
+import { usePermissions } from '../composables/usePermissions'
+import { PERMISSION } from '../constants/permissions'
+
 import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
 import BaseSelect from '../components/base/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
 import BaseButton from '../components/base/BaseButton.vue'
-import { Plus, RefreshCw, UsersRound, SearchX, CircleAlert } from '@lucide/vue'
-import { getCustomerTypeLabel, customerTypes } from '../constants/customerTypes.js'
-import { formatCurrency, formatDate } from '../utils/formatters'
-import { useSorting } from '../composables/useSorting'
-import { useCustomerFilters } from '../composables/useCustomerFilters'
 import CustomerTableSkeleton from '../components/customers/CustomerTableSkeleton.vue'
 import BaseEmptyState from '../components/base/BaseEmptyState.vue'
-import Alert from '../components/Alert.vue'
+
+import { Plus, RefreshCw, UsersRound, SearchX, CircleAlert } from '@lucide/vue'
 
 const router = useRouter()
-
 const { filters, hasActiveFilters, clearFilters } = useCustomerFilters()
-
 const { customers, loading, error, refresh } = useCustomers(filters)
-
 const refreshing = ref(false)
+const { hasPermission } = usePermissions()
 
 async function handleRefresh() {
   refreshing.value = true
@@ -80,7 +82,11 @@ const emptyState = computed(() => {
         <RefreshCw :size="16" :class="{ 'is-loading': refreshing }" />
         {{ refreshing ? 'Refreshing' : 'Refresh' }}
       </button>
-      <RouterLink :to="{ name: 'customer-new' }" class="btn btn-primary">
+      <RouterLink
+        :to="{ name: 'customer-new' }"
+        class="btn btn-primary"
+        v-if="hasPermission(PERMISSION.CUSTOMER_CREATE)"
+      >
         <Plus size="16" />
         Add Customer
       </RouterLink>
@@ -174,7 +180,7 @@ const emptyState = computed(() => {
 
     <template #actions>
       <RouterLink
-        v-if="emptyState.type === 'initial'"
+        v-if="emptyState.type === 'initial' && hasPermission(PERMISSION.CUSTOMER_CREATE)"
         :to="{ name: 'customer-new' }"
         class="btn btn-primary"
       >
