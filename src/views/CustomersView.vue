@@ -78,10 +78,17 @@ const emptyState = computed(() => {
 <template>
   <PageTitle title="Customers">
     <template #actions>
-      <button class="btn btn-secondary" :disabled="refreshing" @click="handleRefresh">
-        <RefreshCw :size="16" :class="{ 'is-loading': refreshing }" />
-        {{ refreshing ? 'Refreshing' : 'Refresh' }}
-      </button>
+      <BaseButton
+        :label="refreshing ? 'Refreshing...' : 'Refresh'"
+        variant="secondary"
+        :disabled="refreshing"
+        :class="{ 'is-loading': refreshing }"
+        @click="handleRefresh"
+      >
+        <template #icon>
+          <RefreshCw size="16" />
+        </template>
+      </BaseButton>
       <RouterLink
         :to="{ name: 'customer-new' }"
         class="btn btn-primary"
