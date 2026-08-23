@@ -32,6 +32,9 @@ import {
 } from '../business/orderNotifications'
 import { printInvoice } from '../utils/printInvoice.js'
 
+import { usePermissions } from '../composables/usePermissions'
+import { PERMISSION } from '../constants/permissions'
+
 import PageTitle from '../components/PageTitle.vue'
 import OrderCard from '../components/orders/OrderCard.vue'
 import OrderTimeline from '../components/orders/OrderTimeline.vue'
@@ -66,6 +69,11 @@ const showAddItemModal = ref(false)
 const showDeleteModal = ref(false)
 const showInvoicePreview = ref(false)
 const customer = ref(null)
+const { hasPermission } = usePermissions()
+
+const canEditOrder = computed(() => {
+  return actions.value.canEdit && hasPermission(PERMISSION.ORDER_EDIT)
+})
 
 function previewInvoice() {
   showInvoicePreview.value = true
@@ -124,7 +132,18 @@ async function performTransition(status, title, message, notify) {
   }
 }
 
+function requirePermission(permission, message) {
+  if (hasPermission(permission)) {
+    return true
+  }
+
+  showError(message || 'You do not have permission to perform this action.')
+  return false
+}
+
 async function postOrder() {
+  if (!requirePermission(PERMISSION.ORDER_POST)) return
+
   await performTransition(
     ORDER_STATUS.PENDING,
     'Order Posted',
@@ -134,6 +153,8 @@ async function postOrder() {
 }
 
 async function startProcessing() {
+  if (!requirePermission(PERMISSION.ORDER_PROCESS)) return
+
   await performTransition(
     ORDER_STATUS.PROCESSING,
     'Order Updated',
@@ -143,6 +164,8 @@ async function startProcessing() {
 }
 
 async function completeOrder() {
+  if (!requirePermission(PERMISSION.ORDER_COMPLETE)) return
+
   await performTransition(
     ORDER_STATUS.COMPLETED,
     'Order Completed',
@@ -152,6 +175,8 @@ async function completeOrder() {
 }
 
 async function cancelOrder() {
+  if (!requirePermission(PERMISSION.ORDER_CANCEL)) return
+
   await performTransition(
     ORDER_STATUS.CANCELED,
     'Order Canceled',
@@ -163,6 +188,8 @@ async function cancelOrder() {
 }
 
 async function handleDeleteOrder() {
+  if (!requirePermission(PERMISSION.ORDER_DELETE)) return
+
   try {
     await deleteOrder(order.value.id)
 
@@ -230,6 +257,7 @@ const lineTotal = computed(() =>
 )
 
 async function createOrderItem(values) {
+  if (!requirePermission(PERMISSION.ORDER_EDIT)) return
   try {
     const existingItem = orderItems.value.find((item) => item.productId === values.productId)
 
@@ -290,39 +318,39 @@ const actionButtons = computed(() => {
       id: ACTION.EDIT,
       label: 'Edit',
       variant: 'secondary',
-      visible: actions.value.canEdit,
+      visible: actions.value.canEdit && hasPermission(PERMISSION.ORDER_EDIT),
     },
     {
       id: ACTION.DELETE,
       label: 'Delete',
       variant: 'danger',
-      visible: actions.value.canDelete,
+      visible: actions.value.canDelete && hasPermission(PERMISSION.ORDER_DELETE),
     },
     {
       id: ACTION.POST,
       label: 'Post Order',
       variant: 'primary',
-      visible: actions.value.canPost,
+      visible: actions.value.canPost && hasPermission(PERMISSION.ORDER_POST),
     },
     {
       id: ACTION.START_PROCESSING,
       label: 'Start Processing',
       variant: 'primary',
-      visible: actions.value.canStartProcessing,
+      visible: actions.value.canStartProcessing && hasPermission(PERMISSION.ORDER_PROCESS),
       icon: Play,
     },
     {
       id: ACTION.COMPLETE,
       label: 'Complete Order',
       variant: 'primary',
-      visible: actions.value.canComplete,
+      visible: actions.value.canComplete && hasPermission(PERMISSION.ORDER_COMPLETE),
       icon: CheckCheck,
     },
     {
       id: ACTION.CANCEL,
       label: 'Cancel Order',
       variant: 'danger',
-      visible: actions.value.canCancel,
+      visible: actions.value.canCancel && hasPermission(PERMISSION.ORDER_CANCEL),
     },
     {
       id: ACTION.PREVIEW,
@@ -351,6 +379,7 @@ const actionButtons = computed(() => {
 function handleAction(actionId) {
   switch (actionId) {
     case ACTION.EDIT:
+      if (!requirePermission(PERMISSION.ORDER_EDIT)) return
       router.push({
         name: 'order-edit',
         params: {
@@ -360,18 +389,22 @@ function handleAction(actionId) {
       break
 
     case ACTION.DELETE:
+      if (!requirePermission(PERMISSION.ORDER_DELETE)) return
       showDeleteModal.value = true
       break
 
     case ACTION.START_PROCESSING:
+      if (!requirePermission(PERMISSION.ORDER_PROCESS)) return
       startProcessing()
       break
 
     case ACTION.POST:
+      if (!requirePermission(PERMISSION.ORDER_POST)) return
       postOrder()
       break
 
     case ACTION.COMPLETE:
+      if (!requirePermission(PERMISSION.ORDER_COMPLETE)) return
       completeOrder()
       break
 
@@ -384,6 +417,7 @@ function handleAction(actionId) {
       break
 
     case ACTION.CANCEL:
+      if (!requirePermission(PERMISSION.ORDER_CANCEL)) return
       showCancelModal.value = true
       break
 
@@ -451,7 +485,7 @@ const pageTitle = computed(() => {
       <h3>Order Items</h3>
 
       <BaseButton
-        v-if="actions.canEdit"
+        v-if="canEditOrder"
         id="add-order-item"
         name="add-order-item"
         label="Add Item"
@@ -465,9 +499,9 @@ const pageTitle = computed(() => {
     </div>
 
     <div class="card-body">
-      <OrderItemTable :items="orderItems" :loading="loadingOrderItems" :editable="actions.canEdit">
+      <OrderItemTable :items="orderItems" :loading="loadingOrderItems" :editable="canEditOrder">
         <template #actions>
-          <BaseButton label="Add First Item" @click="showAddItemModal = true" />
+          <BaseButton v-if="canEditOrder" label="Add First Item" @click="showAddItemModal = true" />
         </template>
       </OrderItemTable>
     </div>
