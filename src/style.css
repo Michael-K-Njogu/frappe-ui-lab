@@ -250,6 +250,7 @@ h1 {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  gap: 0;
   padding: 8px;
   border-radius: var(--border-radius-full);
   width: 32px;
@@ -417,7 +418,8 @@ h1 {
   background-color: var(--text-colour-info);
 }
 
-.notification-item .is-loading {
+.notification-item .is-loading,
+.is-loading .lucide {
   animation: spin 1s linear infinite;
 }
 
