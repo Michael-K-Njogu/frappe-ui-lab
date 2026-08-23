@@ -1,5 +1,7 @@
 import { createRouter, createWebHistory } from 'vue-router'
 import { useAuth } from '../composables/useAuth'
+import { PERMISSION } from '../constants/permissions'
+import { usePermissions } from '../composables/usePermissions'
 
 import AppLayout from '../layouts/AppLayout.vue'
 
@@ -52,61 +54,97 @@ const router = createRouter({
           path: 'customers',
           name: 'customers',
           component: CustomersView,
+          meta: {
+            permission: PERMISSION.CUSTOMER_VIEW,
+          },
         },
         {
           path: 'customers/:id',
           name: 'customer-details',
           component: () => import('../views/CustomerDetailView.vue'),
+          meta: {
+            permission: PERMISSION.CUSTOMER_VIEW,
+          },
         },
         {
           path: 'customers/new',
           name: 'customer-new',
           component: NewCustomerView,
+          meta: {
+            permission: PERMISSION.CUSTOMER_CREATE,
+          },
         },
         {
           path: 'customers/:id/edit',
           name: 'customer-edit',
           component: () => import('../views/EditCustomerView.vue'),
+          meta: {
+            permission: PERMISSION.CUSTOMER_EDIT,
+          },
         },
         {
           path: 'orders',
           name: 'orders',
           component: OrdersView,
+          meta: {
+            permission: PERMISSION.ORDER_VIEW,
+          },
         },
         {
           path: 'orders/:id',
           name: 'order-details',
           component: () => import('../views/OrderDetailView.vue'),
+          meta: {
+            permission: PERMISSION.ORDER_VIEW,
+          },
         },
         {
           path: 'orders/new',
           name: 'order-new',
           component: () => import('../views/NewOrderView.vue'),
+          meta: {
+            permission: PERMISSION.ORDER_CREATE,
+          },
         },
         {
           path: 'orders/:id/edit',
           name: 'order-edit',
           component: () => import('../views/EditOrderView.vue'),
+          meta: {
+            permission: PERMISSION.ORDER_EDIT,
+          },
         },
         {
           path: 'products',
           name: 'products',
           component: () => import('../views/ProductsView.vue'),
+          meta: {
+            permission: PERMISSION.PRODUCT_VIEW,
+          },
         },
         {
           path: 'products/:id',
           name: 'product-details',
           component: () => import('../views/ProductDetailView.vue'),
+          meta: {
+            permission: PERMISSION.PRODUCT_VIEW,
+          },
         },
         {
           path: 'products/new',
           name: 'product-new',
           component: () => import('../views/NewProductView.vue'),
+          meta: {
+            permission: PERMISSION.PRODUCT_CREATE,
+          },
         },
         {
           path: 'products/:id/edit',
           name: 'product-edit',
           component: () => import('../views/ProductEditView.vue'),
+          meta: {
+            permission: PERMISSION.PRODUCT_EDIT,
+          },
         },
         {
           path: '/notifications',
@@ -123,10 +161,14 @@ router.beforeEach(async (to) => {
 
   await initialize()
 
-  const requiresAuth = to.matched.some((route) => route.meta.requiresAuth)
+  const { hasPermission } = usePermissions()
 
+  const requiresAuth = to.matched.some((route) => route.meta.requiresAuth)
   const guestOnly = to.matched.some((route) => route.meta.guestOnly)
 
+  const requiredPermission = to.matched.map((route) => route.meta.permission).find(Boolean)
+
+  // Redirect unauthenticated users to login
   if (requiresAuth && !isAuthenticated.value) {
     return {
       name: 'login',
@@ -136,7 +178,15 @@ router.beforeEach(async (to) => {
     }
   }
 
+  // Prevent authenticated users from accessing guest-only pages
   if (guestOnly && isAuthenticated.value) {
+    return {
+      name: 'dashboard',
+    }
+  }
+
+  // Block users without the required permission
+  if (requiredPermission && !hasPermission(requiredPermission)) {
     return {
       name: 'dashboard',
     }
