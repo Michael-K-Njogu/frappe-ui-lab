@@ -123,12 +123,14 @@ const viewState = computed(() => {
   <PageTitle title="Products">
     <template #actions>
       <BaseButton
-        :label="refreshing ? 'Refreshing' : 'Refresh'"
+        :label="refreshing ? 'Refreshing...' : 'Refresh'"
         variant="secondary"
+        :disabled="refreshing"
+        :class="{ 'is-loading': refreshing }"
         @click="handleRefresh"
       >
         <template #icon>
-          <RefreshCw size="16" :class="{ 'is-loading': refreshing }" />
+          <RefreshCw size="16" />
         </template>
       </BaseButton>
 
