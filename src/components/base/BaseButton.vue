@@ -30,6 +30,6 @@ defineProps({
 <template>
   <button :type="type" :class="`btn btn-${variant} btn-${size}`">
     <slot name="icon" />
-    {{ label }}
+    <span>{{ label }}</span>
   </button>
 </template>
