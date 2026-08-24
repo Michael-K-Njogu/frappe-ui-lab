@@ -1,14 +1,17 @@
 <script setup>
 import { ref, computed } from 'vue'
-import { useRouter, useRoute } from 'vue-router'
+import { useRouter } from 'vue-router'
 
 import { useToast } from '../composables/useToast'
 import { useProducts } from '../composables/useProducts'
 import { useSorting } from '../composables/useSorting'
-import { getProducts, deleteProduct } from '../services/productService'
+import { deleteProduct } from '../services/productService'
 import { PRODUCT_STATUS_OPTIONS } from '../constants/productStatuses.js'
-import { PRODUCT_CATEGORIES, PRODUCT_CATEGORY_OPTIONS } from '../constants/productCategories'
+import { PRODUCT_CATEGORY_OPTIONS } from '../constants/productCategories'
 import { useProductFilters } from '../composables/useProductFilters'
+
+import { usePermissions } from '../composables/usePermissions'
+import { PERMISSION } from '../constants/permissions'
 
 import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
@@ -27,6 +30,7 @@ const showDeleteModal = ref(false)
 const deleting = ref(false)
 const selectedProduct = ref(null)
 const refreshing = ref(false)
+const { hasPermission } = usePermissions()
 
 const { filters, hasActiveFilters, clearFilters } = useProductFilters()
 
@@ -130,13 +134,18 @@ const viewState = computed(() => {
         @click="handleRefresh"
       >
         <template #icon>
-          <RefreshCw size="16" />
+          <RefreshCw size="20" />
         </template>
       </BaseButton>
 
-      <BaseButton label="Add New Product" @click="router.push({ name: 'product-new' })">
+      <BaseButton
+        v-if="hasPermission(PERMISSION.PRODUCT_CREATE)"
+        size="md"
+        label="Add New Product"
+        @click="router.push({ name: 'product-new' })"
+      >
         <template #icon>
-          <Plus size="16" />
+          <Plus size="20" />
         </template>
       </BaseButton>
     </template>
@@ -176,6 +185,8 @@ const viewState = computed(() => {
     <ProductTable
       :products="products"
       :sort="filters.sort"
+      :can-edit="hasPermission(PERMISSION.PRODUCT_EDIT)"
+      :can-delete="hasPermission(PERMISSION.PRODUCT_DELETE)"
       @sort="sortBy"
       @view="viewProduct"
       @edit="editProduct"
@@ -200,7 +211,7 @@ const viewState = computed(() => {
 
     <template #actions>
       <RouterLink
-        v-if="viewState === 'empty'"
+        v-if="viewState === 'empty' && hasPermission(PERMISSION.PRODUCT_CREATE)"
         :to="{ name: 'product-new' }"
         class="btn btn-primary"
       >
