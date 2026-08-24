@@ -1,4 +1,5 @@
 <script setup>
+import { ref } from 'vue'
 import { useRoute, useRouter } from 'vue-router'
 
 import { useProduct } from '../composables/useProduct'
@@ -8,28 +9,40 @@ import { useToast } from '../composables/useToast.js'
 import PageTitle from '../components/PageTitle.vue'
 import ProductForm from '../components/products/ProductForm.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
+import Alert from '../components/Alert.vue'
+import { CircleAlert } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
 
 const { success, error: showError } = useToast()
 
+const saving = ref(false)
+
 const { product, loading, error, saveProduct } = useProduct(route.params.id)
 
 async function update(values) {
+  saving.value = true
+
   try {
     const updatedProduct = await saveProduct(values)
 
-    success(`Product ${updatedProduct.name} updated successfully.`)
+    success(`Product ${updatedProduct.name} updated successfully.`, {
+      title: 'Product Updated',
+    })
 
     await router.push({
       name: 'product-details',
       params: {
-        id: route.params.id,
+        id: updatedProduct.id,
       },
     })
   } catch (err) {
-    showError(err.message)
+    showError(err.message || 'Failed to update product.', {
+      title: 'Product Not Updated',
+    })
+  } finally {
+    saving.value = false
   }
 }
 </script>
@@ -37,14 +50,21 @@ async function update(values) {
 <template>
   <PageTitle title="Edit Product" :has-back-button="true" />
 
-  <BaseSkeleton v-if="loading" width="100%" height="1rem" />
+  <BaseSkeleton v-if="loading" width="100%" height="20rem" />
+
+  <Alert v-else-if="error" type="danger" :message="error">
+    <template #icon>
+      <CircleAlert size="18" />
+    </template>
+
+    <template #title> Error Loading Product </template>
+  </Alert>
 
   <ProductForm
     v-else-if="product"
     submit-label="Update Product"
     :initial-values="product"
-    :loading="loading"
-    :error="error"
+    :loading="saving"
     :validation-schema="updateProductSchema"
     @submit="update"
     @cancel="router.back()"
