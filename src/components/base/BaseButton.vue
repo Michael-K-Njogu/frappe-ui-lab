@@ -18,7 +18,7 @@ defineProps({
   },
   size: {
     type: String,
-    default: '',
+    default: 'md',
   },
   loading: {
     type: Boolean,
