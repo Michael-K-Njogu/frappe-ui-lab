@@ -49,12 +49,16 @@ const router = createRouter({
           path: '',
           name: 'dashboard',
           component: DashboardView,
+          meta: {
+            title: 'Dashboard',
+          },
         },
         {
           path: 'customers',
           name: 'customers',
           component: CustomersView,
           meta: {
+            title: 'Customers',
             permission: PERMISSION.CUSTOMER_VIEW,
           },
         },
@@ -63,6 +67,9 @@ const router = createRouter({
           name: 'customer-details',
           component: () => import('../views/CustomerDetailView.vue'),
           meta: {
+            title: 'Customer Details',
+            parent: 'customers',
+            showBackButton: true,
             permission: PERMISSION.CUSTOMER_VIEW,
           },
         },
@@ -71,6 +78,9 @@ const router = createRouter({
           name: 'customer-new',
           component: NewCustomerView,
           meta: {
+            title: 'New Customer',
+            parent: 'customers',
+            showBackButton: true,
             permission: PERMISSION.CUSTOMER_CREATE,
           },
         },
@@ -79,6 +89,9 @@ const router = createRouter({
           name: 'customer-edit',
           component: () => import('../views/EditCustomerView.vue'),
           meta: {
+            title: 'Edit Customer',
+            parent: 'customer-details',
+            showBackButton: true,
             permission: PERMISSION.CUSTOMER_EDIT,
           },
         },
@@ -87,6 +100,7 @@ const router = createRouter({
           name: 'orders',
           component: OrdersView,
           meta: {
+            title: 'Orders',
             permission: PERMISSION.ORDER_VIEW,
           },
         },
@@ -95,6 +109,9 @@ const router = createRouter({
           name: 'order-details',
           component: () => import('../views/OrderDetailView.vue'),
           meta: {
+            title: 'Order Details',
+            parent: 'orders',
+            showBackButton: true,
             permission: PERMISSION.ORDER_VIEW,
           },
         },
@@ -103,6 +120,9 @@ const router = createRouter({
           name: 'order-new',
           component: () => import('../views/NewOrderView.vue'),
           meta: {
+            title: 'New Order',
+            parent: 'orders',
+            showBackButton: true,
             permission: PERMISSION.ORDER_CREATE,
           },
         },
@@ -111,6 +131,9 @@ const router = createRouter({
           name: 'order-edit',
           component: () => import('../views/EditOrderView.vue'),
           meta: {
+            title: 'Edit Order',
+            parent: 'orders',
+            showBackButton: true,
             permission: PERMISSION.ORDER_EDIT,
           },
         },
@@ -119,6 +142,7 @@ const router = createRouter({
           name: 'products',
           component: () => import('../views/ProductsView.vue'),
           meta: {
+            title: 'Products',
             permission: PERMISSION.PRODUCT_VIEW,
           },
         },
@@ -127,6 +151,9 @@ const router = createRouter({
           name: 'product-details',
           component: () => import('../views/ProductDetailView.vue'),
           meta: {
+            title: 'Product Details',
+            parent: 'products',
+            showBackButton: true,
             permission: PERMISSION.PRODUCT_VIEW,
           },
         },
@@ -135,6 +162,9 @@ const router = createRouter({
           name: 'product-new',
           component: () => import('../views/NewProductView.vue'),
           meta: {
+            title: 'New Product',
+            parent: 'products',
+            showBackButton: true,
             permission: PERMISSION.PRODUCT_CREATE,
           },
         },
@@ -143,6 +173,9 @@ const router = createRouter({
           name: 'product-edit',
           component: () => import('../views/ProductEditView.vue'),
           meta: {
+            title: 'Edit Product',
+            parent: 'product-details',
+            showBackButton: true,
             permission: PERMISSION.PRODUCT_EDIT,
           },
         },
@@ -150,6 +183,9 @@ const router = createRouter({
           path: '/notifications',
           name: 'notifications',
           component: () => import('../views/NotificationsView.vue'),
+          meta: {
+            title: 'Notifications',
+          },
         },
       ],
     },
