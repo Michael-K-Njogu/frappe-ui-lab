@@ -351,7 +351,11 @@ function handleOrderItemSubmit(values) {
       @delete="handleDeleteOrderItem"
     >
       <template #actions>
-        <BaseButton label="Add First Item" type="button" @click="showAddItemModal = true" />
+        <BaseButton label="Add First Item" @click="showAddItemModal = true">
+          <template #icon>
+            <Plus size="20" />
+          </template>
+        </BaseButton>
       </template>
     </OrderItemTable>
 
