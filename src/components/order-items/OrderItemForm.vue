@@ -109,9 +109,10 @@ const lineTotal = computed(() =>
 )
 
 const onSubmit = handleSubmit((values) => {
+  if (!selectedProduct.value) return
+
   emit('submit', {
     ...values,
-
     sku: selectedProduct.value.sku,
     productName: selectedProduct.value.name,
     unit: selectedProduct.value.unit,
