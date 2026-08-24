@@ -8,6 +8,8 @@ export const PERMISSION = {
   ORDER_PROCESS: 'order:process',
   ORDER_COMPLETE: 'order:complete',
   ORDER_CANCEL: 'order:cancel',
+  ORDER_PRINT: 'order:print',
+  ORDER_SHARE: 'order:share',
 
   // Customers
   CUSTOMER_VIEW: 'customer:view',
