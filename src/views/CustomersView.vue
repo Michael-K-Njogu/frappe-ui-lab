@@ -86,17 +86,19 @@ const emptyState = computed(() => {
         @click="handleRefresh"
       >
         <template #icon>
-          <RefreshCw size="16" />
+          <RefreshCw size="20" />
         </template>
       </BaseButton>
-      <RouterLink
-        :to="{ name: 'customer-new' }"
-        class="btn btn-primary"
+      <BaseButton
+        size="md"
+        label="Add Customer"
+        @click="router.push({ name: 'customer-new' })"
         v-if="hasPermission(PERMISSION.CUSTOMER_CREATE)"
       >
-        <Plus size="16" />
-        Add Customer
-      </RouterLink>
+        <template #icon>
+          <Plus size="20" />
+        </template>
+      </BaseButton>
     </template>
   </PageTitle>
 
