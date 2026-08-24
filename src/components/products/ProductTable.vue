@@ -4,7 +4,8 @@ import { formatCurrency } from '../../utils/formatters'
 import { PRODUCT_STATUS } from '../../constants/productStatuses.js'
 
 import BaseBadge from '../base/BaseBadge.vue'
-import { Eye, SquarePen, Trash2, ArrowUpDown, ArrowUp, ArrowDown } from '@lucide/vue'
+import BaseButton from '../base/BaseButton.vue'
+import { Eye, SquarePen, Trash2, ArrowUp, ArrowDown } from '@lucide/vue'
 
 defineProps({
   products: {
@@ -15,6 +16,15 @@ defineProps({
   sort: {
     type: Object,
     required: true,
+  },
+  canEdit: {
+    type: Boolean,
+    default: false,
+  },
+
+  canDelete: {
+    type: Boolean,
+    default: false,
   },
 })
 
@@ -123,29 +133,49 @@ function showProductUnit(product) {
           </BaseBadge>
         </td>
         <td class="row-actions">
-          <button
-            class="btn btn-sm btn-secondary btn-icon"
+          <BaseButton
+            :aria-label="`View ${product.name}`"
+            :title="`View ${product.name}`"
+            size="sm"
+            variant="secondary"
+            class="btn-icon"
             @click="$emit('view', product.id)"
             title="View Product"
           >
-            <Eye size="16" />
-          </button>
+            <template #icon>
+              <Eye size="16" />
+            </template>
+          </BaseButton>
 
-          <button
-            class="btn btn-sm btn-secondary btn-icon"
+          <BaseButton
+            v-if="canEdit"
+            :aria-label="`Edit ${product.name}`"
+            :title="`Edit ${product.name}`"
+            size="sm"
+            variant="secondary"
+            class="btn-icon"
             @click="$emit('edit', product.id)"
             title="Edit Product"
           >
-            <SquarePen size="16" />
-          </button>
+            <template #icon>
+              <SquarePen size="16" />
+            </template>
+          </BaseButton>
 
-          <button
-            class="btn btn-sm btn-danger btn-icon"
+          <BaseButton
+            v-if="canDelete"
+            :aria-label="`Delete ${product.name}`"
+            :title="`Delete ${product.name}`"
+            size="sm"
+            variant="danger"
+            class="btn-icon"
             @click="$emit('delete', product)"
             title="Delete Product"
           >
-            <Trash2 size="16" />
-          </button>
+            <template #icon>
+              <Trash2 size="16" />
+            </template>
+          </BaseButton>
         </td>
       </tr>
     </tbody>
