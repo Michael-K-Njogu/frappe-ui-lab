@@ -1,5 +1,6 @@
 <script setup>
 import { ref, onMounted, onBeforeUnmount } from 'vue'
+import { useAuth } from '../../composables/useAuth'
 import { useRouter } from 'vue-router'
 
 import { Bell, CheckCheck } from '@lucide/vue'
@@ -14,9 +15,19 @@ const emit = defineEmits(['view-all'])
 const router = useRouter()
 const isOpen = ref(false)
 const menuRef = ref(null)
+const { user } = useAuth()
 
-const { notifications, unreadCount, loading, error, refresh, markAsRead, markAllAsRead } =
-  useNotifications()
+const {
+  notifications,
+  unreadCount,
+  loading,
+  error,
+  refresh,
+  subscribeToNotifications,
+  unsubscribeFromNotifications,
+  markAsRead,
+  markAllAsRead,
+} = useNotifications()
 
 async function toggleMenu() {
   isOpen.value = !isOpen.value
@@ -75,13 +86,19 @@ onMounted(async () => {
     await refresh({
       limit: 10,
     })
+
+    if (user.value?.id) {
+      subscribeToNotifications(user.value.id)
+    }
   } catch (err) {
     console.error('Failed to load notifications:', err)
   }
 })
 
-onBeforeUnmount(() => {
+onBeforeUnmount(async () => {
   document.removeEventListener('click', handleClickOutside)
+
+  await unsubscribeFromNotifications()
 })
 </script>
 
