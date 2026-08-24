@@ -5,19 +5,13 @@ const RESOURCE_PATH = '/notifications'
 function mapNotification(notification) {
   return {
     id: notification.id,
-
     userId: notification.user_id,
-
     title: notification.title,
     message: notification.message,
-
     type: notification.type,
-
     entityType: notification.entity_type,
     entityId: notification.entity_id,
-
     isRead: notification.is_read,
-
     createdAt: notification.created_at,
   }
 }
@@ -25,15 +19,11 @@ function mapNotification(notification) {
 function mapNotificationToApi(notification) {
   return {
     user_id: notification.userId,
-
     title: notification.title,
     message: notification.message,
-
     type: notification.type,
-
     entity_type: notification.entityType,
     entity_id: notification.entityId,
-
     is_read: notification.isRead ?? false,
   }
 }
