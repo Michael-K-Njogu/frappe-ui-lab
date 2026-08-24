@@ -146,7 +146,7 @@ const viewState = computed(() => {
         @click="handleRefresh"
       >
         <template #icon>
-          <RefreshCw size="16" />
+          <RefreshCw size="20" />
         </template>
       </BaseButton>
 
@@ -156,7 +156,7 @@ const viewState = computed(() => {
         @click="router.push({ name: 'order-new' })"
       >
         <template #icon>
-          <Plus size="16" />
+          <Plus size="20" />
         </template>
       </BaseButton>
     </template>
