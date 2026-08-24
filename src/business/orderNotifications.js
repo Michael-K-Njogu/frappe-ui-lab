@@ -1,45 +1,56 @@
 import { createNotification } from '../services/notificationService'
+import { useAuth } from '../composables/useAuth'
 
-export async function notifyOrderPosted(order) {
+function getCurrentUserId() {
+  const { user } = useAuth()
+
+  if (!user.value?.id) {
+    throw new Error('Cannot create notification: no authenticated user found.')
+  }
+
+  return user.value.id
+}
+
+async function createOrderNotification({ title, message, order }) {
   return createNotification({
+    userId: getCurrentUserId(),
+    title,
+    message,
+    type: 'order',
+    entityType: 'order',
+    entityId: order.id,
+    isRead: false,
+  })
+}
+
+export function notifyOrderPosted(order) {
+  return createOrderNotification({
+    order,
     title: 'Order Posted',
     message: `Order #${order.orderNumber} has been posted and is awaiting approval.`,
-    type: 'order',
-    entityType: 'order',
-    entityId: order.id,
-    isRead: false,
   })
 }
 
-export async function notifyOrderProcessing(order) {
-  return createNotification({
+export function notifyOrderProcessing(order) {
+  return createOrderNotification({
+    order,
     title: 'Order Processing',
     message: `Order #${order.orderNumber} is now being processed.`,
-    type: 'order',
-    entityType: 'order',
-    entityId: order.id,
-    isRead: false,
   })
 }
 
-export async function notifyOrderCompleted(order) {
-  return createNotification({
+export function notifyOrderCompleted(order) {
+  return createOrderNotification({
+    order,
     title: 'Order Completed',
     message: `Order #${order.orderNumber} has been completed successfully.`,
-    type: 'order',
-    entityType: 'order',
-    entityId: order.id,
-    isRead: false,
   })
 }
 
-export async function notifyOrderCanceled(order) {
-  return createNotification({
+export function notifyOrderCanceled(order) {
+  return createOrderNotification({
+    order,
     title: 'Order Canceled',
     message: `Order #${order.orderNumber} has been canceled.`,
-    type: 'order',
-    entityType: 'order',
-    entityId: order.id,
-    isRead: false,
   })
 }
