@@ -68,6 +68,12 @@ const showCancelModal = ref(false)
 const showAddItemModal = ref(false)
 const showDeleteModal = ref(false)
 const showInvoicePreview = ref(false)
+
+const selectedOrderItem = ref(null)
+const editingOrderItem = ref(null)
+const showEditItemModal = ref(false)
+const showDeleteItemModal = ref(false)
+
 const customer = ref(null)
 const { hasPermission } = usePermissions()
 
@@ -76,15 +82,18 @@ const canEditOrder = computed(() => {
 })
 
 function previewInvoice() {
+  if (!requirePermission(PERMISSION.ORDER_VIEW)) return
+
   showInvoicePreview.value = true
 }
 
 function handlePrintInvoice() {
+  if (!requirePermission(PERMISSION.ORDER_PRINT)) return
+
   try {
     printInvoice()
   } catch (err) {
     console.error(err)
-
     showError(err.message || 'Unable to print invoice.')
   }
 }
@@ -248,57 +257,67 @@ const grandTotal = computed(() => calculateGrandTotal(orderItems.value))
 
 const totalItems = computed(() => calculateTotalItems(orderItems.value))
 
-const lineTotal = computed(() =>
-  calculateLineTotal({
-    quantity: quantity.value,
-    unitPrice: unitPrice.value,
-    discount: discount.value,
-  }),
-)
-
-async function createOrderItem(values) {
+async function handleOrderItemSubmit(values) {
   if (!requirePermission(PERMISSION.ORDER_EDIT)) return
+
   try {
-    const existingItem = orderItems.value.find((item) => item.productId === values.productId)
-
-    if (existingItem) {
-      const mergedQuantity = Number(existingItem.quantity) + Number(values.quantity)
-      const mergedDiscount = Number(existingItem.discount) + Number(values.discount)
-
-      await saveOrderItem(existingItem.id, {
-        ...existingItem,
-
-        quantity: mergedQuantity,
-
-        discount: mergedDiscount,
-
+    if (selectedOrderItem.value) {
+      await saveOrderItem(selectedOrderItem.value.id, {
+        ...selectedOrderItem.value,
+        ...values,
         lineTotal: calculateLineTotal({
-          quantity: mergedQuantity,
-          unitPrice: existingItem.unitPrice,
-          discount: mergedDiscount,
+          quantity: values.quantity,
+          unitPrice: values.unitPrice,
+          discount: values.discount,
         }),
       })
 
-      info('Product quantity updated successfully.', {
+      info('Order item updated successfully.', {
         title: 'Order Updated',
       })
     } else {
-      await addOrderItem({
-        ...values,
-        orderId: order.value.id,
-      })
+      const existingItem = orderItems.value.find((item) => item.productId === values.productId)
 
-      info('Product added to the order successfully.', {
-        title: 'Order Updated',
-      })
+      if (existingItem) {
+        const mergedQuantity = Number(existingItem.quantity) + Number(values.quantity)
+
+        const mergedDiscount = Number(existingItem.discount) + Number(values.discount)
+
+        await saveOrderItem(existingItem.id, {
+          ...existingItem,
+          quantity: mergedQuantity,
+          discount: mergedDiscount,
+          lineTotal: calculateLineTotal({
+            quantity: mergedQuantity,
+            unitPrice: existingItem.unitPrice,
+            discount: mergedDiscount,
+          }),
+        })
+
+        info('Product quantity updated successfully.', {
+          title: 'Order Updated',
+        })
+      } else {
+        await addOrderItem({
+          ...values,
+          orderId: order.value.id,
+        })
+
+        info('Product added to the order successfully.', {
+          title: 'Order Updated',
+        })
+      }
     }
 
+    await refreshOrderItems()
     await refreshOrderTotals()
 
+    selectedOrderItem.value = null
     showAddItemModal.value = false
   } catch (err) {
-    showError(err.message)
-    console.error('Error creating order item:', err)
+    console.error('Error saving order item:', err)
+
+    showError(err.message || 'Unable to save order item.')
   }
 }
 
@@ -356,21 +375,21 @@ const actionButtons = computed(() => {
       id: ACTION.PREVIEW,
       label: 'Preview',
       variant: 'secondary',
-      visible: actions.value.canPreview,
+      visible: actions.value.canPreview && hasPermission(PERMISSION.ORDER_VIEW),
       icon: Eye,
     },
     {
       id: ACTION.PRINT,
       label: 'Export / Print',
       variant: 'primary',
-      visible: actions.value.canPrint,
+      visible: actions.value.canPrint && hasPermission(PERMISSION.ORDER_PRINT),
       icon: Printer,
     },
     {
       id: ACTION.SHARE,
       label: 'Share',
       variant: 'secondary',
-      visible: actions.value.canShare,
+      visible: actions.value.canShare && hasPermission(PERMISSION.ORDER_SHARE),
       icon: Share2,
     },
   ].filter((action) => action.visible)
@@ -450,6 +469,41 @@ const pageTitle = computed(() => {
     return 'Order Details'
   }
 })
+
+function handleEditOrderItem(item) {
+  if (!requirePermission(PERMISSION.ORDER_EDIT)) return
+
+  editingOrderItem.value = item
+  showEditItemModal.value = true
+}
+
+async function handleDeleteOrderItem() {
+  if (!selectedOrderItem.value) return
+
+  if (!requirePermission(PERMISSION.ORDER_EDIT)) return
+
+  try {
+    await removeOrderItem(selectedOrderItem.value.id)
+
+    await refreshOrderTotals()
+
+    info('Product removed from the order successfully.', {
+      title: 'Order Updated',
+    })
+
+    showDeleteItemModal.value = false
+    selectedOrderItem.value = null
+  } catch (err) {
+    console.error('Error deleting order item:', err)
+
+    showError(err.message || 'Unable to remove product from the order.')
+  }
+}
+
+function handleCloseOrderItemModal() {
+  showAddItemModal.value = false
+  selectedOrderItem.value = null
+}
 </script>
 
 <template>
@@ -490,7 +544,7 @@ const pageTitle = computed(() => {
         name="add-order-item"
         label="Add Item"
         size="sm"
-        @click="showAddItemModal = true"
+        @click="((selectedOrderItem = null), (showAddItemModal = true))"
       >
         <template #icon>
           <Plus size="20" />
@@ -499,9 +553,19 @@ const pageTitle = computed(() => {
     </div>
 
     <div class="card-body">
-      <OrderItemTable :items="orderItems" :loading="loadingOrderItems" :editable="canEditOrder">
+      <OrderItemTable
+        :items="orderItems"
+        :loading="loadingOrderItems"
+        :editable="canEditOrder"
+        @edit="handleEditOrderItem"
+        @delete="handleDeleteOrderItem"
+      >
         <template #actions>
-          <BaseButton v-if="canEditOrder" label="Add First Item" @click="showAddItemModal = true" />
+          <BaseButton v-if="canEditOrder" label="Add First Item" @click="showAddItemModal = true">
+            <template #icon>
+              <Plus size="20" />
+            </template>
+          </BaseButton>
         </template>
       </OrderItemTable>
     </div>
@@ -527,11 +591,24 @@ const pageTitle = computed(() => {
     @confirm="handleDeleteOrder"
   />
 
+  <BaseConfirmationModal
+    v-if="selectedOrderItem"
+    v-model="showDeleteItemModal"
+    title="Remove Product"
+    :message="`Are you sure you want to remove ${selectedOrderItem.productName} from this order?`"
+    confirmText="Remove Product"
+    cancelText="Keep Product"
+    @confirm="handleDeleteOrderItem"
+  />
+
   <AddOrderItemModal
+    :key="selectedOrderItem?.id ?? 'new'"
     :open="showAddItemModal"
     :loading="savingOrderItems"
-    @close="showAddItemModal = false"
-    @submit="createOrderItem"
+    :mode="selectedOrderItem ? 'edit' : 'new'"
+    :initial-values="selectedOrderItem"
+    @close="handleCloseOrderItemModal"
+    @submit="handleOrderItemSubmit"
   />
 
   <InvoicePreviewPanel
