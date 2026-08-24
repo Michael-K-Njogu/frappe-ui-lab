@@ -182,7 +182,9 @@ function getOrderStatusVariant(status) {
             size="sm"
             class="btn-icon"
           >
-            <Trash2 size="16" />
+            <template #icon>
+              <Trash2 size="16" />
+            </template>
           </BaseButton>
         </td>
       </tr>
