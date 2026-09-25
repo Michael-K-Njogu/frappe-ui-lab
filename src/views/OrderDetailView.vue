@@ -35,7 +35,7 @@ import { printInvoice } from '../utils/printInvoice.js'
 import { usePermissions } from '../composables/usePermissions'
 import { PERMISSION } from '../constants/permissions'
 
-import PageTitle from '../components/PageTitle.vue'
+import PageToolbar from '../layouts/PageToolbar.vue'
 import OrderCard from '../components/orders/OrderCard.vue'
 import OrderTimeline from '../components/orders/OrderTimeline.vue'
 import OrderItemTable from '../components/order-items/OrderItemTable.vue'
@@ -47,7 +47,18 @@ import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 import InvoiceDocument from '../components/invoices/InvoiceDocument.vue'
 import InvoicePreviewPanel from '../components/invoices/InvoicePreviewPanel.vue'
 
-import { Play, CheckCheck, Plus, Printer, Share2, Eye } from '@lucide/vue'
+import {
+  CirclePlay,
+  CheckCheck,
+  Plus,
+  Printer,
+  Share2,
+  Eye,
+  X,
+  Send,
+  SquarePen,
+  Trash2,
+} from '@lucide/vue'
 
 const ACTION = {
   EDIT: 'edit',
@@ -338,25 +349,28 @@ const actionButtons = computed(() => {
       label: 'Edit',
       variant: 'secondary',
       visible: actions.value.canEdit && hasPermission(PERMISSION.ORDER_EDIT),
+      icon: SquarePen,
     },
     {
       id: ACTION.DELETE,
       label: 'Delete',
       variant: 'danger',
       visible: actions.value.canDelete && hasPermission(PERMISSION.ORDER_DELETE),
+      icon: Trash2,
     },
     {
       id: ACTION.POST,
       label: 'Post Order',
       variant: 'primary',
       visible: actions.value.canPost && hasPermission(PERMISSION.ORDER_POST),
+      icon: Send,
     },
     {
       id: ACTION.START_PROCESSING,
       label: 'Start Processing',
       variant: 'primary',
       visible: actions.value.canStartProcessing && hasPermission(PERMISSION.ORDER_PROCESS),
-      icon: Play,
+      icon: CirclePlay,
     },
     {
       id: ACTION.COMPLETE,
@@ -370,6 +384,7 @@ const actionButtons = computed(() => {
       label: 'Cancel Order',
       variant: 'danger',
       visible: actions.value.canCancel && hasPermission(PERMISSION.ORDER_CANCEL),
+      icon: X,
     },
     {
       id: ACTION.PREVIEW,
@@ -381,7 +396,7 @@ const actionButtons = computed(() => {
     {
       id: ACTION.PRINT,
       label: 'Export / Print',
-      variant: 'primary',
+      variant: 'secondary',
       visible: actions.value.canPrint && hasPermission(PERMISSION.ORDER_PRINT),
       icon: Printer,
     },
@@ -462,9 +477,9 @@ async function refreshOrderTotals() {
 
 const pageTitle = computed(() => {
   if (order.value?.orderNumber) {
-    return `Order #${order.value.orderNumber}`
+    return order.value.orderNumber ? order.value.orderNumber : 'Order Details'
   } else if (loading.value) {
-    return 'Loading...'
+    return 'Loading order details...'
   } else {
     return 'Order Details'
   }
@@ -507,7 +522,13 @@ function handleCloseOrderItemModal() {
 </script>
 
 <template>
-  <PageTitle :title="pageTitle" :has-back-button="true">
+  <PageToolbar>
+    <template #context>
+      <h1>{{ pageTitle }}</h1>
+      <span v-if="order" :class="`badge badge--${order.status.toLowerCase()}`">{{
+        order.status
+      }}</span>
+    </template>
     <template #actions>
       <BaseButton
         v-for="button in actionButtons"
@@ -516,13 +537,14 @@ function handleCloseOrderItemModal() {
         :variant="button.variant"
         :loading="loading"
         @click="handleAction(button.id)"
+        size="sm"
       >
         <template v-if="button.icon" #icon>
-          <component :is="button.icon" size="20" />
+          <component :is="button.icon" size="16" />
         </template>
       </BaseButton>
     </template>
-  </PageTitle>
+  </PageToolbar>
 
   <div class="row">
     <div class="column">
