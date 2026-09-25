@@ -10,7 +10,7 @@ import { formatCurrency, formatDate } from '../utils/formatters'
 import { usePermissions } from '../composables/usePermissions'
 import { PERMISSION } from '../constants/permissions'
 
-import PageTitle from '../components/PageTitle.vue'
+import PageToolbar from '../layouts/PageToolbar.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
 import BaseSelect from '../components/base/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
@@ -76,44 +76,46 @@ const emptyState = computed(() => {
 </script>
 
 <template>
-  <PageTitle title="Customers">
+  <PageToolbar>
+    <template #filters>
+      <BaseSearchInput
+        v-model="filters.query"
+        placeholder="Search customers..."
+        :disabled="loading"
+      />
+
+      <BaseSelect
+        v-model="filters.customerType"
+        name="customerType"
+        id="customerType"
+        :show-label="false"
+        all-options-selected-text="All Customer Types"
+        :options="customerTypes"
+        :disabled="loading"
+      />
+    </template>
+
     <template #actions>
       <BaseButton
-        :label="refreshing ? 'Refreshing...' : 'Refresh'"
+        :aria-label="refreshing ? 'Refreshing' : 'Refresh'"
         variant="secondary"
         :disabled="refreshing"
         :class="{ 'is-loading': refreshing }"
         @click="handleRefresh"
+        class="btn-icon toolbar-icon-button"
       >
         <template #icon>
-          <RefreshCw size="20" />
+          <RefreshCw size="20" :class="{ 'is-loading': refreshing }" />
         </template>
       </BaseButton>
-      <BaseButton
-        size="md"
-        label="Add Customer"
-        @click="router.push({ name: 'customer-new' })"
-        v-if="hasPermission(PERMISSION.CUSTOMER_CREATE)"
-      >
+
+      <BaseButton label="Create Customer" @click="router.push({ name: 'customer-new' })">
         <template #icon>
           <Plus size="20" />
         </template>
       </BaseButton>
     </template>
-  </PageTitle>
-
-  <div class="toolbar">
-    <BaseSearchInput v-model="filters.query" placeholder="Search customers..." />
-
-    <BaseSelect
-      name="customerType"
-      id="customerType"
-      :show-label="false"
-      v-model="filters.customerType"
-      :options="customerTypes"
-      all-options-selected-text="All Customer Types"
-    />
-  </div>
+  </PageToolbar>
 
   <CustomerTableSkeleton v-if="loading" :rows="5" />
 
