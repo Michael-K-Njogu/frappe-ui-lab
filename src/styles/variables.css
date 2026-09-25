@@ -1,15 +1,29 @@
 :root {
+  /* Font Styles */
+  --font-family-default: 'IBM Plex Sans', sans-serif;
+  --font-size-default: 14px;
+
+  --font-weight-regular: 400;
+  --font-weight-medium: 500;
+  --font-weight-semibold: 600;
+  --font-weight-bold: 700;
+
+  /* Text Colours */
   --text-colour-default: #171717;
-  --text-colour-secondary: #737373;
+  --text-colour-secondary: #525252;
   --text-colour-tertiary: #a3a3a3;
-  --text-colour-inverted: #ffffff;
-  --text-colour-disabled: #737373;
+  --text-colour-placeholder: #a3a3a3;
+  --text-colour-disabled: #a3a3a3;
+  --text-colour-inverse: #ffffff;
+  --text-colour-accent: #224583;
+  --text-colour-accent-on-brand: #6ec3ce;
 
   --text-colour-info: #2f5eaf;
-  --text-colour-danger: #dc2626;
   --text-colour-success: #43a047;
+  --text-colour-danger: #dc2626;
   --text-colour-warning: #bf6a02;
 
+  /* Background Colours */
   --bg-colour-default: #f7f7f7;
   --bg-colour-white: #ffffff;
   --bg-colour-accent: #1a223b;
@@ -19,6 +33,7 @@
   --bg-danger-muted: #fef2f2;
   --bg-warning-muted: #fffbeb;
 
+  /* Border Colours */
   --border-colour-default: #d4d4d4;
   --border-colour-subtle: #e5e5e5;
   --border-success: #43a047;
@@ -26,6 +41,7 @@
   --border-danger: #dc2626;
   --border-warning: #bf6a02;
 
+  /* Button Colours */
   --btn-primary-bg: #2f5eaf;
   --btn-primary-bg-hover: #224583;
   --btn-primary-bg-disabled: #e0e0e0;
@@ -37,17 +53,35 @@
   --btn-danger-bg: #dc2626;
   --btn-danger-bg-hover: #b91c1c;
 
+  /* Icon Colours */
   --icon-colour-default: #171717;
   --icon-colour-secondary: #737373;
   --icon-colour-accent: #6ec3ce;
 
+  /* Shadows */
   --shadow-default: 0px 4px 16px 0 rgba(0, 0, 0, 0.08);
 
-  --font-family-default: 'IBM Plex Sans', sans-serif;
-
-  --font-size-default: 14px;
-
+  /* Border Radius */
+  --border-radius-none: 0px;
+  --border-radius-xs: 2px;
+  --border-radius-sm: 4px;
+  --border-radius-md: 6px;
+  --border-radius-lg: 8px;
+  --border-radius-xl: 12px;
+  --border-radius-2xl: 16px;
+  --border-radius-3xl: 24px;
   --border-radius-full: 9999px;
 
-  --space-2: 8px;
+  /* Spacing */
+  --space-0: 0;
+  --space-1: 0.25rem;
+  --space-2: 0.5rem;
+  --space-3: 0.75rem;
+  --space-4: 1rem;
+  --space-5: 1.25rem;
+  --space-6: 1.5rem;
+  --space-7: 2rem;
+  --space-8: 2.5rem;
+  --space-9: 3rem;
+  --space-10: 4rem;
 }
