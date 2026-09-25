@@ -11,7 +11,6 @@ import { useOrderFilters } from '../composables/useOrderFilters'
 import { usePermissions } from '../composables/usePermissions'
 import { PERMISSION } from '../constants/permissions'
 
-import PageTitle from '../components/PageTitle.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
 import BaseSelect from '../components/base/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
@@ -22,6 +21,7 @@ import BaseEmptyState from '../components/base/BaseEmptyState.vue'
 import { Plus, RefreshCw, Package, SearchX, CircleAlert } from '@lucide/vue'
 import Alert from '../components/Alert.vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
+import PageToolbar from '../layouts/PageToolbar.vue'
 
 const router = useRouter()
 const { info, error: showError } = useToast()
@@ -136,45 +136,42 @@ const viewState = computed(() => {
 </script>
 
 <template>
-  <PageTitle title="Orders">
+  <PageToolbar>
+    <template #filters>
+      <BaseSearchInput v-model="filters.query" placeholder="Search orders..." :disabled="loading" />
+
+      <BaseSelect
+        v-model="filters.status"
+        name="status"
+        id="status"
+        :show-label="false"
+        all-options-selected-text="All Statuses"
+        :options="ORDER_STATUS_OPTIONS"
+        :disabled="loading"
+      />
+    </template>
+
     <template #actions>
       <BaseButton
-        :label="refreshing ? 'Refreshing...' : 'Refresh'"
+        :aria-label="refreshing ? 'Refreshing' : 'Refresh'"
         variant="secondary"
         :disabled="refreshing"
         :class="{ 'is-loading': refreshing }"
         @click="handleRefresh"
+        class="btn-icon toolbar-icon-button"
       >
         <template #icon>
-          <RefreshCw size="20" />
+          <RefreshCw size="20" :class="{ 'is-loading': refreshing }" />
         </template>
       </BaseButton>
 
-      <BaseButton
-        v-if="hasPermission(PERMISSION.ORDER_CREATE)"
-        label="Create Order"
-        @click="router.push({ name: 'order-new' })"
-      >
+      <BaseButton label="Create Order" @click="router.push({ name: 'order-new' })">
         <template #icon>
           <Plus size="20" />
         </template>
       </BaseButton>
     </template>
-  </PageTitle>
-
-  <div class="toolbar">
-    <BaseSearchInput v-model="filters.query" placeholder="Search orders..." :disabled="loading" />
-
-    <BaseSelect
-      name="status"
-      id="status"
-      :show-label="false"
-      v-model="filters.status"
-      all-options-selected-text="All Statuses"
-      :options="ORDER_STATUS_OPTIONS"
-      :disabled="loading"
-    />
-  </div>
+  </PageToolbar>
 
   <OrderTableSkeleton v-if="viewState === 'loading'" :rows="6" />
 
