@@ -9,7 +9,6 @@ import { deleteCustomerImage } from '../services/storageService.js'
 
 import BaseButton from '../components/base/BaseButton.vue'
 import CustomerForm from '../components/customers/CustomerForm.vue'
-import PageTitle from '../components/PageTitle.vue'
 import { useToast } from '../composables/useToast.js'
 
 const router = useRouter()
@@ -46,8 +45,6 @@ async function saveCustomer(values) {
 </script>
 
 <template>
-  <PageTitle title="Edit Customer" :has-back-button="true" />
-
   <p v-if="loading">Loading...</p>
 
   <CustomerForm
