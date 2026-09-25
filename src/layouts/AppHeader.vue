@@ -6,7 +6,7 @@ import { useAuth } from '../composables/useAuth'
 
 import NotificationMenu from '../components/notifications/NotificationMenu.vue'
 import UserMenu from '../components/user/UserMenu.vue'
-import { ArrowLeft, ChevronRight } from '@lucide/vue'
+import { ChevronRight } from '@lucide/vue'
 
 const route = useRoute()
 const router = useRouter()
