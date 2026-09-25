@@ -1,7 +1,7 @@
 import { reactive } from 'vue'
 
 const state = reactive({
-  toasts: [],
+  toasts: [], // Array to hold active toast notifications
 })
 
 const TOAST_DURATION = {
