@@ -14,7 +14,6 @@ import { useOrderItems } from '../composables/useOrderItems'
 import { getCustomers, getCustomerAccountSummary } from '../services/customerService'
 import { createOrder, updateOrderGrandTotal } from '../services/orderService'
 
-import PageTitle from '../components/PageTitle.vue'
 import OrderForm from '../components/orders/OrderForm.vue'
 
 const router = useRouter()
@@ -125,8 +124,6 @@ async function postOrder(values) {
 </script>
 
 <template>
-  <PageTitle title="Create Order" :has-back-button="true" />
-
   <OrderForm
     :customer-options="customerOptions"
     :customer-account="customerAccount"
