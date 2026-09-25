@@ -6,7 +6,6 @@ import { useProduct } from '../composables/useProduct'
 import { updateProductSchema } from '../validation/productSchema.js'
 import { useToast } from '../composables/useToast.js'
 
-import PageTitle from '../components/PageTitle.vue'
 import ProductForm from '../components/products/ProductForm.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
 import Alert from '../components/Alert.vue'
@@ -48,8 +47,6 @@ async function update(values) {
 </script>
 
 <template>
-  <PageTitle title="Edit Product" :has-back-button="true" />
-
   <BaseSkeleton v-if="loading" width="100%" height="20rem" />
 
   <Alert v-else-if="error" type="danger" :message="error">
