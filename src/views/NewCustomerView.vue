@@ -6,7 +6,6 @@ import { createCustomerSchema } from '../validation/customerSchema.js'
 import { createCustomer } from '../services/customerService'
 
 import CustomerForm from '../components/customers/CustomerForm.vue'
-import PageTitle from '../components/PageTitle.vue'
 import { useToast } from '../composables/useToast'
 
 const router = useRouter()
@@ -37,8 +36,6 @@ async function saveCustomer(values) {
 </script>
 
 <template>
-  <PageTitle title="New Customer" :has-back-button="true" />
-
   <CustomerForm
     :validation-schema="createCustomerSchema"
     :submit-label="'Save Customer'"
