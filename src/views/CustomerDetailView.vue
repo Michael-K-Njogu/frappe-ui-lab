@@ -8,8 +8,8 @@ import { useToast } from '../composables/useToast'
 import { usePermissions } from '../composables/usePermissions'
 import { PERMISSION } from '../constants/permissions'
 
-import PageTitle from '../components/PageTitle.vue'
-import { Pencil, Trash2 } from '@lucide/vue'
+import PageToolbar from '../layouts/PageToolbar.vue'
+import { SquarePen, Trash2 } from '@lucide/vue'
 import CustomerCard from '../components/customers/CustomerCard.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
@@ -73,21 +73,32 @@ const { customer, loading, error, deleting, deleteCustomer } = useCustomer(route
 </script>
 
 <template>
-  <PageTitle title="Customer Details" :has-back-button="true">
+  <PageToolbar>
+    <template #context>
+      <h1>
+        {{ customer ? customer.name : 'Customer Details' }}
+      </h1>
+    </template>
     <template #actions>
-      <RouterLink
+      <BaseButton
         v-if="customer && hasPermission(PERMISSION.CUSTOMER_EDIT)"
-        :to="{ name: 'customer-edit', params: { id: customer.id } }"
-        class="btn btn-secondary"
+        label="Edit Customer"
+        size="sm"
+        @click="router.push({ name: 'customer-edit', params: { id: customer.id } })"
+        variant="secondary"
       >
-        <Pencil size="16" />
-        Edit Customer
-      </RouterLink>
+        <template #icon>
+          <SquarePen size="16" />
+        </template>
+      </BaseButton>
 
       <BaseButton
         v-if="customer && canDelete && hasPermission(PERMISSION.CUSTOMER_DELETE)"
         label="Delete Customer"
         variant="danger"
+        size="sm"
+        :loading="deleting"
+        :disabled="deleting"
         @click="confirmDeleteCustomer"
       >
         <template #icon>
@@ -95,7 +106,7 @@ const { customer, loading, error, deleting, deleteCustomer } = useCustomer(route
         </template>
       </BaseButton>
     </template>
-  </PageTitle>
+  </PageToolbar>
 
   <p v-if="error">
     {{ error }}
