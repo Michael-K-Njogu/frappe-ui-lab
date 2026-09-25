@@ -188,7 +188,7 @@ onBeforeUnmount(() => {
   border-radius: 50%;
 
   background: var(--btn-primary-bg);
-  color: var(--text-colour-inverted);
+  color: var(--text-colour-inverse);
 
   font-size: 14px;
   font-weight: 600;
