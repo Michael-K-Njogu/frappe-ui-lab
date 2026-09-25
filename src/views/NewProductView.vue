@@ -6,7 +6,6 @@ import { useToast } from '../composables/useToast'
 import { createProduct } from '../services/productService'
 import { createProductSchema } from '../validation/productSchema.js'
 
-import PageTitle from '../components/PageTitle.vue'
 import ProductForm from '../components/products/ProductForm.vue'
 
 const router = useRouter()
@@ -41,8 +40,6 @@ async function saveProduct(values) {
 </script>
 
 <template>
-  <PageTitle title="New Product" :has-back-button="true" />
-
   <ProductForm
     :validation-schema="createProductSchema"
     :loading="saving"
