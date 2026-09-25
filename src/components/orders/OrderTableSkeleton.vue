@@ -8,7 +8,7 @@ const { rows } = defineProps({
   },
 })
 
-const columns = 5 // Assuming there are 5 columns in the customer table
+const columns = 7 // Assuming there are 5 columns in the customer table
 </script>
 
 <template>
