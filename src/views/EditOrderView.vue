@@ -17,7 +17,6 @@ import { updateOrder } from '../services/orderService'
 import { getOrderItemsByOrder } from '../services/orderItemService'
 import { getCustomers, getCustomerAccountSummary } from '../services/customerService'
 
-import PageTitle from '../components/PageTitle.vue'
 import OrderForm from '../components/orders/OrderForm.vue'
 
 const route = useRoute()
@@ -212,8 +211,6 @@ function handleClearAllItems() {
 </script>
 
 <template>
-  <PageTitle :title="`Edit Order #${order ? order.orderNumber : ''}`" :has-back-button="true" />
-
   <div v-if="loading">
     <p>Loading order...</p>
   </div>
