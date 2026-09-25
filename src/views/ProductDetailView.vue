@@ -9,7 +9,7 @@ import { PERMISSION } from '../constants/permissions'
 
 import { SquarePen, Trash2, CircleAlert } from '@lucide/vue'
 
-import PageTitle from '../components/PageTitle.vue'
+import PageToolbar from '../layouts/PageToolbar.vue'
 import ProductCard from '../components/products/ProductCard.vue'
 import BaseConfirmationModal from '../components/base/BaseConfirmationModal.vue'
 import BaseSkeleton from '../components/base/BaseSkeleton.vue'
@@ -79,11 +79,15 @@ async function deleteCurrentProduct() {
 </script>
 
 <template>
-  <PageTitle :title="pageTitle" :has-back-button="true">
+  <PageToolbar>
+    <template #context>
+      <h1>{{ pageTitle }}</h1>
+    </template>
     <template #actions>
       <BaseButton
         v-if="product && hasPermission(PERMISSION.PRODUCT_EDIT)"
         label="Edit Product"
+        size="sm"
         variant="secondary"
         @click="editProduct"
       >
@@ -96,6 +100,7 @@ async function deleteCurrentProduct() {
         v-if="product && hasPermission(PERMISSION.PRODUCT_DELETE)"
         label="Delete Product"
         variant="danger"
+        size="sm"
         :loading="deleting"
         @click="confirmDeleteProduct"
       >
@@ -104,7 +109,7 @@ async function deleteCurrentProduct() {
         </template>
       </BaseButton>
     </template>
-  </PageTitle>
+  </PageToolbar>
 
   <BaseSkeleton v-if="loading" width="100%" height="20rem" />
 
