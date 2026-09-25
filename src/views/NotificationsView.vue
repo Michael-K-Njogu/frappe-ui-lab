@@ -9,7 +9,7 @@ import { getNotificationRoute } from '../utils/notificationNavigation'
 import { formatDate } from '../utils/formatters.js'
 import { useToast } from '../composables/useToast'
 
-import PageTitle from '../components/PageTitle.vue'
+import PageToolbar from '../layouts/PageToolbar.vue'
 import BaseButton from '../components/base/BaseButton.vue'
 import BaseEmptyState from '../components/base/BaseEmptyState.vue'
 
@@ -95,12 +95,19 @@ async function handleMarkAllAsRead() {
 </script>
 
 <template>
-  <PageTitle title="Notifications" :has-back-button="true">
+  <PageToolbar>
+    <template #context>
+      <h1>
+        {{ unreadCount > 0 ? `${unreadCount} Unread Notifications` : 'No New Notifications' }}
+      </h1>
+    </template>
+
     <template #actions>
       <BaseButton
         v-if="unreadCount > 0"
         label="Mark all as read"
         variant="secondary"
+        size="sm"
         @click="handleMarkAllAsRead"
       >
         <template #icon>
@@ -108,7 +115,7 @@ async function handleMarkAllAsRead() {
         </template>
       </BaseButton>
     </template>
-  </PageTitle>
+  </PageToolbar>
 
   <div class="notifications-page">
     <div v-if="unreadCount > 0" class="notifications-summary">
