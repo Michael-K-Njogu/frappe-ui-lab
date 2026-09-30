@@ -13,7 +13,7 @@ import { useProductFilters } from '../composables/useProductFilters'
 import { usePermissions } from '../composables/usePermissions'
 import { PERMISSION } from '../constants/permissions'
 
-import PageTitle from '../components/PageTitle.vue'
+import PageToolbar from '../layouts/PageToolbar.vue'
 import BaseSearchInput from '../components/base/BaseSearchInput.vue'
 import BaseSelect from '../components/base/BaseSelect.vue'
 import BasePagination from '../components/base/BasePagination.vue'
@@ -124,60 +124,52 @@ const viewState = computed(() => {
 </script>
 
 <template>
-  <PageTitle title="Products">
+  <PageToolbar>
+    <template #filters>
+      <BaseSearchInput
+        v-model="filters.query"
+        placeholder="Search by SKU or product name..."
+        :disabled="loading"
+      />
+
+      <BaseSelect
+        v-model="filters.category"
+        :show-label="false"
+        :options="PRODUCT_CATEGORY_OPTIONS"
+        all-options-selected-text="All Categories"
+        :disabled="loading"
+      />
+
+      <BaseSelect
+        v-model="filters.status"
+        :show-label="false"
+        :options="PRODUCT_STATUS_OPTIONS"
+        all-options-selected-text="All Statuses"
+        :disabled="loading"
+      />
+    </template>
+
     <template #actions>
       <BaseButton
-        :label="refreshing ? 'Refreshing...' : 'Refresh'"
+        :aria-label="refreshing ? 'Refreshing...' : 'Refresh'"
         variant="secondary"
         :disabled="refreshing"
         :class="{ 'is-loading': refreshing }"
         @click="handleRefresh"
+        class="btn-icon toolbar-icon-button"
       >
         <template #icon>
           <RefreshCw size="20" />
         </template>
       </BaseButton>
 
-      <BaseButton
-        v-if="hasPermission(PERMISSION.PRODUCT_CREATE)"
-        size="md"
-        label="Add New Product"
-        @click="router.push({ name: 'product-new' })"
-      >
+      <BaseButton label="Add New Product" @click="router.push({ name: 'product-new' })">
         <template #icon>
-          <Plus size="20" />
+          <Plus size="16" />
         </template>
       </BaseButton>
     </template>
-  </PageTitle>
-
-  <div class="toolbar">
-    <BaseSearchInput
-      v-model="filters.query"
-      placeholder="Search by SKU or product name..."
-      :disabled="loading"
-    />
-
-    <BaseSelect
-      name="category"
-      id="category"
-      :show-label="false"
-      v-model="filters.category"
-      all-options-selected-text="All Categories"
-      :options="PRODUCT_CATEGORY_OPTIONS"
-      :disabled="loading"
-    />
-
-    <BaseSelect
-      name="status"
-      id="status"
-      :show-label="false"
-      v-model="filters.status"
-      all-options-selected-text="All Statuses"
-      :options="PRODUCT_STATUS_OPTIONS"
-      :disabled="loading"
-    />
-  </div>
+  </PageToolbar>
 
   <ProductTableSkeleton v-if="viewState === 'loading'" />
 
