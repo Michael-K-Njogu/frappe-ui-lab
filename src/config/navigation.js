@@ -9,6 +9,7 @@ import {
   ChartNoAxesCombined,
   ReceiptText,
   CreditCard,
+  Warehouse,
 } from '@lucide/vue'
 
 export const navigation = [
@@ -35,12 +36,12 @@ export const navigation = [
     to: '/products',
     permission: PERMISSION.PRODUCT_VIEW,
   },
-  /*
   {
-    title: 'Invoices',
-    icon: ReceiptText,
-    to: '/invoices',
+    title: 'Inventory',
+    icon: Warehouse,
+    to: '/inventory',
   },
+  /*
   {
     title: 'Payments',
     icon: CreditCard,
