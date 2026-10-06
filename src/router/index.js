@@ -25,6 +25,9 @@ import ProductsView from '../views/ProductsView.vue'
 import ProductDetailView from '../views/ProductDetailView.vue'
 import NewProductView from '../views/NewProductView.vue'
 
+// Inventory
+import InventoryView from '../views/InventoryView.vue'
+
 const router = createRouter({
   history: createWebHistory(),
   routes: [
@@ -185,6 +188,15 @@ const router = createRouter({
           component: () => import('../views/NotificationsView.vue'),
           meta: {
             title: 'Notifications',
+          },
+        },
+        {
+          path: '/inventory',
+          name: 'inventory',
+          component: () => import('../views/InventoryView.vue'),
+          meta: {
+            title: 'Inventory',
+            permission: PERMISSION.INVENTORY_VIEW,
           },
         },
       ],
